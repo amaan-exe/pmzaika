@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PM Zaika Restaurant – Test Bhi Best Bhi | Patna</title>
+  <meta name="description" content="PM Zaika Restaurant serves delicious, freshly prepared food with authentic flavors and quality ingredients in Patna. Starters, Biryani, Tandoori, and Indian Curries.">
+  <link rel="icon" type="image/png" href="assets/images/logoAsset-1.png">
+  
+  <!-- Google Fonts: Poppins & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- =========================================================================
+       SITE HEADER & NAVIGATION
+       ========================================================================= -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar">
+        <!-- Brand Logo -->
+        <a href="index.html" class="brand-logo" title="PM Zaika Restaurant">
+          <img src="assets/images/pm_zaika_circular_logo.png" alt="PM Zaika Restaurant Logo">
+        </a>
+
+        <!-- Main Navigation Links -->
+        <ul class="nav-links" id="navLinks">
+          <li class="nav-item">
+            <a href="index.html" class="nav-link active">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="#menu-showcase" class="nav-link">
+              Order Online
+              <span class="dropdown-icon">▼</span>
+            </a>
+            <!-- Categories Dropdown -->
+            <div class="dropdown-menu">
+              <a href="#menu-showcase" class="dropdown-item" onclick="filterCategory('all')">All Dishes <span>🍱</span></a>
+              <a href="#menu-showcase" class="dropdown-item" onclick="filterCategory('starters')">Starters & Appetizers <span>🍢</span></a>
+              <a href="#menu-showcase" class="dropdown-item" onclick="filterCategory('biryani')">Royal Biryani <span>🍛</span></a>
+              <a href="#menu-showcase" class="dropdown-item" onclick="filterCategory('tandoori')">Tandoori Specials <span>🍗</span></a>
+              <a href="#menu-showcase" class="dropdown-item" onclick="filterCategory('veg-curry')">Indian Veg Curry <span>🥦</span></a>
+              <a href="#menu-showcase" class="dropdown-item" onclick="filterCategory('non-veg-curry')">Indian Non Veg Curry <span>🥘</span></a>
+              <a href="#menu-showcase" class="dropdown-item" onclick="filterCategory('chinese')">Chinese & Noodles <span>🥢</span></a>
+              <a href="#menu-showcase" class="dropdown-item" onclick="filterCategory('momos')">Steamed & Fried Momos <span>🥟</span></a>
+              <a href="#menu-showcase" class="dropdown-item" onclick="filterCategory('rolls')">Kathi & Egg Rolls <span>🌯</span></a>
+              <a href="#menu-showcase" class="dropdown-item" onclick="filterCategory('breads')">Tandoori Roti & Naan <span>🫓</span></a>
+              <a href="#menu-showcase" class="dropdown-item" onclick="filterCategory('thali')">Special Grand Thali <span>🍽️</span></a>
+              <a href="#menu-showcase" class="dropdown-item" onclick="filterCategory('desserts')">Desserts & Drinks <span>🍮</span></a>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a href="cart.html" class="nav-link" id="cartTrigger">
+              Cart
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="reservation.html" class="nav-link">Reservation</a>
+          </li>
+          <li class="nav-item">
+            <a href="contact.html" class="nav-link">Contact-Us</a>
+          </li>
+          <li class="nav-item">
+            <a href="about.html" class="nav-link">About-Us</a>
+          </li>
+          <li class="nav-item">
+            <a href="gallery.html" class="nav-link">Gallery</a>
+          </li>
+        </ul>
+
+        <!-- Action Tools: Search & Cart Button -->
+        <div class="header-actions">
+          <button class="icon-btn" id="searchTrigger" title="Search Dishes" aria-label="Search Dishes">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+          
+          <button class="icon-btn" onclick="window.cart.openDrawer()" title="View Cart" aria-label="Shopping Cart">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span class="badge-count" id="cartBadge" style="display:none;">0</span>
+          </button>
+
+          <!-- Mobile Toggle -->
+          <button class="mobile-toggle" id="mobileToggle" aria-label="Open Menu">
+            ☰
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       HERO SECTION (MATCHING SCREENSHOT 1)
+       ========================================================================= -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-grid">
+        <!-- Left Hero Content -->
+        <div class="hero-content">
+          <span class="hero-tag">WELCOME TO PM ZAIKA RESTAURANT</span>
+          <h1 class="hero-title">Giving your Hunger<br>a new Option</h1>
+          <p class="hero-desc">
+            Freshly prepared dishes with authentic flavors and quality ingredients, crafted to satisfy your cravings every time.
+          </p>
+
+          <div class="hero-buttons">
+            <a href="#reservation" class="btn btn-primary open-reservation-modal">
+              Make Reservation →
+            </a>
+            <a href="#menu-showcase" class="btn btn-outline">
+              Order Online
+            </a>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-number">
+                10 K<span class="stat-plus">+</span>
+              </div>
+              <span class="stat-label">Satisfied Customer</span>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">
+                8 K<span class="stat-plus">+</span>
+              </div>
+              <span class="stat-label">Food Delivered</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Hero Visual with Concentric Orange Arch Backdrop & Multi-layered Dishes (Matching Recording) -->
+        <div class="hero-visual">
+          <div class="hero-blob-bg">
+            <svg viewBox="0 0 540 540" fill="none" class="hero-arch-svg" xmlns="http://www.w3.org/2000/svg">
+              <!-- Outer Arch -->
+              <path d="M 15 525 A 255 255 0 0 1 525 525 Z" fill="#EF9C58"/>
+              <!-- Inner Concentric Arch -->
+              <path d="M 90 525 A 180 180 0 0 1 450 525 Z" fill="#EC7851"/>
+              <!-- White Curved Arc Line Slicing Across -->
+              <path d="M -20 540 Q 270 420 560 390" stroke="rgba(255, 255, 255, 0.82)" stroke-width="2.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+
+          <!-- Multi-Layered Dish Composition (Matching Uploaded Assets) -->
+          <div class="hero-dishes-composition">
+            <!-- 1. Top-Right Raspberry Plate -->
+            <div class="dish-item dish-berries">
+              <img src="assets/images/hero_plate_berries.png" alt="Fresh Raspberries Plate" class="dish-img">
+            </div>
+
+            <!-- 2. Center Signature Fresh Salad Platter -->
+            <div class="dish-item dish-salad">
+              <img src="assets/images/hero_plate_salad.png" alt="Signature Fresh Salad Platter" class="dish-img">
+            </div>
+
+            <!-- 3. Bottom-Left Salmon Poke Bowl with Chopsticks -->
+            <div class="dish-item dish-salmon">
+              <img src="assets/images/hero_plate_salmon.png" alt="Salmon Poke Bowl with Chopsticks" class="dish-img">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION: CHOOSE THE VARIETY OF FOOD YOU LIKE (MATCHING SCREENSHOT 2)
+       ========================================================================= -->
+  <section class="section-variety">
+    <div class="container">
+      <div class="section-header-center">
+        <h2 class="section-title">Choose the variety of food you like.</h2>
+      </div>
+
+      <div class="cards-grid-3">
+        <!-- Card 1: Starters -->
+        <div class="variety-card">
+          <div class="variety-img-wrapper">
+            <img src="assets/images/image1.webp" alt="Starters">
+          </div>
+          <h3 class="variety-card-title">Starters</h3>
+          <p class="variety-card-text">
+            Crispy, tasty starters made fresh with quality ingredients and bold flavors. Perfect to begin your meal on a delicious note.
+          </p>
+          <a href="#menu-showcase" class="btn btn-pill-sm" onclick="filterCategory('starters')">
+            Order Now →
+          </a>
+        </div>
+
+        <!-- Card 2: Main Courses -->
+        <div class="variety-card">
+          <div class="variety-img-wrapper">
+            <img src="assets/images/image2.webp" alt="Main Courses">
+          </div>
+          <h3 class="variety-card-title">Main Courses</h3>
+          <p class="variety-card-text">
+            Rich, flavorful main course dishes cooked with fresh ingredients and authentic spices. A perfect meal for lunch or dinner.
+          </p>
+          <a href="#menu-showcase" class="btn btn-pill-sm" onclick="filterCategory('veg-curry')">
+            Order Now →
+          </a>
+        </div>
+
+        <!-- Card 3: Dinner -->
+        <div class="variety-card">
+          <div class="variety-img-wrapper">
+            <img src="assets/images/image3.webp" alt="Dinner">
+          </div>
+          <h3 class="variety-card-title">Dinner</h3>
+          <p class="variety-card-text">
+            .Enjoy a comforting dinner with delicious dishes, rich flavors, and freshly prepared meals. Perfect to end your day on a tasty note.
+          </p>
+          <a href="#menu-showcase" class="btn btn-pill-sm" onclick="filterCategory('dinner')">
+            Order Now →
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION: POPULAR FOOD / GOOD FOOD IN YOUR AREA (MATCHING SCREENSHOT 3 & 4)
+       ========================================================================= -->
+  <section class="section-popular">
+    <div class="container">
+      <div class="section-header-center">
+        <span class="section-tag">POPULAR FOOD</span>
+        <h2 class="section-title">Good Food in Your Area.</h2>
+      </div>
+
+      <div class="cards-grid-3">
+        <!-- Card 1: Fast Food -->
+        <div class="popular-card">
+          <div class="popular-img-wrapper">
+            <img src="assets/images/food_momos_noodles.jpg" alt="Steaming Momos & Hakka Noodles" loading="lazy">
+          </div>
+          <h3 class="popular-title">FAST-FOOD</h3>
+          <p class="popular-desc">
+            Crispy, juicy, and freshly prepared fast food made with quality ingredients. Perfect for quick meals, snacks, and on-the-go cravings—served hot and full of flavor.
+          </p>
+          <button class="btn btn-pill-sm" onclick="window.cart.addItem('fast-1')">
+            Place Order →
+          </button>
+        </div>
+
+        <!-- Card 2: Veg Food Item -->
+        <div class="popular-card">
+          <div class="popular-img-wrapper">
+            <img src="assets/images/food_butter_curry.jpg" alt="Pure Vegetarian Dishes" loading="lazy">
+          </div>
+          <h3 class="popular-title">VEG-FOOD ITEM</h3>
+          <p class="popular-desc">
+            Fresh, wholesome vegetarian dishes prepared with seasonal vegetables and authentic spices. Light, nutritious, and full of flavor—perfect for healthy meals and everyday dining.
+          </p>
+          <button class="btn btn-pill-sm" onclick="window.cart.addItem('veg-1')">
+            Place Order →
+          </button>
+        </div>
+
+        <!-- Card 3: Non-Veg Food Item -->
+        <div class="popular-card">
+          <div class="popular-img-wrapper">
+            <img src="assets/images/food_tandoori_kebab.jpg" alt="Non-Vegetarian Specialties" loading="lazy">
+          </div>
+          <h3 class="popular-title orange-title">NON-VEG FOOD ITEM</h3>
+          <p class="popular-desc">
+            Rich, flavorful non-veg dishes prepared fresh with quality ingredients and authentic tandoori spices.
+          </p>
+          <button class="btn btn-pill-sm" onclick="window.cart.addItem('starter-1')">
+            Place Order →
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION: HOW DOES IT WORK / EMPEROR SECTION (MATCHING SCREENSHOT 5)
+       ========================================================================= -->
+  <section class="section-emperor">
+    <div class="container">
+      <div class="section-header-center">
+        <span class="section-tag">HOW DOES IT WORK</span>
+        <h2 class="section-title">Get served as an emperor.</h2>
+        <p class="section-subtitle">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ac enim sollicitudin, viverra est vel, volutpat orci. Maecenas at velit sodales.
+        </p>
+      </div>
+
+      <div class="cards-grid-4">
+        <!-- Step 1: Place Order -->
+        <div class="emperor-card">
+          <div class="emperor-icon-box">
+            <img src="assets/images/icon1_3.png" alt="1. Place Order Icon">
+          </div>
+          <h3 class="emperor-title">1. Place Order</h3>
+          <p class="emperor-text">
+            Quickly choose food and place your order easily.
+          </p>
+          <a href="#menu-showcase" class="btn btn-pill-sm">
+            View Menue →
+          </a>
+        </div>
+
+        <!-- Step 2: Payment -->
+        <div class="emperor-card">
+          <div class="emperor-icon-box">
+            <img src="assets/images/icon2_3.png" alt="2. Payment Icon">
+          </div>
+          <h3 class="emperor-title">2. Payment</h3>
+          <p class="emperor-text">
+            Secure and fast payment with UPI or cash.
+          </p>
+          <a href="#contact" class="btn btn-pill-sm">
+            Payment FAQs →
+          </a>
+        </div>
+
+        <!-- Step 3: Reservation -->
+        <div class="emperor-card">
+          <div class="emperor-icon-box">
+            <img src="assets/images/icon3_3.png" alt="3. Reservation Icon">
+          </div>
+          <h3 class="emperor-title">3. Reservation</h3>
+          <p class="emperor-text">
+            Reserve your table easily and avoid waiting.
+          </p>
+          <a href="#reservation" class="btn btn-pill-sm open-reservation-modal">
+            Reservation →
+          </a>
+        </div>
+
+        <!-- Step 4: Reviews -->
+        <div class="emperor-card">
+          <div class="emperor-icon-box">
+            <img src="assets/images/icon4_3.png" alt="4. Reviews Icon">
+          </div>
+          <h3 class="emperor-title">4. Reviews</h3>
+          <p class="emperor-text">
+            Read reviews and share your dining experience.
+          </p>
+          <a href="#testimonials" class="btn btn-pill-sm">
+            Review Us →
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION: INTERACTIVE MENU SHOWCASE (LIVE DISHES & ORDERING)
+       ========================================================================= -->
+  <section class="section-menu-showcase" id="menu-showcase">
+    <div class="container">
+      <div class="section-header-center">
+        <span class="section-tag">OUR DELICIOUS MENU</span>
+        <h2 class="section-title">Order Your Favorites Online</h2>
+        <p class="section-subtitle">
+          Handcrafted by expert chefs using authentic spices, fresh ingredients, and time-honored recipes.
+        </p>
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="menu-filter-bar">
+        <button class="filter-btn active" data-filter="all">All Dishes</button>
+        <button class="filter-btn" data-filter="biryani">Royal Biryani</button>
+        <button class="filter-btn" data-filter="starters">Starters</button>
+        <button class="filter-btn" data-filter="tandoori">Tandoori</button>
+        <button class="filter-btn" data-filter="veg-curry">Veg Curries</button>
+        <button class="filter-btn" data-filter="non-veg-curry">Non-Veg Curries</button>
+        <button class="filter-btn" data-filter="chinese">Chinese</button>
+        <button class="filter-btn" data-filter="momos">Momos</button>
+        <button class="filter-btn" data-filter="rolls">Rolls</button>
+        <button class="filter-btn" data-filter="thali">Special Thali</button>
+      </div>
+
+      <!-- Dishes Grid -->
+      <div class="dish-grid" id="menuShowcaseGrid">
+        <!-- Rendered dynamically by app.js from MENU_DATA -->
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION: TESTIMONIALS (WHAT VALUED GUESTS SAY)
+       ========================================================================= -->
+  <section class="section-testimonials" id="testimonials">
+    <div class="container">
+      <div class="section-header-center">
+        <span class="section-tag">TESTIMONIALS</span>
+        <h2 class="section-title">What Customers Say About Us.</h2>
+        <p class="section-subtitle">Real experiences from our valued diners in Patna.</p>
+      </div>
+
+      <div class="testimonials-grid-2x2">
+        <!-- Review 1 -->
+        <div class="testimonial-card-exact">
+          <span class="quote-icon-orange">”</span>
+          <p class="testimonial-text-exact">
+            “Food taste was amazing! Chicken Biryani was full of flavor and perfectly cooked. Highly recommended.”
+          </p>
+          <div class="reviewer-meta-exact">
+            <img src="assets/images/WhatsApp-Image-2026-02-03-at-2.39.05-PM-2.jpeg" alt="Customer" class="reviewer-img-exact">
+            <span class="reviewer-label-orange">Customer</span>
+          </div>
+        </div>
+
+        <!-- Review 2 -->
+        <div class="testimonial-card-exact">
+          <span class="quote-icon-orange">”</span>
+          <p class="testimonial-text-exact">
+            “Best restaurant in this area. Fresh food, good quantity, and quick service.”
+          </p>
+          <div class="reviewer-meta-exact">
+            <img src="assets/images/WhatsApp-Image-2026-02-03-at-2.39.04-PM.jpeg" alt="Customer" class="reviewer-img-exact">
+            <span class="reviewer-label-orange">Customer</span>
+          </div>
+        </div>
+
+        <!-- Review 3 -->
+        <div class="testimonial-card-exact">
+          <span class="quote-icon-orange">”</span>
+          <p class="testimonial-text-exact">
+            Very good food at reasonable prices. Definitely ordering again.<br>
+            “PM Zaika never disappoints. Great taste, hygiene, and friendly service.”
+          </p>
+          <div class="reviewer-meta-exact">
+            <img src="assets/images/WhatsApp-Image-2026-02-03-at-2.39.04-PM-1.jpeg" alt="Customer" class="reviewer-img-exact">
+            <span class="reviewer-label-orange">Customer</span>
+          </div>
+        </div>
+
+        <!-- Review 4 -->
+        <div class="testimonial-card-exact">
+          <span class="quote-icon-orange">”</span>
+          <p class="testimonial-text-exact">
+            “Loved the quality and presentation. You can feel the authentic taste in every bite.”
+          </p>
+          <div class="reviewer-meta-exact">
+            <img src="assets/images/WhatsApp-Image-2026-02-03-at-2.39.05-PM-2.jpeg" alt="Customer" class="reviewer-img-exact">
+            <span class="reviewer-label-orange">Customer</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center;">
+        <button class="btn btn-pill-sm" style="padding: 12px 34px; font-size: 14px;">
+          See More →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       DARK FOOTER (MATCHING SCREENSHOT 3 & 4)
+       ========================================================================= -->
+  <footer class="site-footer-dark" id="contact">
+    <div class="footer-shape-tr"></div>
+    <div class="footer-shape-bl"></div>
+
+    <div class="container footer-content-relative">
+      <div class="footer-grid-dark">
+        <!-- Col 1: Brand Info -->
+        <div>
+          <img src="assets/images/pm_zaika_circular_logo.png" alt="PM Zaika Logo" class="footer-logo-img">
+          <p class="footer-desc-dark">
+            PM Zaika Restaurant serves delicious, freshly prepared food with authentic flavors and quality ingredients. Perfect for family dining, takeaway, and online orders.
+          </p>
+        </div>
+
+        <!-- Col 2: Get In Touch -->
+        <div>
+          <h3 class="footer-title-white">Get In Touch</h3>
+          <ul class="footer-contact-dark">
+            <li class="contact-item-dark">
+              <span style="color:var(--primary-amber); font-size:16px;">📍</span>
+              <span>PM Zaika Restaurant shersha road,gur ki Mandi,infront of bank of india,patna-800007, Bihar</span>
+            </li>
+            <li class="contact-item-dark">
+              <span style="color:var(--primary-amber); font-size:16px;">✉️</span>
+              <a href="mailto:zaikarestaurant81@gmail.com" style="color:#D1D5DB;">zaikarestaurant81@gmail.com</a>
+            </li>
+            <li class="contact-item-dark">
+              <span style="color:var(--primary-amber); font-size:16px;">📞</span>
+              <a href="tel:+917488260572" style="color:#D1D5DB;">+91 7488 260 572</a>
+            </li>
+            <li class="contact-item-dark">
+              <span style="color:var(--primary-amber); font-size:16px;">🕒</span>
+              <span>11:00 AM - 10:00 PM</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Quicklinks -->
+        <div>
+          <h3 class="footer-title-white">Quicklinks</h3>
+          <ul class="footer-links-dark">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#menu-showcase">Order Online ⌄</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a href="reservation.html">Reservation</a></li>
+            <li><a href="contact.html">Contact-Us</a></li>
+            <li><a href="about.html">About-Us</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Follow Us -->
+        <div>
+          <h3 class="footer-title-white">Follow Us</h3>
+          <div class="footer-social-circles">
+            <a href="https://facebook.com" class="social-circle-dark" title="Facebook" target="_blank" rel="noopener">f</a>
+            <a href="https://twitter.com" class="social-circle-dark" title="Twitter" target="_blank" rel="noopener">t</a>
+            <a href="https://instagram.com" class="social-circle-dark" title="Instagram" target="_blank" rel="noopener">ig</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Bottom Bar -->
+      <div class="footer-bottom-dark">
+        <div>Copyright © 2021 ASK Project</div>
+        <div>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Shipping Policy</a>
+          <a href="#">Refund Policy</a>
+          <a href="#">Terms & Services</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       BOTTOM CONTACT FORM SECTION (MATCHING SCREENSHOT 4 & 5)
+       ========================================================================= -->
+  <section class="section-bottom-form">
+    <div class="container">
+      <div class="bottom-form-container">
+        <form id="standaloneBottomContactForm">
+          <div class="form-group-bottom">
+            <label class="form-label-bottom" for="contactName">Name</label>
+            <input type="text" id="contactName" class="form-input-bottom" placeholder="Name" required>
+          </div>
+
+          <div class="form-group-bottom">
+            <label class="form-label-bottom" for="contactEmail">Email</label>
+            <input type="email" id="contactEmail" class="form-input-bottom" placeholder="Email" required>
+          </div>
+
+          <div class="form-group-bottom">
+            <label class="form-label-bottom" for="contactMessage">Message</label>
+            <textarea id="contactMessage" class="form-input-bottom" placeholder="Message" required></textarea>
+          </div>
+
+          <button type="submit" class="btn-send-bottom">
+            Send
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       FLOATING ACTION BUTTONS (BOTTOM RIGHT - MATCHING SCREENSHOTS 1 TO 5)
+       ========================================================================= -->
+  <div class="floating-ctas">
+    <!-- WhatsApp Order Online -->
+    <a href="https://wa.me/917488260572?text=Hello%20PM%20Zaika%20Restaurant,%20I%20would%20like%20to%20place%20an%20order!" target="_blank" rel="noopener" class="floating-btn whatsapp" title="Order via WhatsApp">
+      <span>Order Online</span>
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.204 8.204 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.188 8.188 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24zm4.52 11.66c-.19-.09-1.12-.55-1.3-.61-.17-.07-.3-.1-.43.1-.12.19-.48.61-.59.74-.11.12-.22.14-.41.05-.19-.09-.81-.3-1.55-.96-.57-.51-.96-1.14-1.07-1.33-.11-.19-.01-.3.08-.39.09-.08.19-.22.29-.33.09-.11.12-.19.19-.31.06-.12.03-.23-.01-.33-.05-.09-.43-1.04-.6-1.42-.16-.38-.33-.32-.45-.33l-.39-.01c-.13 0-.34.05-.52.24-.18.19-.69.67-.69 1.64s.71 1.91.81 2.04c.1.13 1.39 2.12 3.37 2.97.47.2.84.32 1.13.41.47.15.91.13 1.25.08.38-.06 1.17-.48 1.33-.94.17-.46.17-.86.12-.94-.05-.09-.18-.14-.37-.24z"/></svg>
+      </div>
+    </a>
+
+    <!-- Phone Call Order -->
+    <a href="tel:+917488260572" class="floating-btn phone" title="Call PM Zaika">
+      <span>Contact-Us for Order</span>
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+      </div>
+    </a>
+  </div>
+
+  <!-- =========================================================================
+       CART DRAWER (SLIDE-IN SIDEBAR)
+       ========================================================================= -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Cart Sidebar">
+    <div class="cart-header">
+      <h3 class="cart-title">
+        <span>🛒 Your Food Order</span>
+      </h3>
+      <button class="cart-close-btn" id="cartClose" aria-label="Close Cart">&times;</button>
+    </div>
+
+    <!-- Items List -->
+    <div class="cart-items-container" id="cartItemsList">
+      <!-- Populated dynamically by app.js -->
+    </div>
+
+    <!-- Cart Footer with Totals & WhatsApp Checkout -->
+    <div class="cart-footer">
+      <div class="cart-summary-line">
+        <span>Subtotal</span>
+        <span id="cartSubtotal">₹0</span>
+      </div>
+      <div class="cart-summary-line">
+        <span>Delivery Fee</span>
+        <span style="color:#22C55E; font-weight:600;">FREE (Patna City)</span>
+      </div>
+      <div class="cart-summary-line cart-summary-total">
+        <span>Total Amount</span>
+        <span id="cartTotal" style="color:var(--accent-orange);">₹0</span>
+      </div>
+
+      <button class="cart-order-btn" id="whatsappOrderBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.204 8.204 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.188 8.188 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24zm4.52 11.66c-.19-.09-1.12-.55-1.3-.61-.17-.07-.3-.1-.43.1-.12.19-.48.61-.59.74-.11.12-.22.14-.41.05-.19-.09-.81-.3-1.55-.96-.57-.51-.96-1.14-1.07-1.33-.11-.19-.01-.3.08-.39.09-.08.19-.22.29-.33.09-.11.12-.19.19-.31.06-.12.03-.23-.01-.33-.05-.09-.43-1.04-.6-1.42-.16-.38-.33-.32-.45-.33l-.39-.01c-.13 0-.34.05-.52.24-.18.19-.69.67-.69 1.64s.71 1.91.81 2.04c.1.13 1.39 2.12 3.37 2.97.47.2.84.32 1.13.41.47.15.91.13 1.25.08.38-.06 1.17-.48 1.33-.94.17-.46.17-.86.12-.94-.05-.09-.18-.14-.37-.24z"/></svg>
+        <span>Send Order via WhatsApp</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       TABLE RESERVATION MODAL
+       ========================================================================= -->
+  <div class="modal-backdrop" id="reservationModalBackdrop">
+    <div class="modal-window" id="reservationModal">
+      <div class="modal-header">
+        <h3 class="modal-title">🍽️ Table Reservation</h3>
+        <button class="cart-close-btn" id="reservationClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="tableReservationForm">
+          <div class="modal-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="resName">Full Name *</label>
+              <input type="text" id="resName" class="form-input" placeholder="e.g. Amanullah" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="resPhone">Phone Number *</label>
+              <input type="tel" id="resPhone" class="form-input" placeholder="e.g. 9876543210" required>
+            </div>
+          </div>
+
+          <div class="modal-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="resDate">Reservation Date *</label>
+              <input type="date" id="resDate" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="resTime">Preferred Time *</label>
+              <select id="resTime" class="form-input" required>
+                <option value="12:00 PM">12:00 PM (Lunch)</option>
+                <option value="01:00 PM">01:00 PM (Lunch)</option>
+                <option value="02:00 PM">02:00 PM (Lunch)</option>
+                <option value="07:00 PM" selected>07:00 PM (Dinner)</option>
+                <option value="08:00 PM">08:00 PM (Dinner)</option>
+                <option value="09:00 PM">09:00 PM (Dinner)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="resGuests">Number of Guests *</label>
+              <select id="resGuests" class="form-input" required>
+                <option value="2 Persons">2 Persons</option>
+                <option value="3-4 Persons" selected>3 - 4 Persons</option>
+                <option value="5-8 Persons">5 - 8 Persons (Family Table)</option>
+                <option value="8+ Persons">8+ Persons (Party Section)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="resSeating">Seating Preference</label>
+              <select id="resSeating" class="form-input">
+                <option value="Indoor AC">Indoor AC Section</option>
+                <option value="Family Lounge">Family Lounge</option>
+                <option value="Window Side">Window Side Table</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="resNotes">Special Requests (Optional)</label>
+            <textarea id="resNotes" class="form-input" placeholder="Birthday celebration, high chair, spice preferences, etc."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 15px;">
+            Confirm Reservation Table →
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       SEARCH DISHES MODAL
+       ========================================================================= -->
+  <div class="modal-backdrop" id="searchModalBackdrop">
+    <div class="modal-window" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🔍 Search PM Zaika Menu</h3>
+        <button class="cart-close-btn" id="searchClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="dishSearchInput" class="form-input" placeholder="Type dish name (e.g. Biryani, Butter Chicken, Naan)..." style="font-size: 16px; padding: 14px 18px;">
+        <div id="searchResults" style="margin-top: 18px; max-height: 340px; overflow-y: auto;">
+          <p style="text-align: center; color: #9CA3AF; padding: 20px;">Type to search our delicious kitchen items...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/menu-data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Helper to scroll and filter menu
+    function filterCategory(cat) {
+      const section = document.getElementById('menu-showcase');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+      const btns = document.querySelectorAll('.filter-btn');
+      btns.forEach(b => {
+        if (b.getAttribute('data-filter') === cat) {
+          b.click();
+        }
+      });
+    }
+
+    // Set today's date as minimum in reservation date input
+    document.addEventListener('DOMContentLoaded', () => {
+      const dateInput = document.getElementById('resDate');
+      if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+        dateInput.value = today;
+      }
+    });
+  </script>
+</body>
+</html>

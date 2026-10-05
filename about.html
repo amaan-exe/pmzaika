@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About-Us – PM Zaika</title>
+  <meta name="description" content="Learn about PM Zaika Restaurant in Patna. Freshly prepared meals, rich traditional flavors, and passionate service.">
+  <link rel="icon" type="image/png" href="assets/images/pm_zaika_circular_logo.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar">
+        <a href="index.html" class="brand-logo" title="PM Zaika Restaurant">
+          <img src="assets/images/pm_zaika_circular_logo.png" alt="PM Zaika Restaurant Logo">
+        </a>
+        <ul class="nav-links" id="navLinks">
+          <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+          <li class="nav-item"><a href="index.html#menu-showcase" class="nav-link">Order Online <span style="font-size:11px;">&#9662;</span></a></li>
+          <li class="nav-item"><a href="cart.html" class="nav-link">Cart</a></li>
+          <li class="nav-item"><a href="reservation.html" class="nav-link">Reservation</a></li>
+          <li class="nav-item"><a href="contact.html" class="nav-link">Contact-Us</a></li>
+          <li class="nav-item"><a href="about.html" class="nav-link active">About-Us</a></li>
+          <li class="nav-item"><a href="gallery.html" class="nav-link">Gallery</a></li>
+        </ul>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="openSearchModal()" title="Search Dishes">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+          <button class="icon-btn" onclick="window.cart.openDrawer()" title="View Cart">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span class="badge-count" id="cartBadge" style="display:none;">0</span>
+          </button>
+          <button class="mobile-toggle" id="mobileToggle">&#9776;</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Banner (Matching Screenshot 3: "About Us" / "Home > About Us") -->
+  <section class="subpage-banner bg-courier">
+    <div class="banner-shape-left"></div>
+    <div class="banner-shape-right"></div>
+    <div class="container subpage-banner-content">
+      <h1 class="subpage-banner-title">About Us</h1>
+      <div class="subpage-breadcrumb">
+        <a href="index.html">Home</a>
+        <span>&gt;</span>
+        <span>About-Us</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 1: Intro About (Matching Screenshot 3) -->
+  <section class="about-intro-section">
+    <div class="container">
+      <div class="about-intro-grid">
+        <!-- Left: Logo Box Card -->
+        <div>
+          <div class="about-logo-box">
+            <img src="assets/images/ChatGPT-Image-Jan-9-2026-06_42_49-PM-1.png" alt="PM Zaika Restaurant Emblem" loading="lazy">
+          </div>
+        </div>
+
+        <!-- Right: Description & CTA Buttons -->
+        <div>
+          <span class="about-tag">ABOUT PM ZAIKA RESTAURANT</span>
+          <h2 class="about-heading">PM Zaika Serve the delicious food.</h2>
+          <p class="about-desc">
+            PM Zaika brings you the perfect blend of taste, quality, and hygiene. From freshly prepared meals to rich traditional flavors, every dish is crafted with love and premium ingredients. Our mission is to serve delicious food that makes every bite memorable.
+          </p>
+          <div class="about-buttons">
+            <a href="index.html#menu-showcase" class="btn btn-primary">
+              Our Menu &rarr;
+            </a>
+            <a href="index.html#menu-showcase" class="btn btn-outline">
+              Order Now
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: 4 Stat Counters (Matching Screenshot 3) -->
+  <section class="about-stats-section">
+    <div class="container">
+      <div class="about-stats-grid">
+        <!-- Stat 1 -->
+        <div class="about-stat-item">
+          <img src="assets/images/icon1_3.png" alt="Satisfaction Customer" class="about-stat-icon">
+          <div class="about-stat-number">
+            10 K <span>+</span>
+          </div>
+          <div class="about-stat-label">Satisfaction Customer</div>
+        </div>
+
+        <!-- Stat 2 -->
+        <div class="about-stat-item">
+          <img src="assets/images/icon2_3.png" alt="Food Delivered" class="about-stat-icon">
+          <div class="about-stat-number">
+            2 K <span>+</span>
+          </div>
+          <div class="about-stat-label">Food Delivered</div>
+        </div>
+
+        <!-- Stat 3 -->
+        <div class="about-stat-item">
+          <img src="assets/images/icon3_3.png" alt="Kitchen Partner" class="about-stat-icon">
+          <div class="about-stat-number">
+            5 <span>+</span>
+          </div>
+          <div class="about-stat-label">Kitchen Partner</div>
+        </div>
+
+        <!-- Stat 4 -->
+        <div class="about-stat-item">
+          <img src="assets/images/icon4_3.png" alt="Experienced Server" class="about-stat-icon">
+          <div class="about-stat-number">
+            200 <span>+</span>
+          </div>
+          <div class="about-stat-label">Experienced Server</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Testimonials (Matching Screenshot 3) -->
+  <section class="about-testimonials-section">
+    <div class="container">
+      <div class="about-testimonials-grid">
+        <!-- Left: Heading & Description & Button -->
+        <div>
+          <span class="about-tag">TESTIMONIALS</span>
+          <h2 class="about-heading" style="font-size: 36px; margin-bottom: 16px;">
+            What Customers Say About Us.
+          </h2>
+          <p class="about-desc" style="margin-bottom: 30px;">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus viverra orci sed risus tincidunt tempor. Nulla malesuada vestibulum nibh.
+          </p>
+          <a href="#standaloneBottomContactForm" class="btn btn-primary">
+            See More &rarr;
+          </a>
+        </div>
+
+        <!-- Right: 2x2 Grid of Testimonial Cards -->
+        <div class="about-testimonials-cards">
+          <!-- Card 1 -->
+          <div class="about-testimonial-card">
+            <div class="about-testimonial-quote">&ldquo;</div>
+            <p class="about-testimonial-text">
+              PM Zaika ne expectations se zyada accha experience diya. Food quality, taste aur presentation sab top class tha. Paisa vasool food.
+            </p>
+            <div class="about-testimonial-author">
+              <img src="assets/images/WhatsApp-Image-2026-02-03-at-2.39.05-PM-1.jpeg" alt="Customer Avatar">
+              <span>Customer</span>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="about-testimonial-card">
+            <div class="about-testimonial-quote">&ldquo;</div>
+            <p class="about-testimonial-text">
+              Mujhe PM Zaika ka taste bahut pasand aaya. Masale balanced the aur taste bilkul fresh tha. Family ke saath ya dosto ke sath order karne ke liye best place.
+            </p>
+            <div class="about-testimonial-author">
+              <img src="assets/images/WhatsApp-Image-2026-02-03-at-2.39.05-PM.jpeg" alt="Customer Avatar">
+              <span>Customer</span>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="about-testimonial-card">
+            <div class="about-testimonial-quote">&ldquo;</div>
+            <p class="about-testimonial-text">
+              Patna me best taste! Fresh aur tasty food mila, biryani aur gravy items lajawab the. Service fast thi aur staff polite tha. Highly recommended.
+            </p>
+            <div class="about-testimonial-author">
+              <img src="assets/images/WhatsApp-Image-2026-02-03-at-2.39.03-PM.jpeg" alt="Customer Avatar">
+              <span>Customer</span>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="about-testimonial-card">
+            <div class="about-testimonial-quote">&ldquo;</div>
+            <p class="about-testimonial-text">
+              PM Zaika ka khana truly amazing hai. Har bite me great flavor aur quantity bhi perfect thi. Packaging bhi secure aur hygienic thi. Definitely ordering again.
+            </p>
+            <div class="about-testimonial-author">
+              <img src="assets/images/WhatsApp-Image-2026-02-03-at-2.39.01-PM.jpeg" alt="Customer Avatar">
+              <span>Customer</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dark Footer (Matching Screenshot 1, 2, 3, 4) -->
+  <footer class="site-footer-dark" id="contact">
+    <div class="footer-shape-tr"></div>
+    <div class="footer-shape-bl"></div>
+
+    <div class="container footer-content-relative">
+      <div class="footer-grid-dark">
+        <div>
+          <img src="assets/images/pm_zaika_circular_logo.png" alt="PM Zaika Logo" class="footer-logo-img">
+          <p class="footer-desc-dark">
+            PM Zaika Restaurant serves delicious, freshly prepared food with authentic flavors and quality ingredients. Perfect for family dining, takeaway, and online orders.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="footer-title-white">Get In Touch</h3>
+          <ul class="footer-contact-dark">
+            <li class="contact-item-dark">
+              <span>📍</span>
+              <span>PM Zaika Restaurant shersha road,gur ki Mandi,infront of bank of india,patna-800007, Bihar</span>
+            </li>
+            <li class="contact-item-dark">
+              <span>✉️</span>
+              <a href="mailto:zaikarestaurant81@gmail.com" style="color:#D1D5DB;">zaikarestaurant81@gmail.com</a>
+            </li>
+            <li class="contact-item-dark">
+              <span>📞</span>
+              <a href="tel:+917488260572" style="color:#D1D5DB;">+91 7488 260 572</a>
+            </li>
+            <li class="contact-item-dark">
+              <span>🕒</span>
+              <span>11:00 AM - 10:00 PM</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="footer-title-white">Quicklinks</h3>
+          <ul class="footer-links-dark">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#menu-showcase">Order Online &#9662;</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a href="reservation.html">Reservation</a></li>
+            <li><a href="contact.html">Contact-Us</a></li>
+            <li><a href="about.html">About-Us</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="footer-title-white">Follow Us</h3>
+          <div class="footer-social-circles">
+            <a href="https://facebook.com" class="social-circle-dark" title="Facebook" target="_blank" rel="noopener">f</a>
+            <a href="https://twitter.com" class="social-circle-dark" title="Twitter" target="_blank" rel="noopener">t</a>
+            <a href="https://instagram.com" class="social-circle-dark" title="Instagram" target="_blank" rel="noopener">ig</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom-dark">
+        <div>Copyright © 2021 ASK Project</div>
+        <div>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Shipping Policy</a>
+          <a href="#">Refund Policy</a>
+          <a href="#">Terms & Services</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Standalone Bottom Contact Form (Matching Screenshot 1 & 3) -->
+  <section class="section-bottom-form">
+    <div class="container">
+      <div class="bottom-form-container">
+        <form id="standaloneBottomContactForm">
+          <div class="form-group-bottom">
+            <label class="form-label-bottom" for="contactName">Name</label>
+            <input type="text" id="contactName" class="form-input-bottom" placeholder="Name" required>
+          </div>
+
+          <div class="form-group-bottom">
+            <label class="form-label-bottom" for="contactEmail">Email</label>
+            <input type="email" id="contactEmail" class="form-input-bottom" placeholder="Email" required>
+          </div>
+
+          <div class="form-group-bottom">
+            <label class="form-label-bottom" for="contactMessage">Message</label>
+            <textarea id="contactMessage" class="form-input-bottom" placeholder="Message" required></textarea>
+          </div>
+
+          <button type="submit" class="btn-send-bottom">
+            Send
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Floating CTAs (Matching Screenshot 1 & 3) -->
+  <div class="floating-ctas">
+    <a href="https://wa.me/917488260572" target="_blank" rel="noopener" class="floating-btn whatsapp">
+      <span>Order Online</span>
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.204 8.204 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.188 8.188 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24zm4.52 11.66c-.19-.09-1.12-.55-1.3-.61-.17-.07-.3-.1-.43.1-.12.19-.48.61-.59.74-.11.12-.22.14-.41.05-.19-.09-.81-.3-1.55-.96-.57-.51-.96-1.14-1.07-1.33-.11-.19-.01-.3.08-.39.09-.08.19-.22.29-.33.09-.11.12-.19.19-.31.06-.12.03-.23-.01-.33-.05-.09-.43-1.04-.6-1.42-.16-.38-.33-.32-.45-.33l-.39-.01c-.13 0-.34.05-.52.24-.18.19-.69.67-.69 1.64s.71 1.91.81 2.04c.1.13 1.39 2.12 3.37 2.97.47.2.84.32 1.13.41.47.15.91.13 1.25.08.38-.06 1.17-.48 1.33-.94.17-.46.17-.86.12-.94-.05-.09-.18-.14-.37-.24z"/></svg>
+      </div>
+    </a>
+    <a href="tel:+917488260572" class="floating-btn phone">
+      <span>Contact-Us for Order</span>
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+      </div>
+    </a>
+  </div>
+
+  <script src="js/menu-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

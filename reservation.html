@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reservation – PM Zaika Restaurant | Patna</title>
+  <meta name="description" content="Book your dining table at PM Zaika Restaurant in Patna. Fine dining, family lounges, authentic Mughlai cuisine.">
+  <link rel="icon" type="image/png" href="assets/images/logoAsset-1.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Reservation Hero Banner Matching Screenshot 4 */
+    .res-page-banner {
+      position: relative;
+      background: url('assets/images/res_banner_bg.jpg') center/cover no-repeat;
+      padding: 100px 0 90px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .res-page-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(2px);
+      z-index: 1;
+    }
+    .banner-shape-left {
+      position: absolute;
+      bottom: -60px;
+      left: -60px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, #F88A44 0%, #FA9E58 70%, transparent 72%);
+      border-radius: 50%;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .banner-shape-right {
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, #F88A44 0%, #FA9E58 70%, transparent 72%);
+      border-radius: 50%;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .res-banner-content {
+      position: relative;
+      z-index: 3;
+    }
+    .res-banner-title {
+      font-size: 44px;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 8px;
+    }
+    .res-breadcrumb {
+      font-size: 14px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .res-breadcrumb a {
+      color: var(--text-heading);
+      font-weight: 500;
+    }
+    .res-breadcrumb span {
+      color: var(--accent-orange);
+    }
+
+    /* Main Reservation Form Layout Matching Screenshot 4 & 5 */
+    .res-layout-grid {
+      display: grid;
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: 60px;
+      padding: 80px 0 100px;
+      align-items: flex-start;
+    }
+    .res-heading-col h2 {
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--text-heading);
+      line-height: 1.2;
+    }
+    .res-form-wrapper {
+      max-width: 600px;
+    }
+    .res-form-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 4px;
+    }
+    .res-required-note {
+      font-size: 13px;
+      color: #6B7280;
+      margin-bottom: 26px;
+    }
+    .res-required-note span {
+      color: #EF4444;
+    }
+
+    .form-item-res {
+      margin-bottom: 18px;
+    }
+    .form-label-res {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-heading);
+      margin-bottom: 6px;
+    }
+    .form-label-res .req-star {
+      color: #EF4444;
+      margin-left: 2px;
+    }
+    .form-input-res {
+      width: 100%;
+      padding: 13px 22px;
+      border-radius: var(--radius-full);
+      border: 1px solid #D1D5DB;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text-heading);
+      background: #FFFFFF;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-input-res:focus {
+      outline: none;
+      border-color: var(--primary-amber);
+      box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.18);
+    }
+    .btn-submit-res {
+      padding: 12px 38px;
+      border-radius: var(--radius-full);
+      background: var(--primary-amber);
+      color: #1F2429;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(245, 166, 35, 0.3);
+      transition: var(--transition-smooth);
+      margin-top: 8px;
+    }
+    .btn-submit-res:hover {
+      background: var(--primary-amber-hover);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 900px) {
+      .res-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar">
+        <a href="index.html" class="brand-logo" title="PM Zaika Restaurant">
+          <img src="assets/images/pm_zaika_circular_logo.png" alt="PM Zaika Restaurant Logo">
+        </a>
+        <ul class="nav-links" id="navLinks">
+          <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+          <li class="nav-item"><a href="index.html#menu-showcase" class="nav-link">Order Online</a></li>
+          <li class="nav-item"><a href="cart.html" class="nav-link">Cart</a></li>
+          <li class="nav-item"><a href="reservation.html" class="nav-link active">Reservation</a></li>
+          <li class="nav-item"><a href="contact.html" class="nav-link">Contact-Us</a></li>
+          <li class="nav-item"><a href="about.html" class="nav-link">About-Us</a></li>
+          <li class="nav-item"><a href="gallery.html" class="nav-link">Gallery</a></li>
+        </ul>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="window.cart.openDrawer()" title="View Cart">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span class="badge-count" id="cartBadge" style="display:none;">0</span>
+          </button>
+          <button class="mobile-toggle" id="mobileToggle">☰</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Reservation Banner (Matching Screenshot 4) -->
+  <section class="res-page-banner">
+    <div class="banner-shape-left"></div>
+    <div class="banner-shape-right"></div>
+    <div class="container res-banner-content">
+      <h1 class="res-banner-title">Reservation</h1>
+      <div class="res-breadcrumb">
+        <a href="index.html">Home</a>
+        <span>&gt;</span>
+        <span>Reservation</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reservation Form Main Section (Matching Screenshot 4 & 5) -->
+  <div class="container">
+    <div class="res-layout-grid">
+      <!-- Left Heading -->
+      <div class="res-heading-col">
+        <h2>Reservation Form</h2>
+      </div>
+
+      <!-- Right Form Fields Matching Screenshot 4 & 5 -->
+      <div class="res-form-wrapper">
+        <h3 class="res-form-title">Reservation</h3>
+        <p class="res-required-note">Fields marked with an <span>*</span> are required</p>
+
+        <form id="pmZaikaFullResForm">
+          <!-- First Name -->
+          <div class="form-item-res">
+            <label class="form-label-res" for="rfFirstName">First Name <span class="req-star">*</span></label>
+            <input type="text" id="rfFirstName" class="form-input-res" placeholder="First Name" required>
+          </div>
+
+          <!-- Last Name -->
+          <div class="form-item-res">
+            <label class="form-label-res" for="rfLastName">Last Name <span class="req-star">*</span></label>
+            <input type="text" id="rfLastName" class="form-input-res" placeholder="Last Name" required>
+          </div>
+
+          <!-- Phone -->
+          <div class="form-item-res">
+            <label class="form-label-res" for="rfPhone">Phone <span class="req-star">*</span></label>
+            <input type="tel" id="rfPhone" class="form-input-res" placeholder="Phone" required>
+          </div>
+
+          <!-- Email -->
+          <div class="form-item-res">
+            <label class="form-label-res" for="rfEmail">Email <span class="req-star">*</span></label>
+            <input type="email" id="rfEmail" class="form-input-res" placeholder="Email" required>
+          </div>
+
+          <!-- City -->
+          <div class="form-item-res">
+            <label class="form-label-res" for="rfCity">City <span class="req-star">*</span></label>
+            <input type="text" id="rfCity" class="form-input-res" placeholder="City" value="Patna" required>
+          </div>
+
+          <!-- Address -->
+          <div class="form-item-res">
+            <label class="form-label-res" for="rfAddress">Address <span class="req-star">*</span></label>
+            <input type="text" id="rfAddress" class="form-input-res" placeholder="Address" required>
+          </div>
+
+          <!-- Zip -->
+          <div class="form-item-res">
+            <label class="form-label-res" for="rfZip">Zip <span class="req-star">*</span></label>
+            <input type="text" id="rfZip" class="form-input-res" placeholder="Pin-Code" required>
+          </div>
+
+          <!-- Date/Time -->
+          <div class="form-item-res">
+            <label class="form-label-res" for="rfDateTime">Date/Time <span class="req-star">*</span></label>
+            <input type="text" id="rfDateTime" class="form-input-res" placeholder="Date Of Reservation (e.g. Tomorrow 7:30 PM)" required>
+          </div>
+
+          <!-- Number of Guests -->
+          <div class="form-item-res">
+            <label class="form-label-res" for="rfNumber">Number <span class="req-star">*</span></label>
+            <input type="number" id="rfNumber" class="form-input-res" placeholder="Number of Guest" min="1" max="100" required>
+          </div>
+
+          <!-- Increase Number of Guest -->
+          <div class="form-item-res">
+            <label class="form-label-res" for="rfIncrease">Increase Number of Guest</label>
+            <input type="text" id="rfIncrease" class="form-input-res" placeholder="please Contact-us">
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-submit-res">
+            Submit
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dark Footer (Matching Screenshot 3 & 4) -->
+  <footer class="site-footer-dark" id="contact">
+    <div class="footer-shape-tr"></div>
+    <div class="footer-shape-bl"></div>
+
+    <div class="container footer-content-relative">
+      <div class="footer-grid-dark">
+        <div>
+          <img src="assets/images/pm_zaika_circular_logo.png" alt="PM Zaika Logo" class="footer-logo-img">
+          <p class="footer-desc-dark">
+            PM Zaika Restaurant serves delicious, freshly prepared food with authentic flavors and quality ingredients. Perfect for family dining, takeaway, and online orders.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="footer-title-white">Get In Touch</h3>
+          <ul class="footer-contact-dark">
+            <li class="contact-item-dark">
+              <span>📍</span>
+              <span>PM Zaika Restaurant shersha road,gur ki Mandi,infront of bank of india,patna-800007, Bihar</span>
+            </li>
+            <li class="contact-item-dark">
+              <span>✉️</span>
+              <a href="mailto:zaikarestaurant81@gmail.com" style="color:#D1D5DB;">zaikarestaurant81@gmail.com</a>
+            </li>
+            <li class="contact-item-dark">
+              <span>📞</span>
+              <a href="tel:+917488260572" style="color:#D1D5DB;">+91 7488 260 572</a>
+            </li>
+            <li class="contact-item-dark">
+              <span>🕒</span>
+              <span>11:00 AM - 10:00 PM</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="footer-title-white">Quicklinks</h3>
+          <ul class="footer-links-dark">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#menu-showcase">Order Online ⌄</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a href="reservation.html">Reservation</a></li>
+            <li><a href="contact.html">Contact-Us</a></li>
+            <li><a href="about.html">About-Us</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="footer-title-white">Follow Us</h3>
+          <div class="footer-social-circles">
+            <a href="https://facebook.com" class="social-circle-dark" title="Facebook" target="_blank" rel="noopener">f</a>
+            <a href="https://twitter.com" class="social-circle-dark" title="Twitter" target="_blank" rel="noopener">t</a>
+            <a href="https://instagram.com" class="social-circle-dark" title="Instagram" target="_blank" rel="noopener">ig</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom-dark">
+        <div>Copyright © 2021 ASK Project</div>
+        <div>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Shipping Policy</a>
+          <a href="#">Refund Policy</a>
+          <a href="#">Terms & Services</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Standalone Bottom Contact Form -->
+  <section class="section-bottom-form">
+    <div class="container">
+      <div class="bottom-form-container">
+        <form id="standaloneBottomContactForm">
+          <div class="form-group-bottom">
+            <label class="form-label-bottom" for="contactName">Name</label>
+            <input type="text" id="contactName" class="form-input-bottom" placeholder="Name" required>
+          </div>
+
+          <div class="form-group-bottom">
+            <label class="form-label-bottom" for="contactEmail">Email</label>
+            <input type="email" id="contactEmail" class="form-input-bottom" placeholder="Email" required>
+          </div>
+
+          <div class="form-group-bottom">
+            <label class="form-label-bottom" for="contactMessage">Message</label>
+            <textarea id="contactMessage" class="form-input-bottom" placeholder="Message" required></textarea>
+          </div>
+
+          <button type="submit" class="btn-send-bottom">
+            Send
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Floating CTAs -->
+  <div class="floating-ctas">
+    <a href="https://wa.me/917488260572" target="_blank" rel="noopener" class="floating-btn whatsapp">
+      <span>Order Online</span>
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.204 8.204 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.188 8.188 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24zm4.52 11.66c-.19-.09-1.12-.55-1.3-.61-.17-.07-.3-.1-.43.1-.12.19-.48.61-.59.74-.11.12-.22.14-.41.05-.19-.09-.81-.3-1.55-.96-.57-.51-.96-1.14-1.07-1.33-.11-.19-.01-.3.08-.39.09-.08.19-.22.29-.33.09-.11.12-.19.19-.31.06-.12.03-.23-.01-.33-.05-.09-.43-1.04-.6-1.42-.16-.38-.33-.32-.45-.33l-.39-.01c-.13 0-.34.05-.52.24-.18.19-.69.67-.69 1.64s.71 1.91.81 2.04c.1.13 1.39 2.12 3.37 2.97.47.2.84.32 1.13.41.47.15.91.13 1.25.08.38-.06 1.17-.48 1.33-.94.17-.46.17-.86.12-.94-.05-.09-.18-.14-.37-.24z"/></svg>
+      </div>
+    </a>
+    <a href="tel:+917488260572" class="floating-btn phone">
+      <span>Contact-Us for Order</span>
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+      </div>
+    </a>
+  </div>
+
+  <script src="js/menu-data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.getElementById('pmZaikaFullResForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const first = document.getElementById('rfFirstName').value;
+      const last = document.getElementById('rfLastName').value;
+      const phone = document.getElementById('rfPhone').value;
+      const dt = document.getElementById('rfDateTime').value;
+      const guests = document.getElementById('rfNumber').value;
+
+      const waMsg = encodeURIComponent(
+        `*🍽️ TABLE RESERVATION - PM ZAIKA RESTAURANT*\n\n` +
+        `Name: ${first} ${last}\n` +
+        `Phone: ${phone}\n` +
+        `Date/Time: ${dt}\n` +
+        `Guests: ${guests}\n\n` +
+        `Please confirm our table booking. Thank you!`
+      );
+
+      showToast('Reservation request submitted successfully! ✨');
+      setTimeout(() => {
+        window.open(`https://wa.me/917488260572?text=${waMsg}`, '_blank');
+      }, 700);
+    });
+  </script>
+</body>
+</html>

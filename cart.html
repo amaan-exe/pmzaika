@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart – PM Zaika Restaurant | Patna</title>
+  <meta name="description" content="View your cart items and complete your food order at PM Zaika Restaurant in Patna.">
+  <link rel="icon" type="image/png" href="assets/images/logoAsset-1.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Cart Hero Banner Matching Screenshot 1 */
+    .cart-page-banner {
+      position: relative;
+      background: url('assets/images/cart_banner_bg.jpg') center/cover no-repeat;
+      padding: 100px 0 90px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .cart-page-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(2px);
+      z-index: 1;
+    }
+    .banner-shape-left {
+      position: absolute;
+      bottom: -60px;
+      left: -60px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, #F88A44 0%, #FA9E58 70%, transparent 72%);
+      border-radius: 50%;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .banner-shape-right {
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, #F88A44 0%, #FA9E58 70%, transparent 72%);
+      border-radius: 50%;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .cart-banner-content {
+      position: relative;
+      z-index: 3;
+    }
+    .cart-banner-title {
+      font-size: 44px;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 8px;
+    }
+    .cart-breadcrumb {
+      font-size: 14px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .cart-breadcrumb a {
+      color: var(--text-heading);
+      font-weight: 500;
+    }
+    .cart-breadcrumb span {
+      color: var(--accent-orange);
+    }
+
+    /* Empty Cart State Matching Screenshot 1 & 2 */
+    .empty-cart-section {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+    .sad-circle-icon {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 24px;
+      background: #1F2429;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .sad-circle-icon svg {
+      width: 72px;
+      height: 72px;
+      fill: #FFFFFF;
+    }
+    .empty-cart-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 24px;
+    }
+
+    /* New in Store Section Matching Screenshot 2 */
+    .new-in-store-section {
+      padding: 40px 0 80px;
+    }
+    .new-in-store-title {
+      font-size: 28px;
+      font-weight: 700;
+      text-align: center;
+      color: var(--text-heading);
+      margin-bottom: 40px;
+    }
+    .store-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 28px;
+    }
+    .store-product-card {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .store-img-wrapper {
+      width: 100%;
+      height: 240px;
+      background: #F9FAFB;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      border: 1px solid var(--border-subtle);
+    }
+    .store-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .store-img-wrapper img.placeholder-icon {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      opacity: 0.6;
+    }
+    .store-product-card:hover .store-img-wrapper img {
+      transform: scale(1.05);
+    }
+    .store-product-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent-orange);
+      margin-bottom: 14px;
+    }
+    .store-read-btn {
+      display: inline-block;
+      padding: 10px 24px;
+      background: #2B2B2B;
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      transition: var(--transition-smooth);
+    }
+    .store-read-btn:hover {
+      background: var(--primary-amber);
+      color: #1F2429;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 992px) {
+      .store-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 600px) {
+      .store-grid-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar">
+        <a href="index.html" class="brand-logo" title="PM Zaika Restaurant">
+          <img src="assets/images/pm_zaika_circular_logo.png" alt="PM Zaika Restaurant Logo">
+        </a>
+        <ul class="nav-links" id="navLinks">
+          <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+          <li class="nav-item"><a href="index.html#menu-showcase" class="nav-link">Order Online</a></li>
+          <li class="nav-item"><a href="cart.html" class="nav-link active">Cart</a></li>
+          <li class="nav-item"><a href="reservation.html" class="nav-link">Reservation</a></li>
+          <li class="nav-item"><a href="contact.html" class="nav-link">Contact-Us</a></li>
+          <li class="nav-item"><a href="about.html" class="nav-link">About-Us</a></li>
+          <li class="nav-item"><a href="gallery.html" class="nav-link">Gallery</a></li>
+        </ul>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="window.cart.openDrawer()" title="View Cart">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span class="badge-count" id="cartBadge" style="display:none;">0</span>
+          </button>
+          <button class="mobile-toggle" id="mobileToggle">☰</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Cart Banner (Matching Screenshot 1) -->
+  <section class="cart-page-banner">
+    <div class="banner-shape-left"></div>
+    <div class="banner-shape-right"></div>
+    <div class="container cart-banner-content">
+      <h1 class="cart-banner-title">Cart</h1>
+      <div class="cart-breadcrumb">
+        <a href="index.html">Home</a>
+        <span>&gt;</span>
+        <span>Cart</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Empty Cart State (Matching Screenshot 1 & 2) -->
+  <section class="empty-cart-section" id="emptyCartDisplay">
+    <div class="container">
+      <div class="sad-circle-icon">
+        <!-- Sad Emoji SVG with Tear drop -->
+        <svg viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="30" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+          <!-- Eyes -->
+          <circle cx="23" cy="26" r="3.5" fill="#FFFFFF"/>
+          <circle cx="41" cy="26" r="3.5" fill="#FFFFFF"/>
+          <!-- Sad Mouth Arc -->
+          <path d="M21 44 Q32 35 43 44" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+          <!-- Tear Drop on Left Eye -->
+          <path d="M26 31 C26 31, 23 37, 23 39 C23 40.5, 24.3 42, 26 42 C27.7 42, 29 40.5, 29 39 C29 37, 26 31, 26 31 Z" fill="#38BDF8"/>
+        </svg>
+      </div>
+
+      <h2 class="empty-cart-title">Your cart is currently empty!</h2>
+      <a href="index.html#menu-showcase" class="btn btn-primary" style="padding: 12px 32px;">
+        Browse Delicious Menu →
+      </a>
+    </div>
+  </section>
+
+  <!-- New in Store Section (Matching Screenshot 2) -->
+  <section class="new-in-store-section">
+    <div class="container">
+      <h2 class="new-in-store-title">New in store</h2>
+
+      <div class="store-grid-4">
+        <!-- Product 1: Placeholder Icon -->
+        <div class="store-product-card">
+          <div class="store-img-wrapper">
+            <img src="assets/images/woocommerce-placeholder.webp" alt="Product Placeholder" class="placeholder-icon">
+          </div>
+          <div class="store-product-name">Product</div>
+          <a href="index.html#menu-showcase" class="store-read-btn">Read more</a>
+        </div>
+
+        <!-- Product 2: Starters Platter -->
+        <div class="store-product-card">
+          <div class="store-img-wrapper">
+            <img src="assets/images/WhatsApp-Image-2026-02-03-at-8.01.46-PM-1-300x300.jpeg" alt="Chilli Chicken Platter">
+          </div>
+          <div class="store-product-name">Product</div>
+          <a href="index.html#menu-showcase" class="store-read-btn">Read more</a>
+        </div>
+
+        <!-- Product 3: Chicken Dish -->
+        <div class="store-product-card">
+          <div class="store-img-wrapper">
+            <img src="assets/images/WhatsApp-Image-2026-02-03-at-8.01.46-PM-300x300.jpeg" alt="Tikka Chicken Dish">
+          </div>
+          <div class="store-product-name">Product</div>
+          <a href="index.html#menu-showcase" class="store-read-btn">Read more</a>
+        </div>
+
+        <!-- Product 4: Red Fries Dish -->
+        <div class="store-product-card">
+          <div class="store-img-wrapper">
+            <img src="assets/images/WhatsApp-Image-2026-02-03-at-8.01.45-PM-1-300x300.jpeg" alt="Honey Chilli Potato">
+          </div>
+          <div class="store-product-name">Product</div>
+          <a href="index.html#menu-showcase" class="store-read-btn">Read more</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dark Footer (Matching Screenshot 3 & 4) -->
+  <footer class="site-footer-dark" id="contact">
+    <div class="footer-shape-tr"></div>
+    <div class="footer-shape-bl"></div>
+
+    <div class="container footer-content-relative">
+      <div class="footer-grid-dark">
+        <div>
+          <img src="assets/images/pm_zaika_circular_logo.png" alt="PM Zaika Logo" class="footer-logo-img">
+          <p class="footer-desc-dark">
+            PM Zaika Restaurant serves delicious, freshly prepared food with authentic flavors and quality ingredients. Perfect for family dining, takeaway, and online orders.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="footer-title-white">Get In Touch</h3>
+          <ul class="footer-contact-dark">
+            <li class="contact-item-dark">
+              <span>📍</span>
+              <span>PM Zaika Restaurant shersha road,gur ki Mandi,infront of bank of india,patna-800007, Bihar</span>
+            </li>
+            <li class="contact-item-dark">
+              <span>✉️</span>
+              <a href="mailto:zaikarestaurant81@gmail.com" style="color:#D1D5DB;">zaikarestaurant81@gmail.com</a>
+            </li>
+            <li class="contact-item-dark">
+              <span>📞</span>
+              <a href="tel:+917488260572" style="color:#D1D5DB;">+91 7488 260 572</a>
+            </li>
+            <li class="contact-item-dark">
+              <span>🕒</span>
+              <span>11:00 AM - 10:00 PM</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="footer-title-white">Quicklinks</h3>
+          <ul class="footer-links-dark">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#menu-showcase">Order Online ⌄</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a href="reservation.html">Reservation</a></li>
+            <li><a href="contact.html">Contact-Us</a></li>
+            <li><a href="about.html">About-Us</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="footer-title-white">Follow Us</h3>
+          <div class="footer-social-circles">
+            <a href="https://facebook.com" class="social-circle-dark" title="Facebook" target="_blank" rel="noopener">f</a>
+            <a href="https://twitter.com" class="social-circle-dark" title="Twitter" target="_blank" rel="noopener">t</a>
+            <a href="https://instagram.com" class="social-circle-dark" title="Instagram" target="_blank" rel="noopener">ig</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom-dark">
+        <div>Copyright © 2021 ASK Project</div>
+        <div>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Shipping Policy</a>
+          <a href="#">Refund Policy</a>
+          <a href="#">Terms & Services</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Standalone Bottom Contact Form (Matching Screenshot 4 & 5) -->
+  <section class="section-bottom-form">
+    <div class="container">
+      <div class="bottom-form-container">
+        <form id="standaloneBottomContactForm">
+          <div class="form-group-bottom">
+            <label class="form-label-bottom" for="contactName">Name</label>
+            <input type="text" id="contactName" class="form-input-bottom" placeholder="Name" required>
+          </div>
+
+          <div class="form-group-bottom">
+            <label class="form-label-bottom" for="contactEmail">Email</label>
+            <input type="email" id="contactEmail" class="form-input-bottom" placeholder="Email" required>
+          </div>
+
+          <div class="form-group-bottom">
+            <label class="form-label-bottom" for="contactMessage">Message</label>
+            <textarea id="contactMessage" class="form-input-bottom" placeholder="Message" required></textarea>
+          </div>
+
+          <button type="submit" class="btn-send-bottom">
+            Send
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Floating CTAs -->
+  <div class="floating-ctas">
+    <a href="https://wa.me/917488260572" target="_blank" rel="noopener" class="floating-btn whatsapp">
+      <span>Order Online</span>
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.204 8.204 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.188 8.188 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24zm4.52 11.66c-.19-.09-1.12-.55-1.3-.61-.17-.07-.3-.1-.43.1-.12.19-.48.61-.59.74-.11.12-.22.14-.41.05-.19-.09-.81-.3-1.55-.96-.57-.51-.96-1.14-1.07-1.33-.11-.19-.01-.3.08-.39.09-.08.19-.22.29-.33.09-.11.12-.19.19-.31.06-.12.03-.23-.01-.33-.05-.09-.43-1.04-.6-1.42-.16-.38-.33-.32-.45-.33l-.39-.01c-.13 0-.34.05-.52.24-.18.19-.69.67-.69 1.64s.71 1.91.81 2.04c.1.13 1.39 2.12 3.37 2.97.47.2.84.32 1.13.41.47.15.91.13 1.25.08.38-.06 1.17-.48 1.33-.94.17-.46.17-.86.12-.94-.05-.09-.18-.14-.37-.24z"/></svg>
+      </div>
+    </a>
+    <a href="tel:+917488260572" class="floating-btn phone">
+      <span>Contact-Us for Order</span>
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+      </div>
+    </a>
+  </div>
+
+  <script src="js/menu-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
