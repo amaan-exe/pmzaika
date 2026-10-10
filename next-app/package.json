@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node -e \"try{const fs=require('fs');fs.mkdirSync('next-app',{recursive:true});if(!fs.existsSync('next-app/.next'))fs.symlinkSync('../.next','next-app/.next',process.platform==='win32'?'junction':'dir');}catch(e){}\"",
     "start": "next start",
     "lint": "eslint",
     "seed:firestore": "node scripts/seed-firestore.cjs"
