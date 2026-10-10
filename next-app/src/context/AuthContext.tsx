@@ -63,7 +63,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const getIdToken = async () => {
     if (!user) throw new Error('Please sign in before placing an order.');
-    return user.getIdToken();
+    try {
+      return await user.getIdToken(true);
+    } catch {
+      return user.getIdToken();
+    }
   };
 
   return (
