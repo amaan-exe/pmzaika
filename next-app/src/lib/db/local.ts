@@ -48,13 +48,13 @@ async function load(): Promise<LocalShape> {
 }
 
 async function persist(db: LocalShape): Promise<void> {
-  const targetFile = getDataFile();
-  const dir = path.dirname(targetFile);
-  await mkdir(dir, { recursive: true });
-  await writeFile(targetFile, JSON.stringify(db, null, 2), 'utf8');
-
-  // Also keep root .data and next-app .data in sync if possible
   try {
+    const targetFile = getDataFile();
+    const dir = path.dirname(targetFile);
+    await mkdir(dir, { recursive: true });
+    await writeFile(targetFile, JSON.stringify(db, null, 2), 'utf8');
+
+    // Also keep root .data and next-app .data in sync if possible
     const isInsideNextApp = targetFile.includes(path.join('next-app', '.data'));
     const altFile = isInsideNextApp
       ? path.join(process.cwd(), '.data', 'pm-zaika.json')
@@ -63,7 +63,7 @@ async function persist(db: LocalShape): Promise<void> {
       await writeFile(altFile, JSON.stringify(db, null, 2), 'utf8');
     }
   } catch {
-    // best-effort sync
+    // Read-only filesystem (e.g. Vercel serverless lambda) - preserve in-memory
   }
 }
 

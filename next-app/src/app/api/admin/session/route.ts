@@ -91,12 +91,6 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
 /** Returns the current session so the dashboard can restore itself on reload. */
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const response = {
-    ok: false,
-    error: 'Not signed in',
-    capabilities: capabilities(),
-  };
-
   try {
     const session = await requireAdmin(request);
     return json({
@@ -105,7 +99,11 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       capabilities: capabilities(),
     });
   } catch {
-    return json(response, { status: 401 });
+    return json({
+      ok: false,
+      session: null,
+      capabilities: capabilities(),
+    });
   }
 });
 
