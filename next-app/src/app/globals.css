@@ -914,125 +914,20 @@ img {
   }
 }
 
-/* Interactive Hover Reactions (Default fallback) */
-.hero-dishes-composition:not(.gsap-enabled):hover .dish-salad {
+/* Interactive Hover Reactions */
+.hero-dishes-composition:hover .dish-salad {
   transform: translateY(-5px) scale(1.02);
   filter: drop-shadow(0 26px 48px rgba(0, 0, 0, 0.28));
 }
 
-.hero-dishes-composition:not(.gsap-enabled):hover .dish-berries {
+.hero-dishes-composition:hover .dish-berries {
   transform: translate(8px, -10px) scale(1.05) rotate(3deg);
   filter: drop-shadow(0 20px 35px rgba(240, 93, 35, 0.3));
 }
 
-.hero-dishes-composition:not(.gsap-enabled):hover .dish-salmon {
+.hero-dishes-composition:hover .dish-salmon {
   transform: translate(-8px, -8px) scale(1.05) rotate(-2deg);
   filter: drop-shadow(0 24px 45px rgba(240, 93, 35, 0.3));
-}
-
-/* ==========================================================================
-   GSAP DANCING PLATES SYSTEM
-   ========================================================================== */
-
-.hero-dishes-composition.gsap-enabled .dish-item {
-  animation: none !important;
-  transition: filter 0.4s ease !important;
-}
-
-/* Enhanced dynamic lighting & shadows while dancing */
-.hero-dishes-composition.is-dancing .dish-salad {
-  filter: drop-shadow(0 32px 55px rgba(240, 93, 35, 0.28)) drop-shadow(0 15px 25px rgba(0, 0, 0, 0.22));
-}
-
-.hero-dishes-composition.is-dancing .dish-berries {
-  filter: drop-shadow(0 26px 42px rgba(245, 166, 35, 0.35)) drop-shadow(0 12px 20px rgba(0, 0, 0, 0.18));
-}
-
-.hero-dishes-composition.is-dancing .dish-salmon {
-  filter: drop-shadow(0 28px 45px rgba(240, 93, 35, 0.32)) drop-shadow(0 14px 22px rgba(0, 0, 0, 0.2));
-}
-
-/* Interactive Dance Pill Badge */
-.hero-dance-badge {
-  position: absolute;
-  bottom: -22px;
-  right: 20px;
-  z-index: 10;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(240, 93, 35, 0.25);
-  box-shadow: 0 10px 28px -6px rgba(240, 93, 35, 0.25), 0 4px 12px rgba(0, 0, 0, 0.06);
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #1F2937;
-  letter-spacing: 0.02em;
-  user-select: none;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  transform-origin: center;
-}
-
-.hero-dance-badge:hover {
-  transform: translateY(-2px) scale(1.04);
-  border-color: #F05D23;
-  box-shadow: 0 14px 34px -4px rgba(240, 93, 35, 0.35);
-}
-
-.hero-dance-badge.active {
-  background: linear-gradient(135deg, #F5A623 0%, #F05D23 100%);
-  color: #FFFFFF;
-  border-color: transparent;
-  box-shadow: 0 12px 30px -4px rgba(240, 93, 35, 0.45);
-  animation: danceBadgePulse 2s infinite alternate;
-}
-
-@keyframes danceBadgePulse {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.03); }
-}
-
-.dance-note-icon {
-  font-size: 14px;
-  display: inline-block;
-  animation: danceIconWiggle 1.2s infinite ease-in-out;
-}
-
-@keyframes danceIconWiggle {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(-10deg) scale(1.15); }
-  75% { transform: rotate(10deg) scale(1.15); }
-}
-
-.dance-sparkle {
-  position: absolute;
-  pointer-events: none;
-  font-size: 18px;
-  animation: sparkleFloat 1.2s infinite ease-in-out;
-}
-
-.dance-sparkle--top {
-  top: -15px;
-  right: 15px;
-}
-
-.dance-sparkle--center {
-  top: 10px;
-  left: 20px;
-}
-
-.dance-sparkle--bottom {
-  bottom: -10px;
-  right: 25px;
-}
-
-@keyframes sparkleFloat {
-  0%, 100% { transform: translateY(0px) scale(0.9); opacity: 0.7; }
-  50% { transform: translateY(-8px) scale(1.25); opacity: 1; }
 }
 
 /* ==========================================================================

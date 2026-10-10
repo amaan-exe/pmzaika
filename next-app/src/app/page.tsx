@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import DishCard from '@/components/DishCard';
-import HeroDancingPlates from '@/components/HeroDancingPlates';
 import { MENU_DATA, MENU_CATEGORIES } from '@/data/menuData';
 import { useCart } from '@/context/CartContext';
 
@@ -90,8 +89,23 @@ export default function HomePage() {
                 </svg>
               </div>
 
-              {/* GSAP Dancing Plates Composition (3 Distinct Floating Planes) */}
-              <HeroDancingPlates />
+              {/* Multi-Layered Dish Composition (3 Distinct Floating Planes) */}
+              <div className="hero-dishes-composition">
+                {/* 1. Top-Right Raspberry Plate */}
+                <div className="dish-item dish-berries">
+                  <img src="/assets/images/hero_plate_berries.png" alt="Fresh Berry Garnish" className="dish-img" />
+                </div>
+
+                {/* 2. Center Signature Fresh Salad Platter */}
+                <div className="dish-item dish-salad">
+                  <img src="/assets/images/hero_plate_salad.png" alt="Fresh Healthy Salad Platter" className="dish-img" />
+                </div>
+
+                {/* 3. Bottom-Left Salmon Poke Bowl with Chopsticks */}
+                <div className="dish-item dish-salmon">
+                  <img src="/assets/images/hero_plate_salmon.png" alt="Signature Poke Bowl" className="dish-img" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
