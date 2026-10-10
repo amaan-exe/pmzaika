@@ -8,5 +8,8 @@
     "start": "npm --prefix next-app run start",
     "postinstall": "npm --prefix next-app install",
     "server": "node server.js"
+  },
+  "overrides": {
+    "jose": "^4.15.9"
   }
 }
