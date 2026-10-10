@@ -18,7 +18,7 @@ import { useAsyncData } from '@/components/admin/useAsyncData';
 
 export default function AdminOverviewPage() {
   const stats = useAsyncData(() => fetchStats(), []);
-  const recent = useAsyncData(() => fetchOrders({ limit: 8 }), []);
+  const recent = useAsyncData(() => fetchOrders({ limit: 8, scope: 'all' }), []);
 
   const categories = useMemo(() => stats.data?.categories ?? [], [stats.data]);
   const orders = useMemo(() => recent.data?.orders ?? [], [recent.data]);
