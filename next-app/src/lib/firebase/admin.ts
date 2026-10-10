@@ -20,18 +20,22 @@ function ensureApp(): App | null {
     return app;
   }
 
-  app = initializeApp({
-    credential: cert({
-      projectId: firebaseAdminConfig.projectId,
-      clientEmail: firebaseAdminConfig.clientEmail,
-      privateKey: firebaseAdminConfig.privateKey,
-    }),
-    ...(firebaseAdminConfig.databaseURL
-      ? { databaseURL: firebaseAdminConfig.databaseURL }
-      : {}),
-  });
-
-  return app;
+  try {
+    app = initializeApp({
+      credential: cert({
+        projectId: firebaseAdminConfig.projectId,
+        clientEmail: firebaseAdminConfig.clientEmail,
+        privateKey: firebaseAdminConfig.privateKey,
+      }),
+      ...(firebaseAdminConfig.databaseURL
+        ? { databaseURL: firebaseAdminConfig.databaseURL }
+        : {}),
+    });
+    return app;
+  } catch (err) {
+    console.error('[firebase-admin] Failed to initialize App with credentials:', err);
+    return null;
+  }
 }
 
 export function adminAuth(): Auth {

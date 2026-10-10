@@ -64,6 +64,10 @@ function isQuotaExhausted(err: unknown): boolean {
     msg.includes('RESOURCE_EXHAUSTED') ||
     msg.includes('Quota exceeded') ||
     msg.includes('exceeded its quota') ||
+    msg.includes('Failed to parse private key') ||
+    msg.includes('Firestore is not configured') ||
+    msg.includes('DECODER routines') ||
+    msg.includes('invalid-credential') ||
     (err as { code?: number })?.code === 8
   );
 }

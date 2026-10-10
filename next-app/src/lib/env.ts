@@ -49,10 +49,24 @@ export const PRICING = {
 export const SESSION_COOKIE = 'pm_cart_sid';
 export const ADMIN_COOKIE = 'pm_admin_session';
 
+function normalizePrivateKey(key: string | undefined): string | undefined {
+  if (!key) return undefined;
+  let cleaned = key.trim();
+  while (
+    (cleaned.startsWith('"') && cleaned.endsWith('"')) ||
+    (cleaned.startsWith("'") && cleaned.endsWith("'"))
+  ) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  cleaned = cleaned.replace(/\\n/g, '\n').replace(/\\r/g, '').trim();
+  if (!cleaned.includes('BEGIN PRIVATE KEY')) return undefined;
+  return cleaned;
+}
+
 export const firebaseAdminConfig = {
   projectId: process.env.FIREBASE_PROJECT_ID ?? process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  privateKey: normalizePrivateKey(process.env.FIREBASE_PRIVATE_KEY),
   databaseURL: process.env.FIREBASE_DATABASE_URL,
 };
 
