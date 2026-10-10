@@ -75,12 +75,24 @@ export function persistenceMode(): PersistenceMode {
 }
 
 export const firebaseClientConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey:
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+    'AIzaSyBM3O-44B0G09idoWx4WBQ-IzF3zQXkMD0',
+  authDomain:
+    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
+    'pm-zaika-dc6cb.firebaseapp.com',
+  projectId:
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+    'pm-zaika-dc6cb',
+  storageBucket:
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+    'pm-zaika-dc6cb.firebasestorage.app',
+  messagingSenderId:
+    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
+    '864606272158',
+  appId:
+    process.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
+    '1:864606272158:web:052c3161a58ab98a80198f',
 } as const;
 
 export function isFirebaseClientConfigured(): boolean {
