@@ -260,45 +260,90 @@
   </section>
 
   <!-- New in Store Section (Matching Screenshot 2) -->
+  <!-- Chef's Recommendations Section -->
   <section class="new-in-store-section">
     <div class="container">
-      <h2 class="new-in-store-title">New in store</h2>
+      <div class="section-header-center">
+        <span class="section-tag">CHEF'S PICKS</span>
+        <h2 class="section-title">Popular Specialties You Might Love</h2>
+        <p class="section-subtitle">Single-tap additions crafted fresh to satisfy your cravings:</p>
+      </div>
 
-      <div class="store-grid-4">
-        <!-- Product 1: Placeholder Icon -->
-        <div class="store-product-card">
-          <div class="store-img-wrapper">
-            <img src="assets/images/woocommerce-placeholder.webp" alt="Product Placeholder" class="placeholder-icon">
+      <div class="cart-rec-grid">
+        <!-- Product 1: Biryani -->
+        <div class="cart-rec-card">
+          <div class="rec-img-container">
+            <img src="assets/images/food_royal_biryani.jpg" alt="PM Special Hyderabadi Biryani" loading="lazy">
+            <span class="rec-tag-pill">Bestseller</span>
+            <div class="rec-diet-dot non-veg"></div>
           </div>
-          <div class="store-product-name">Product</div>
-          <a href="index.html#menu-showcase" class="store-read-btn">Read more</a>
+          <div class="rec-body">
+            <span class="rec-cat-text">Royal Biryani</span>
+            <h4 class="rec-dish-name">PM Special Hyderabadi Chicken Biryani</h4>
+            <div class="rec-footer">
+              <span class="rec-dish-price">₹240</span>
+              <button type="button" class="btn-quick-add" onclick="window.cart.addItem('biryani-1')">
+                + Add
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- Product 2: Starters Platter -->
-        <div class="store-product-card">
-          <div class="store-img-wrapper">
-            <img src="assets/images/WhatsApp-Image-2026-02-03-at-8.01.46-PM-1-300x300.jpeg" alt="Chilli Chicken Platter">
+        <!-- Product 2: Tandoori Kebab -->
+        <div class="cart-rec-card">
+          <div class="rec-img-container">
+            <img src="assets/images/food_tandoori_kebab.jpg" alt="Charcoal Tandoori Kebab" loading="lazy">
+            <span class="rec-tag-pill">Clay Oven</span>
+            <div class="rec-diet-dot non-veg"></div>
           </div>
-          <div class="store-product-name">Product</div>
-          <a href="index.html#menu-showcase" class="store-read-btn">Read more</a>
+          <div class="rec-body">
+            <span class="rec-cat-text">Tandoori</span>
+            <h4 class="rec-dish-name">Charcoal Tandoori Chicken Kebab</h4>
+            <div class="rec-footer">
+              <span class="rec-dish-price">₹250</span>
+              <button type="button" class="btn-quick-add" onclick="window.cart.addItem('starter-1')">
+                + Add
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- Product 3: Chicken Dish -->
-        <div class="store-product-card">
-          <div class="store-img-wrapper">
-            <img src="assets/images/WhatsApp-Image-2026-02-03-at-8.01.46-PM-300x300.jpeg" alt="Tikka Chicken Dish">
+        <!-- Product 3: Paneer Butter Masala -->
+        <div class="cart-rec-card">
+          <div class="rec-img-container">
+            <img src="assets/images/food_butter_curry.jpg" alt="Paneer Butter Masala" loading="lazy">
+            <span class="rec-tag-pill">100% Veg</span>
+            <div class="rec-diet-dot veg"></div>
           </div>
-          <div class="store-product-name">Product</div>
-          <a href="index.html#menu-showcase" class="store-read-btn">Read more</a>
+          <div class="rec-body">
+            <span class="rec-cat-text">Indian Veg Curry</span>
+            <h4 class="rec-dish-name">Paneer Butter Masala (Makhani)</h4>
+            <div class="rec-footer">
+              <span class="rec-dish-price">₹220</span>
+              <button type="button" class="btn-quick-add" onclick="window.cart.addItem('veg-1')">
+                + Add
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- Product 4: Red Fries Dish -->
-        <div class="store-product-card">
-          <div class="store-img-wrapper">
-            <img src="assets/images/WhatsApp-Image-2026-02-03-at-8.01.45-PM-1-300x300.jpeg" alt="Honey Chilli Potato">
+        <!-- Product 4: Momos -->
+        <div class="cart-rec-card">
+          <div class="rec-img-container">
+            <img src="assets/images/food_momos_noodles.jpg" alt="Steamed Momos" loading="lazy">
+            <span class="rec-tag-pill">Street Food</span>
+            <div class="rec-diet-dot non-veg"></div>
           </div>
-          <div class="store-product-name">Product</div>
-          <a href="index.html#menu-showcase" class="store-read-btn">Read more</a>
+          <div class="rec-body">
+            <span class="rec-cat-text">Momos & Chinese</span>
+            <h4 class="rec-dish-name">Steamed & Fried Chicken Momos</h4>
+            <div class="rec-footer">
+              <span class="rec-dish-price">₹140</span>
+              <button type="button" class="btn-quick-add" onclick="window.cart.addItem('momos-1')">
+                + Add
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

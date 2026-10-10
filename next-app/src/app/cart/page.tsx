@@ -1,178 +1,499 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
+import { MENU_DATA } from '@/data/menuData';
+import { api } from '@/lib/client/api';
+
+interface StorefrontSettings {
+  deliveryChargePaise: number;
+  freeDeliveryAbovePaise: number;
+  minimumOrderPaise: number;
+  gstPercentage: number;
+  isStoreOpen: boolean;
+}
 
 export default function CartPage() {
-  const { items, updateQuantity, removeFromCart, subtotal, checkoutWhatsApp } = useCart();
+  const {
+    items,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    subtotal,
+    addToCart,
+    placeOrder,
+    isPlacingOrder,
+    orderError,
+  } = useCart();
+
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  const [orderType, setOrderType] = useState<'delivery' | 'dinein'>('delivery');
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [specialNotes, setSpecialNotes] = useState('');
+  const [settings, setSettings] = useState<StorefrontSettings | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Live pricing + open/closed state come from the backend so the summary can
+  // never disagree with what checkout actually charges.
+  useEffect(() => {
+    let cancelled = false;
+
+    api
+      .get<{ settings: StorefrontSettings }>('/api/settings')
+      .then(({ settings: loaded }) => {
+        if (!cancelled) setSettings(loaded);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // 4 Top Chef Recommended Dishes for Quick-Add
+  const recommendedDishes = [
+    {
+      id: 'biryani-1',
+      name: 'PM Special Hyderabadi Chicken Biryani',
+      price: 240,
+      image: '/assets/images/food_royal_biryani.jpg',
+      tag: 'Bestseller',
+      category: 'Royal Biryani',
+      isVeg: false,
+    },
+    {
+      id: 'starter-1',
+      name: 'Charcoal Tandoori Chicken Kebab',
+      price: 250,
+      image: '/assets/images/food_tandoori_kebab.jpg',
+      tag: 'Clay Oven Special',
+      category: 'Tandoori',
+      isVeg: false,
+    },
+    {
+      id: 'veg-1',
+      name: 'Paneer Butter Masala (Makhani)',
+      price: 220,
+      image: '/assets/images/food_butter_curry.jpg',
+      tag: '100% Pure Veg',
+      category: 'Indian Veg Curry',
+      isVeg: true,
+    },
+    {
+      id: 'momos-1',
+      name: 'Steamed & Fried Chicken Momos',
+      price: 140,
+      image: '/assets/images/food_momos_noodles.jpg',
+      tag: 'Street Delight',
+      category: 'Momos & Chinese',
+      isVeg: false,
+    },
+  ];
+
+  /**
+   * Checkout hands off to the backend, which re-prices the cart, records the
+   * order and returns the tracking link plus a WhatsApp deep link asking the
+   * customer to share their UPI payment proof.
+   */
+  const handleCustomWhatsAppCheckout = async () => {
+    if (items.length === 0) return;
+
+    if (!customerName.trim() || !customerPhone.trim()) {
+      return;
+    }
+
+    try {
+      const result = await placeOrder({
+        orderType,
+        customerName: customerName.trim(),
+        customerPhone: customerPhone.trim(),
+        address: orderType === 'delivery' ? deliveryAddress.trim() : undefined,
+        tableNote: orderType === 'dinein' ? deliveryAddress.trim() : undefined,
+        notes: specialNotes.trim() || undefined,
+      });
+
+      // Open WhatsApp with the full order + proof request, then show the payment
+      // QR and live tracking on the order page.
+      window.open(result.paymentProofUrl, '_blank');
+      router.push(`/track/${result.orderId}?token=${result.trackingToken}&new=1`);
+    } catch {
+      // The context already surfaced the message through a toast.
+    }
+  };
+
+  const isCartEmpty = !mounted ? true : items.length === 0;
+
+  const freeDeliveryThreshold = settings
+    ? settings.freeDeliveryAbovePaise / 100
+    : 499;
+  const standardDeliveryCharge = settings
+    ? Math.round(settings.deliveryChargePaise / 100)
+    : 29;
+
+  const deliveryFee =
+    orderType === 'delivery' && subtotal < freeDeliveryThreshold
+      ? standardDeliveryCharge
+      : 0;
+  const grandTotal = subtotal + deliveryFee;
+  const isStoreClosed = settings?.isStoreOpen === false;
+  const minimumOrder = settings ? settings.minimumOrderPaise / 100 : 0;
+  const meetsMinOrder = minimumOrder === 0 || subtotal >= minimumOrder;
+  const missingDetails =
+    !customerName.trim() ||
+    !customerPhone.trim() ||
+    (orderType === 'delivery' && !deliveryAddress.trim());
+  const canCheckout = !isPlacingOrder && !isStoreClosed && !missingDetails && meetsMinOrder;
 
   return (
-    <>
-      {/* Cart Banner (Matching Screenshot 1 & cart.html) */}
-      <section className="cart-page-banner">
-        <div className="banner-shape-left"></div>
-        <div className="banner-shape-right"></div>
-        <div className="container cart-banner-content">
-          <h1 className="cart-banner-title">Cart</h1>
-          <div className="cart-breadcrumb">
-            <Link href="/">Home</Link>
-            <span>&gt;</span>
-            <span>Cart</span>
+    <div className="cart-page-wrapper">
+      {/* =========================================================================
+           CART HERO BANNER
+           ========================================================================= */}
+      <section className="cart-luxury-banner">
+        <div className="container">
+          <div className="cart-banner-badge">
+            <span className="badge-pulse-dot"></span>
+            <span>Fast Patna Doorstep Delivery • Fresh to Order</span>
           </div>
+          <h1 className="cart-banner-heading">Your Royal Order</h1>
+          <nav className="cart-breadcrumb-trail" aria-label="Breadcrumb">
+            <Link href="/" className="crumb-link">Home</Link>
+            <span className="crumb-sep">/</span>
+            <span className="crumb-active">Cart &amp; Checkout</span>
+          </nav>
         </div>
       </section>
 
-      {/* Cart Content: Empty or Populated */}
-      {items.length === 0 ? (
-        /* Empty Cart State (Matching Screenshot 1 & 2) */
-        <section className="empty-cart-section" id="emptyCartDisplay">
-          <div className="container">
-            <div className="sad-circle-icon">
-              {/* Sad Emoji SVG with Tear drop */}
-              <svg viewBox="0 0 64 64">
-                <circle cx="32" cy="32" r="30" fill="none" stroke="#FFFFFF" strokeWidth="4" />
-                {/* Eyes */}
-                <circle cx="23" cy="26" r="3.5" fill="#FFFFFF" />
-                <circle cx="41" cy="26" r="3.5" fill="#FFFFFF" />
-                {/* Sad Mouth Arc */}
-                <path d="M21 44 Q32 35 43 44" fill="none" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" />
-                {/* Tear Drop on Left Eye */}
-                <path d="M26 31 C26 31, 23 37, 23 39 C23 40.5, 24.3 42, 26 42 C27.7 42, 29 40.5, 29 39 C29 37, 26 31, 26 31 Z" fill="#38BDF8" />
-              </svg>
+      {/* =========================================================================
+           MAIN CART VIEWPORT
+           ========================================================================= */}
+      <div className="container cart-content-container">
+        {items.length === 0 ? (
+          /* =========================================================================
+             EMPTY CART STATE (Double-Bezel Architecture + Quick-Add Recommendations)
+             ========================================================================= */
+          <div className="empty-cart-experience">
+            <div className="empty-cart-luxury-card">
+              <div className="empty-cloche-frame">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+                  <path d="M4 11a8 8 0 0 1 16 0v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7z" />
+                  <path d="M12 2v2" />
+                  <line x1="2" y1="20" x2="22" y2="20" />
+                </svg>
+              </div>
+
+              <h2 className="empty-card-heading">Your Culinary Cart is Empty</h2>
+              <p className="empty-card-subtitle">
+                You haven&apos;t added any delicacies yet. Explore our slow-cooked Hyderabadi Dum Biryanis, charcoal tandoori kebabs, and authentic slow-simmered curries to start your feast.
+              </p>
+
+              <div className="empty-card-actions">
+                <Link href="/#menu-showcase" className="btn-explore-menu">
+                  <span>Explore Menu Showcase</span>
+                  <span className="btn-arrow-circle">→</span>
+                </Link>
+              </div>
             </div>
 
-            <h2 className="empty-cart-title">Your cart is currently empty!</h2>
-            <Link href="/#menu-showcase" className="btn btn-primary" style={{ padding: '12px 32px' }}>
-              Browse Delicious Menu →
-            </Link>
-          </div>
-        </section>
-      ) : (
-        /* Active Cart Table View */
-        <section style={{ padding: '60px 0' }}>
-          <div className="container" style={{ maxWidth: '840px' }}>
-            <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '32px', boxShadow: '0 10px 30px rgba(0,0,0,0.06)' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '24px', color: 'var(--text-heading)' }}>
-                Your Order ({items.length} {items.length === 1 ? 'item' : 'items'})
-              </h2>
+            {/* Quick-Add Recommended Specialties */}
+            <div className="cart-recommendations-wrapper">
+              <div className="rec-header">
+                <div className="rec-eyebrow">CHEF&apos;S RECOMMENDATIONS</div>
+                <h3 className="rec-title">Popular Specialties You Might Love</h3>
+                <p className="rec-desc">Single-tap additions crafted fresh to satisfy your cravings:</p>
+              </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '14px 16px',
-                      background: '#FAF7F2',
-                      borderRadius: '12px',
-                      gap: '16px',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        style={{ width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover' }}
-                      />
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text-heading)' }}>
-                          {item.name}
-                        </div>
-                        <div style={{ fontSize: '13px', color: 'var(--accent-orange)', fontWeight: 600 }}>
-                          ₹{item.price} each
-                        </div>
-                      </div>
+              <div className="cart-rec-grid">
+                {recommendedDishes.map((dish) => (
+                  <div key={dish.id} className="cart-rec-card group">
+                    <div className="rec-img-container">
+                      <img src={dish.image} alt={dish.name} loading="lazy" />
+                      <span className="rec-tag-pill">{dish.tag}</span>
+                      <div className={`rec-diet-dot ${dish.isVeg ? 'veg' : 'non-veg'}`}></div>
                     </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-                      <div className="qty-controls">
-                        <button className="qty-btn" onClick={() => updateQuantity(item.id, -1)}>
-                          −
-                        </button>
-                        <span className="qty-number">{item.quantity}</span>
-                        <button className="qty-btn" onClick={() => updateQuantity(item.id, 1)}>
-                          +
+                    <div className="rec-body">
+                      <span className="rec-cat-text">{dish.category}</span>
+                      <h4 className="rec-dish-name">{dish.name}</h4>
+                      <div className="rec-footer">
+                        <span className="rec-dish-price">₹{dish.price}</span>
+                        <button
+                          type="button"
+                          className="btn-quick-add"
+                          onClick={() => addToCart(dish.id)}
+                          title={`Add ${dish.name} to cart`}
+                        >
+                          <span>+ Add</span>
                         </button>
                       </div>
-                      <div style={{ fontWeight: 700, fontSize: '16px', minWidth: '60px', textAlign: 'right' }}>
-                        ₹{item.price * item.quantity}
-                      </div>
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', opacity: 0.7 }}
-                        title="Remove item"
-                      >
-                        🗑️
-                      </button>
                     </div>
                   </div>
                 ))}
               </div>
-
-              <div style={{ marginTop: '28px', paddingTop: '20px', borderTop: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontSize: '18px', fontWeight: 700 }}>
-                  Subtotal: <span style={{ color: 'var(--accent-orange)' }}>₹{subtotal}</span>
+            </div>
+          </div>
+        ) : (
+          /* =========================================================================
+             ACTIVE CART VIEWPORT (2-Column Luxury Atelier Layout)
+             ========================================================================= */
+          <div className="active-cart-grid">
+            {/* Left Column: Dishes Review */}
+            <div className="cart-items-column">
+              <div className="cart-items-card">
+                <div className="cart-items-header">
+                  <div>
+                    <h2 className="cart-card-title">Order Items</h2>
+                    <span className="cart-items-count">
+                      {items.length} {items.length === 1 ? 'delicacy' : 'delicacies'} selected
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={clearCart}
+                    className="btn-clear-cart"
+                    title="Remove all items from cart"
+                  >
+                    Clear All
+                  </button>
                 </div>
+
+                <div className="cart-items-list">
+                  {items.map((item) => (
+                    <div key={item.id} className="cart-item-luxury-row">
+                      <div className="item-thumbnail-frame">
+                        <img src={item.image} alt={item.name} loading="lazy" />
+                      </div>
+
+                      <div className="item-details-box">
+                        <div className="item-title-row">
+                          <h3 className="item-name">{item.name}</h3>
+                          <button
+                            type="button"
+                            className="btn-item-delete"
+                            onClick={() => removeFromCart(item.id)}
+                            title="Remove from cart"
+                            aria-label={`Remove ${item.name}`}
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        <div className="item-price-each">₹{item.price} per portion</div>
+
+                        <div className="item-actions-row">
+                          <div className="cart-stepper-pill">
+                            <button
+                              type="button"
+                              className="stepper-btn"
+                              onClick={() => updateQuantity(item.id, -1)}
+                              aria-label="Decrease quantity"
+                            >
+                              −
+                            </button>
+                            <span className="stepper-count">{item.quantity}</span>
+                            <button
+                              type="button"
+                              className="stepper-btn"
+                              onClick={() => updateQuantity(item.id, 1)}
+                              aria-label="Increase quantity"
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          <div className="item-subtotal-price">
+                            ₹{item.price * item.quantity}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Special Instructions Box */}
+                <div className="chef-notes-container">
+                  <label htmlFor="chefNotes" className="chef-notes-label">
+                    <span>Chef&apos;s Preparation Note (Optional)</span>
+                    <span className="optional-tag">Spice Level, Packaging, Cutlery</span>
+                  </label>
+                  <textarea
+                    id="chefNotes"
+                    rows={2}
+                    className="chef-notes-input"
+                    placeholder="E.g. Mild spice, extra green mint chutney, no chopped onions, separate gravy..."
+                    value={specialNotes}
+                    onChange={(e) => setSpecialNotes(e.target.value)}
+                  />
+                </div>
+
+                <div className="cart-continue-bar">
+                  <Link href="/#menu-showcase" className="btn-continue-shopping">
+                    <span>← Add More Royal Delicacies</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Checkout & Bill Summary */}
+            <div className="cart-summary-column">
+              <div className="cart-summary-sticky-card">
+                <h3 className="summary-title">Order Summary</h3>
+
+                {/* Order Type Selector: Delivery or Dine-in */}
+                <div className="order-type-switch">
+                  <button
+                    type="button"
+                    className={`order-switch-btn ${orderType === 'delivery' ? 'active' : ''}`}
+                    onClick={() => setOrderType('delivery')}
+                  >
+                    <span>🛵 Home Delivery</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`order-switch-btn ${orderType === 'dinein' ? 'active' : ''}`}
+                    onClick={() => setOrderType('dinein')}
+                  >
+                    <span>🍽️ Dine-in Table</span>
+                  </button>
+                </div>
+
+                {/* Customer Details Form */}
+                <div className="customer-info-fields">
+                  <div className="form-group-item">
+                    <label htmlFor="custName">Your Name</label>
+                    <input
+                      type="text"
+                      id="custName"
+                      placeholder="e.g. Rahul Kumar"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      className="cust-input"
+                    />
+                  </div>
+
+                  <div className="form-group-item">
+                    <label htmlFor="custPhone">Phone / WhatsApp Number</label>
+                    <input
+                      type="tel"
+                      id="custPhone"
+                      placeholder="e.g. 9876543210"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      className="cust-input"
+                    />
+                  </div>
+
+                  <div className="form-group-item">
+                    <label htmlFor="custAddress">
+                      {orderType === 'delivery' ? 'Delivery Address (Patna)' : 'Table Number / Dine-in Notes'}
+                    </label>
+                    <input
+                      type="text"
+                      id="custAddress"
+                      placeholder={orderType === 'delivery' ? 'House / Flat no, Colony, Landmark' : 'Table 4 / Window Side'}
+                      value={deliveryAddress}
+                      onChange={(e) => setDeliveryAddress(e.target.value)}
+                      className="cust-input"
+                    />
+                  </div>
+                </div>
+
+                {/* Bill Breakdown */}
+                <div className="bill-breakdown-list">
+                  <div className="bill-line">
+                    <span>Items Subtotal</span>
+                    <span className="bill-val">₹{subtotal}</span>
+                  </div>
+                  <div className="bill-line">
+                    <span>Restaurant Packaging</span>
+                    <span className="bill-val free-tag">FREE</span>
+                  </div>
+                  <div className="bill-line">
+                    <span>Delivery Fee</span>
+                    <span className="bill-val info-tag">
+                      {orderType === 'dinein'
+                        ? 'Not applicable'
+                        : deliveryFee > 0
+                          ? `₹${deliveryFee}`
+                          : 'FREE'}
+                    </span>
+                  </div>
+                  <div className="bill-line">
+                    <span>Taxes &amp; GST</span>
+                    <span className="bill-val included-tag">Included in Price</span>
+                  </div>
+
+                  <div className="bill-divider"></div>
+
+                  <div className="bill-line total-highlight">
+                    <span>Grand Total</span>
+                    <span className="total-number">₹{grandTotal}</span>
+                  </div>
+                </div>
+
+                {/* Primary WhatsApp Order Action */}
                 <button
-                  className="btn btn-primary"
-                  onClick={checkoutWhatsApp}
-                  style={{ background: 'var(--whatsapp-green)', color: '#FFFFFF', padding: '12px 28px' }}
+                  type="button"
+                  className="btn-whatsapp-order-primary"
+                  onClick={handleCustomWhatsAppCheckout}
+                  disabled={!canCheckout}
                 >
-                  Place Order on WhatsApp →
+                  <div className="wa-icon-circle">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z" />
+                    </svg>
+                  </div>
+                  <div className="wa-btn-text">
+                    <span className="btn-main-label">
+                      {isPlacingOrder
+                        ? 'Placing Your Order…'
+                        : isStoreClosed
+                          ? 'Restaurant Closed'
+                          : 'Place Order & Pay via UPI'}
+                    </span>
+                    <span className="btn-sub-label">
+                      {orderError
+                        ? orderError
+                        : 'Instant Kitchen Confirmation'}
+                    </span>
+                  </div>
+                  <span className="wa-arrow-trailing">→</span>
                 </button>
+
+                {!meetsMinOrder && (
+                  <p style={{ marginTop: '10px', fontSize: '13px', color: '#c0392b', textAlign: 'center', fontWeight: 600 }}>
+                    Minimum order amount is ₹{minimumOrder}. Add ₹{minimumOrder - subtotal} more to order.
+                  </p>
+                )}
+
+                {/* Trust Badges */}
+                <div className="trust-assurances-row">
+                  <div className="trust-item">
+                    <span className="trust-icon">⚡</span>
+                    <span>Direct Kitchen Connection</span>
+                  </div>
+                  <div className="trust-item">
+                    <span className="trust-icon">🛡️</span>
+                    <span>Hygienically Sealed</span>
+                  </div>
+                  <div className="trust-item">
+                    <span className="trust-icon">💵</span>
+                    <span>UPI &amp; Cash on Delivery</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </section>
-      )}
-
-      {/* New in Store Section (Matching Screenshot 2 & cart.html) */}
-      <section className="new-in-store-section">
-        <div className="container">
-          <h2 className="new-in-store-title">New in store</h2>
-
-          <div className="store-grid-4">
-            {/* Product 1: Placeholder Icon */}
-            <div className="store-product-card">
-              <div className="store-img-wrapper">
-                <img src="/assets/images/woocommerce-placeholder.webp" alt="Product Placeholder" className="placeholder-icon" />
-              </div>
-              <div className="store-product-name">Product</div>
-              <Link href="/#menu-showcase" className="store-read-btn">Read more</Link>
-            </div>
-
-            {/* Product 2: Starters Platter */}
-            <div className="store-product-card">
-              <div className="store-img-wrapper">
-                <img src="/assets/images/WhatsApp-Image-2026-02-03-at-8.01.46-PM-1-300x300.jpeg" alt="Chilli Chicken Platter" />
-              </div>
-              <div className="store-product-name">Product</div>
-              <Link href="/#menu-showcase" className="store-read-btn">Read more</Link>
-            </div>
-
-            {/* Product 3: Chicken Dish */}
-            <div className="store-product-card">
-              <div className="store-img-wrapper">
-                <img src="/assets/images/WhatsApp-Image-2026-02-03-at-8.01.46-PM-300x300.jpeg" alt="Tikka Chicken Dish" />
-              </div>
-              <div className="store-product-name">Product</div>
-              <Link href="/#menu-showcase" className="store-read-btn">Read more</Link>
-            </div>
-
-            {/* Product 4: Red Fries Dish */}
-            <div className="store-product-card">
-              <div className="store-img-wrapper">
-                <img src="/assets/images/WhatsApp-Image-2026-02-03-at-8.01.45-PM-1-300x300.jpeg" alt="Honey Chilli Potato" />
-              </div>
-              <div className="store-product-name">Product</div>
-              <Link href="/#menu-showcase" className="store-read-btn">Read more</Link>
-            </div>
-          </div>
-        </div>
-      </section>
-    </>
+        )}
+      </div>
+    </div>
   );
 }

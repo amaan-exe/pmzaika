@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './subpages.css';
 import { CartProvider } from '@/context/CartContext';
+import { AuthProvider } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BottomContactForm from '@/components/BottomContactForm';
@@ -8,6 +10,7 @@ import FloatingCtas from '@/components/FloatingCtas';
 import CartDrawer from '@/components/CartDrawer';
 import SearchModal from '@/components/SearchModal';
 import ToastContainer from '@/components/ToastContainer';
+import AuthModal from '@/components/AuthModal';
 
 export const metadata: Metadata = {
   title: 'PM Zaika Restaurant – Taste Bhi Best Bhi | Patna',
@@ -34,16 +37,19 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <CartProvider>
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
-          <BottomContactForm />
-          <FloatingCtas />
-          <CartDrawer />
-          <SearchModal />
-          <ToastContainer />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Navbar />
+            <main>{children}</main>
+            <Footer />
+            <BottomContactForm />
+            <FloatingCtas />
+            <CartDrawer />
+            <SearchModal />
+            <ToastContainer />
+            <AuthModal />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

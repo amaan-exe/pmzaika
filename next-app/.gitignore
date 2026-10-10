@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# local-mode persistence fallback (see src/lib/db/local.ts)
+.data/
 
 # vercel
 .vercel

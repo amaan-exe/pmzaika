@@ -4,10 +4,12 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { totalCount, openDrawer, openSearch } = useCart();
+  const { user, loading, openAuth, signOutUser } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -31,6 +33,10 @@ export default function Navbar() {
     if (href !== '/' && pathname.startsWith(href)) return true;
     return false;
   };
+
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <header className={`site-header ${isScrolled ? 'scrolled' : ''}`}>
@@ -79,6 +85,11 @@ export default function Navbar() {
             <li className="nav-item">
               <Link href="/cart" className={`nav-link ${isActive('/cart') ? 'active' : ''}`} id="cartTrigger">
                 Cart
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link href="/my-orders" className={`nav-link ${isActive('/my-orders') ? 'active' : ''}`}>
+                My Orders
               </Link>
             </li>
             <li className="nav-item">
@@ -134,6 +145,19 @@ export default function Navbar() {
                   {totalCount}
                 </span>
               )}
+            </button>
+
+            <button
+              className="account-btn"
+              type="button"
+              onClick={user ? signOutUser : openAuth}
+              title={user ? `Signed in as ${user.email} (Click to sign out)` : 'Sign in to PM Zaika'}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>{loading ? 'Account' : user ? 'Sign out' : 'Sign in'}</span>
             </button>
 
             {/* Mobile Toggle */}

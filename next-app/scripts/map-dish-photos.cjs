@@ -1,0 +1,162 @@
+/**
+ * Generates `src/data/dishPhotos.ts` by matching the real dish photographs in
+ * `public/assets/images/dishes` against the extracted menu items.
+ *
+ * The photos were captured by the restaurant and named after the dish, so they
+ * line up with menu items once spelling variance is normalised (the menu sheet
+ * writes "Kabab" where the photo file says "Kawab", "Mashroom" vs "Massroom",
+ * and so on). Matching is scored rather than exact so one photo never silently
+ * wins a wrong dish, and every photo is used at most once.
+ *
+ * Re-run after adding photos:
+ *   node scripts/map-dish-photos.cjs
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const root = path.resolve(__dirname, '..');
+const dishDir = path.join(root, 'public/assets/images/dishes');
+const sourceFile = path.join(root, 'src/data/menuItemsSource.ts');
+
+// Words that never help identify a dish.
+const STOP_WORDS = new Set([
+  'full', 'half', 'regular', 'plain', 'with', 'without', 'of', 'the',
+  'and', 'a', 'special', 'spl', 'pmz', 'dish',
+]);
+
+/** Spelling variants that mean the same thing. */
+const CANON = {
+  kawab: 'kabab', kabab: 'kabab', karahi: 'kadahi', kadahi: 'kadahi',
+  mashroom: 'mashroom', massroom: 'mashroom', mushroom: 'mashroom',
+  matar: 'matar', matter: 'matar',
+  muradabadi: 'muradabadi', muradabdi: 'muradabadi',
+  biryani: 'biryani', biriyani: 'biryani', briyani: 'biryani',
+  pyaza: 'pyaza', payza: 'pyaza',
+  leg: 'leg', reshmi: 'reshmi', patyala: 'patyala',
+  sizwan: 'sizwan', scotach: 'scotch',
+};
+
+const normalise = (value) =>
+  value
+    .toLowerCase()
+    .replace(/\.(jpe?g|png|webp|avif)$/i, '')
+    .replace(/\([^)]*\)/g, ' ')      // drop "(8 Pic)" style portions
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+const tokens = (value) =>
+  normalise(value)
+    .split(' ')
+    .filter(Boolean)
+    .map((t) => CANON[t] ?? t)
+    .filter((t) => !STOP_WORDS.has(t));
+
+// --- 1. Menu items ---------------------------------------------------------
+// Note: case-insensitive — a few entries in the source file are keyed `Name:`
+// rather than `name:`, and missing them would hide dishes from the matcher.
+const source = fs.readFileSync(sourceFile, 'utf8');
+const items = [];
+const entryRe = /\{\s*id:\s*"([^"]+)",\s*name:\s*"([^"]+)"/gi;
+let match;
+while ((match = entryRe.exec(source)) !== null) {
+  items.push({ id: match[1], name: match[2], tokens: tokens(match[2]) });
+}
+
+// --- 2. Photos (prefer .webp) ----------------------------------------------
+const byKey = new Map();
+for (const file of fs.readdirSync(dishDir)) {
+  const key = normalise(file);
+  const existing = byKey.get(key);
+  if (!existing || (!existing.endsWith('.webp') && file.endsWith('.webp'))) {
+    byKey.set(key, file);
+  }
+}
+
+// --- 3. Score every photo against every item --------------------------------
+function score(photoTokens, itemTokens) {
+  if (photoTokens.length === 0 || itemTokens.length === 0) return 0;
+
+  const photoSet = new Set(photoTokens);
+  const itemSet = new Set(itemTokens);
+
+  const shared = [...photoSet].filter((t) => itemSet.has(t));
+  if (shared.length === 0) return 0;
+
+  // Jaccard similarity, weighted so full containment scores very highly.
+  const union = new Set([...photoSet, ...itemSet]).size;
+  const jaccard = shared.length / union;
+
+  const photoStr = photoTokens.join(' ');
+  const itemStr = itemTokens.join(' ');
+  const containment = photoStr.includes(itemStr) || itemStr.includes(photoStr) ? 0.55 : 0;
+
+  // Every photo token present is the strongest signal we can get.
+  const coverage = shared.length / photoSet.size;
+
+  return jaccard + containment + coverage * 0.35;
+}
+
+const candidates = [];
+for (const [, file] of byKey) {
+  const photoTokens = tokens(file);
+  for (const item of items) {
+    const value = score(photoTokens, item.tokens);
+    if (value > 0) candidates.push({ file, itemId: item.id, itemName: item.name, value });
+  }
+}
+candidates.sort((a, b) => b.value - a.value);
+
+// Greedy one-to-one assignment, highest confidence first.
+// A match must explain most of the photo filename, so a single shared word can
+// never drag an unrelated dish into the mapping.
+const MIN_SCORE = 1.15;
+const mapping = {};
+const usedPhotos = new Set();
+const usedItems = new Set();
+
+for (const c of candidates) {
+  if (c.value < MIN_SCORE) break;
+  if (usedPhotos.has(c.file) || usedItems.has(c.itemId)) continue;
+  usedPhotos.add(c.file);
+  usedItems.add(c.itemId);
+  mapping[c.itemId] = `/assets/images/dishes/${c.file}`;
+}
+
+// --- 4. Emit ---------------------------------------------------------------
+const entries = Object.entries(mapping).sort(([a], [b]) => a.localeCompare(b));
+const body = entries.map(([id, src]) => `  '${id}': '${src}',`).join('\n');
+
+fs.writeFileSync(
+  path.join(root, 'src/data/dishPhotos.ts'),
+  `/**
+ * Real dish photographs, mapped to menu item ids.
+ *
+ * AUTO-GENERATED by \`node scripts/map-dish-photos.cjs\` — do not edit by hand.
+ * Photos live in \`public/assets/images/dishes\` and were captured by the
+ * restaurant. Items without a match fall back to a category image in
+ * \`src/lib/menu/seed.ts\`.
+ */
+
+/** menuItemId -> public image path */
+export const DISH_PHOTOS: Record<string, string> = {
+${body}
+};
+
+/** Number of menu items that have a real photograph. */
+export const DISH_PHOTO_COUNT = ${entries.length};
+`,
+  'utf8'
+);
+
+const unmatched = [...byKey.entries()].filter(([, f]) => !usedPhotos.has(f)).map(([, f]) => f);
+
+console.log(`menu items   : ${items.length}`);
+console.log(`photos       : ${byKey.size}`);
+console.log(`mapped       : ${entries.length}`);
+console.log('--- mapped ---');
+for (const [id, src] of entries) console.log(`  ${src.split('/').pop().padEnd(34)} -> ${id}`);
+if (unmatched.length) {
+  console.log(`--- no confident match (${unmatched.length}) ---`);
+  unmatched.forEach((f) => console.log(`  ${f}`));
+}

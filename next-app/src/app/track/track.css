@@ -1,0 +1,195 @@
+﻿
+/* =========================================================================
+   ORDER TRACKER (/track/[orderId])
+   Scoped styles for the payment QR + live status view. Uses the same design
+   tokens as the rest of the site.
+   ========================================================================= */
+
+.track-page {
+  padding: 3rem 0 5rem;
+  background: var(--bg-warm);
+  min-height: 60vh;
+}
+
+.track-container {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.track-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.track-head {
+  text-align: center;
+}
+
+.track-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--primary-amber);
+  margin: 0 0 0.4rem;
+}
+
+.track-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.6rem, 5vw, 2.1rem);
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.track-status {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: var(--accent-orange-light);
+  color: var(--accent-orange);
+  margin: 0 0 0.5rem;
+}
+
+.track-status[data-tone='success'] {
+  background: #e7f7ef;
+  color: #047857;
+}
+
+.track-status[data-tone='danger'] {
+  background: #fdecec;
+  color: #b91c1c;
+}
+
+.track-hint {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0.25rem 0;
+}
+
+.track-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+}
+
+.track-panel--pay {
+  text-align: center;
+  border-color: var(--primary-amber);
+  box-shadow: var(--shadow-glow);
+}
+
+.track-panel-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0 0 0.5rem;
+}
+
+.track-qr {
+  width: min(260px, 70vw);
+  height: auto;
+  margin: 1rem auto 0.75rem;
+  padding: 0.75rem;
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.track-amount {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin-bottom: 1rem;
+}
+
+.track-wa {
+  display: inline-block;
+  background: var(--whatsapp-green);
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 0.85rem 1.6rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.track-wa:hover {
+  background: var(--whatsapp-green-dark);
+}
+
+.track-items {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.track-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.92rem;
+  color: var(--text-main);
+  padding-bottom: 0.6rem;
+  border-bottom: 1px dashed var(--border-subtle);
+}
+
+.track-item-name {
+  font-weight: 600;
+}
+
+.track-item-qty {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.track-item-price {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.track-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  padding: 0.3rem 0;
+}
+
+.track-total-row--grand {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+}
+
+.track-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+
+.track-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--accent-orange);
+  font-weight: 700;
+  text-decoration: none;
+}

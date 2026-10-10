@@ -1,0 +1,98 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Kitchen staff, identified by e-mail. Mirrors ADMIN_EMAILS on the server.
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'admin@pmzaika.com',
+          'kitchen@pmzaika.com',
+          'owner@pmzaika.com',
+          'amaanullah2607@gmail.com',
+          'md.amanullahkhan1980@gmail.com',
+          'amanullah.100ms@gmail.com'
+        ];
+    }
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.token.uid == uid;
+    }
+
+    // ---------------------------------------------------------------------
+    // Orders
+    //
+    // Every write goes through the server (firebase-admin bypasses these
+    // rules), so the browser is read-only here. That is what keeps pricing,
+    // coupons and the status machine tamper-proof.
+    // ---------------------------------------------------------------------
+    match /orders/{orderId} {
+      // Customers see only their own orders; kitchen staff see everything.
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.token.uid);
+      allow write: if false;
+    }
+
+    match /orders_archive/{orderId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.token.uid);
+      allow write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // ---------------------------------------------------------------------
+    // Public storefront data
+    // ---------------------------------------------------------------------
+    match /menu/{itemId} {
+      allow read: if true;      // the storefront menu is public
+      allow write: if false;    // admin-only, and only via the server
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;      // pricing rules + announcement banner
+      allow write: if false;
+    }
+
+    match /coupons/{couponId} {
+      // Readable so the cart can show a coupon hint; validation is server-side.
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ---------------------------------------------------------------------
+    // Customer profiles
+    // ---------------------------------------------------------------------
+    match /users/{uid} {
+      allow read, write: if isOwner(uid) || isAdmin();
+    }
+
+    // ---------------------------------------------------------------------
+    // Kitchen-only collections
+    // ---------------------------------------------------------------------
+    match /admin_roles/{email} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /admin_notification_subscriptions/{subId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /webhook_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Server-side carts hold live order drafts; never exposed to the client SDK.
+    match /carts/{sessionId} {
+      allow read, write: if false;
+    }
+
+    // Default deny.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

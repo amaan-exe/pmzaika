@@ -1,0 +1,12 @@
+{
+  "name": "zaika",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix next-app run dev",
+    "build": "npm --prefix next-app run build",
+    "start": "npm --prefix next-app run start",
+    "postinstall": "npm --prefix next-app install",
+    "server": "node server.js"
+  }
+}
