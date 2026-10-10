@@ -17,5 +17,12 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     listCategories(),
   ]);
 
-  return json({ ok: true, count: items.length, categories, items });
+  return json(
+    { ok: true, count: items.length, categories, items },
+    {
+      headers: {
+        'Cache-Control': 'public, max-age=180, stale-while-revalidate=600',
+      },
+    }
+  );
 });

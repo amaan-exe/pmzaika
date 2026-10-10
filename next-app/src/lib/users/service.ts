@@ -142,16 +142,20 @@ export interface AdminUserSummary {
 /** Customer directory for the admin desk. */
 export async function listUsers(limit = 100): Promise<AdminUserSummary[]> {
   const db = await getDb();
-  const [{ docs: profiles }, { docs: orders }] = await Promise.all([
-    db.collection<UserProfile>(COLLECTIONS.users).list({ limit }),
-    db.collection<Order>(COLLECTIONS.orders).list({ limit: 500 }),
-  ]);
+  const [{ docs: profiles }, { docs: activeOrders }, { docs: archivedOrders }] =
+    await Promise.all([
+      db.collection<UserProfile>(COLLECTIONS.users).list({ limit }),
+      db.collection<Order>(COLLECTIONS.orders).list({ limit: 500 }),
+      db.collection<Order>(COLLECTIONS.orderArchive).list({ limit: 500 }).catch(() => ({ docs: [] })),
+    ]);
 
+  const allOrders = [...activeOrders, ...archivedOrders];
   const byUser = new Map<string, { count: number; spent: number; last: string | null }>();
-  for (const order of orders) {
+  for (const order of allOrders) {
+    if (!order.userId || order.status === 'cancelled') continue;
     const entry = byUser.get(order.userId) ?? { count: 0, spent: 0, last: null };
     entry.count += 1;
-    entry.spent += order.totals.grandTotalPaise;
+    entry.spent += order.totals?.grandTotalPaise ?? 0;
     if (!entry.last || order.createdAt > entry.last) entry.last = order.createdAt;
     byUser.set(order.userId, entry);
   }

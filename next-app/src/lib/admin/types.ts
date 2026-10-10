@@ -148,6 +148,10 @@ export interface AdminSettings {
   restaurantAddress: string;
   autoCloseByTime: boolean;
   announcement: { enabled: boolean; text: string; type: 'info' | 'warning' | 'success' | 'urgent' };
+  heroEyebrow?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
+  estimatedDeliveryTime?: string;
   /** Server timestamp — used to key the settings form so saves re-mount it. */
   updatedAt: string;
 }

@@ -23,7 +23,7 @@ const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'cancelled', label: 'Cancelled' },
 ];
 
-const REFRESH_MS = 30_000;
+const REFRESH_MS = 60_000;
 
 const STATUS_ACTIONS: Record<string, Array<{ status: ReservationStatus; label: string; tone: string }>> = {
   pending: [

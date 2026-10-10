@@ -1,24 +1,207 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import DishCard from '@/components/DishCard';
 import { MENU_DATA, MENU_CATEGORIES } from '@/data/menuData';
 import { useCart } from '@/context/CartContext';
+import { useStoreSettings } from '@/context/StoreSettingsContext';
+
+type DishItem = {
+  id: string;
+  name?: string;
+  title?: string;
+  category?: string;
+  categoryName?: string;
+  price?: number;
+  pricePaise?: number;
+  originalPrice?: number;
+  isVeg?: boolean;
+  vegNonVeg?: 'veg' | 'non-veg';
+  rating?: number;
+  reviewsCount?: number;
+  badge?: string;
+  description?: string;
+  image?: string;
+  isAvailable?: boolean;
+};
 
 export default function HomePage() {
-  const [activeCategory, setActiveCategory] = useState('all');
+  const { settings } = useStoreSettings();
   const { addToCart } = useCart();
 
-  const filteredDishes =
-    activeCategory === 'all'
-      ? MENU_DATA
-      : MENU_DATA.filter((dish) => dish.category === activeCategory);
+  const [menuItems, setMenuItems] = useState<DishItem[]>(MENU_DATA);
+  const [liveCategories, setLiveCategories] = useState<{ id: string; label: string; icon: string; count?: number }[]>(MENU_CATEGORIES);
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dietFilter, setDietFilter] = useState<'all' | 'veg' | 'non-veg'>('all');
+  const [sortBy, setSortBy] = useState<'recommended' | 'price-asc' | 'price-desc'>('recommended');
+  const [displayLimit, setDisplayLimit] = useState(24);
+
+  // Fetch live menu items and categories from database API with client sessionStorage cache
+  useEffect(() => {
+    let cancelled = false;
+
+    // 1. Instant hydration from sessionStorage if available
+    try {
+      const cached = sessionStorage.getItem('pm_zaika_menu_cache');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed.items) && parsed.items.length > 0 && Date.now() - (parsed.ts || 0) < 300_000) {
+          setMenuItems(parsed.items);
+          if (Array.isArray(parsed.categories)) {
+            setLiveCategories(parsed.categories);
+          }
+        }
+      }
+    } catch {
+      // sessionStorage unavailable or disabled
+    }
+
+    async function fetchLiveMenu() {
+      try {
+        const res = await fetch('/api/menu');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && data.ok && Array.isArray(data.items) && data.items.length > 0) {
+          setMenuItems(data.items);
+          if (Array.isArray(data.categories) && data.categories.length > 0) {
+            const categoryIcons: Record<string, string> = {
+              all: '🍱',
+              biryani: '🍛',
+              starters: '🍢',
+              tandoori: '🍗',
+              'veg-curry': '🥦',
+              'non-veg-curry': '🥘',
+              chinese: '🥢',
+              momos: '🥟',
+              rolls: '🌯',
+              thali: '🍽️',
+              breads: '🫓',
+              rice: '🍚',
+              beverages: '🥤',
+              desserts: '🍨',
+              soups: '🍲',
+            };
+            const mappedCats = [
+              { id: 'all', label: 'All Dishes', icon: '🍱', count: data.items.length },
+              ...data.categories.map((c: { id: string; name?: string; count?: number }) => ({
+                id: c.id,
+                label: c.name || c.id,
+                icon: categoryIcons[c.id.toLowerCase()] || '🍽️',
+                count: c.count,
+              })),
+            ];
+            setLiveCategories(mappedCats);
+
+            // Save to sessionStorage for 0-request repeat visits
+            try {
+              sessionStorage.setItem(
+                'pm_zaika_menu_cache',
+                JSON.stringify({ items: data.items, categories: mappedCats, ts: Date.now() })
+              );
+            } catch {}
+          }
+        }
+      } catch {
+        // Fallback to static data
+      }
+    }
+    fetchLiveMenu();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Listen for category selection events from the Navbar
+  useEffect(() => {
+    const handleSelectCategory = (e: Event) => {
+      const custom = e as CustomEvent<string>;
+      if (custom.detail) {
+        setActiveCategory(custom.detail);
+      }
+    };
+    window.addEventListener('selectCategory', handleSelectCategory);
+    return () => window.removeEventListener('selectCategory', handleSelectCategory);
+  }, []);
+
+  const filteredDishes = useMemo(() => {
+    let list = [...menuItems];
+
+    if (activeCategory !== 'all') {
+      list = list.filter((item) => item.category === activeCategory);
+    }
+
+    if (dietFilter === 'veg') {
+      list = list.filter((item) => item.isVeg === true || item.vegNonVeg === 'veg');
+    } else if (dietFilter === 'non-veg') {
+      list = list.filter((item) => item.isVeg === false || item.vegNonVeg === 'non-veg');
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (item) =>
+          (item.name && item.name.toLowerCase().includes(q)) ||
+          (item.title && item.title.toLowerCase().includes(q)) ||
+          (item.description && item.description.toLowerCase().includes(q)) ||
+          (item.categoryName && item.categoryName.toLowerCase().includes(q))
+      );
+    }
+
+    if (sortBy === 'price-asc') {
+      list.sort((a, b) => {
+        const pA = a.price !== undefined ? a.price : (a.pricePaise || 0) / 100;
+        const pB = b.price !== undefined ? b.price : (b.pricePaise || 0) / 100;
+        return pA - pB;
+      });
+    } else if (sortBy === 'price-desc') {
+      list.sort((a, b) => {
+        const pA = a.price !== undefined ? a.price : (a.pricePaise || 0) / 100;
+        const pB = b.price !== undefined ? b.price : (b.pricePaise || 0) / 100;
+        return pB - pA;
+      });
+    }
+
+    return list;
+  }, [menuItems, activeCategory, dietFilter, searchQuery, sortBy]);
+
+  const visibleDishes = filteredDishes.slice(0, displayLimit);
 
   const scrollToMenu = (cat?: string) => {
     if (cat) setActiveCategory(cat);
     const el = document.getElementById('menu-showcase');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const heroEyebrow = settings.heroEyebrow || 'Welcome to PM Zaika Restaurant';
+  const heroSubtitle =
+    settings.heroSubtitle ||
+    'Freshly prepared royal delicacies crafted with authentic heritage spices and hand-picked ingredients, designed to indulge your palate every single time.';
+  const deliveryTime = settings.estimatedDeliveryTime || '30-45 mins';
+
+  const renderHeroHeadline = () => {
+    const custom = settings.heroTitle?.trim();
+    if (!custom) {
+      return (
+        <>
+          Giving your Hunger<br />
+          <span className="gradient-text-amber">a new Option</span>
+        </>
+      );
+    }
+    const words = custom.split(' ');
+    if (words.length <= 2) {
+      return <span className="gradient-text-amber">{custom}</span>;
+    }
+    const leading = words.slice(0, -2).join(' ');
+    const highlighted = words.slice(-2).join(' ');
+    return (
+      <>
+        {leading}<br />
+        <span className="gradient-text-amber">{highlighted}</span>
+      </>
+    );
   };
 
   return (
@@ -33,16 +216,15 @@ export default function HomePage() {
             <div className="hero-content">
               <div className="eyebrow-pill">
                 <span className="eyebrow-dot"></span>
-                <span>Welcome to PM Zaika Restaurant</span>
+                <span>{heroEyebrow}</span>
               </div>
 
               <h1 className="hero-title">
-                Giving your Hunger<br />
-                <span className="gradient-text-amber">a new Option</span>
+                {renderHeroHeadline()}
               </h1>
 
               <p className="hero-desc">
-                Freshly prepared royal delicacies crafted with authentic heritage spices and hand-picked ingredients, designed to indulge your palate every single time.
+                {heroSubtitle}
               </p>
 
               <div className="hero-buttons">
@@ -65,6 +247,13 @@ export default function HomePage() {
                     10 K<span className="stat-plus">+</span>
                   </div>
                   <span className="stat-label">Satisfied Diners</span>
+                </div>
+                <div className="stat-divider"></div>
+                <div className="stat-box">
+                  <div className="stat-number" style={{ fontSize: '20px' }}>
+                    {deliveryTime}
+                  </div>
+                  <span className="stat-label">Avg. Delivery</span>
                 </div>
                 <div className="stat-divider"></div>
                 <div className="stat-box">
@@ -446,29 +635,199 @@ export default function HomePage() {
             </p>
           </div>
 
+          {/* Interactive Search & Filter Toolbar */}
+          <div className="menu-search-toolbar">
+            <div className="menu-search-box">
+              <span className="menu-search-box-icon">🔍</span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setDisplayLimit(24);
+                }}
+                placeholder="Search 300+ dishes, kebabs, biryani, curries..."
+                className="menu-search-input"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="menu-search-clear"
+                  title="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            <div className="menu-filter-controls-right">
+              {/* Veg / Non-Veg Toggles */}
+              <div className="menu-diet-toggles">
+                <button
+                  type="button"
+                  className={`diet-toggle-btn ${dietFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setDietFilter('all')}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  className={`diet-toggle-btn ${dietFilter === 'veg' ? 'active is-veg' : ''}`}
+                  onClick={() => setDietFilter('veg')}
+                >
+                  🌱 Veg Only
+                </button>
+                <button
+                  type="button"
+                  className={`diet-toggle-btn ${dietFilter === 'non-veg' ? 'active is-non-veg' : ''}`}
+                  onClick={() => setDietFilter('non-veg')}
+                >
+                  🍗 Non-Veg
+                </button>
+              </div>
+
+              {/* Price / Popularity Sort */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'recommended' | 'price-asc' | 'price-desc')}
+                className="menu-sort-select"
+              >
+                <option value="recommended">Featured / Popular</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+              </select>
+            </div>
+          </div>
+
           {/* Filter Pills Bar */}
           <div className="menu-filter-container">
             <div className="menu-filter-track">
-              {MENU_CATEGORIES.map((cat) => (
+              {liveCategories.map((cat) => (
                 <button
                   key={cat.id}
                   type="button"
                   className={`menu-tab-pill ${activeCategory === cat.id ? 'active' : ''}`}
-                  onClick={() => setActiveCategory(cat.id)}
+                  onClick={() => {
+                    setActiveCategory(cat.id);
+                    setDisplayLimit(24);
+                  }}
                 >
                   <span className="tab-icon">{cat.icon}</span>
-                  <span className="tab-label">{cat.label}</span>
+                  <span className="tab-label">
+                    {cat.label} {cat.count ? `(${cat.count})` : ''}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Dishes Grid: Guaranteed 3-Column Luxury Architecture */}
-          <div className="dish-luxury-grid" id="menuShowcaseGrid">
-            {filteredDishes.map((dish) => (
-              <DishCard key={dish.id} dish={dish} />
-            ))}
+          {/* Meta Counter & Active Filter Reset */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+              flexWrap: 'wrap',
+              gap: '12px',
+            }}
+          >
+            <div className="menu-meta-counter" style={{ margin: 0 }}>
+              Showing <strong>{filteredDishes.length}</strong> {filteredDishes.length === 1 ? 'dish' : 'dishes'}
+              {activeCategory !== 'all' && (
+                <span> in <span style={{ color: '#f5a623', fontWeight: 600 }}>{liveCategories.find((c) => c.id === activeCategory)?.label || activeCategory}</span></span>
+              )}
+              {dietFilter !== 'all' && (
+                <span> • <span style={{ color: dietFilter === 'veg' ? '#16a34a' : '#dc2626', fontWeight: 600 }}>{dietFilter === 'veg' ? 'Pure Veg' : 'Non-Veg'}</span></span>
+              )}
+              {searchQuery && (
+                <span> matching &ldquo;{searchQuery}&rdquo;</span>
+              )}
+            </div>
+
+            {(activeCategory !== 'all' || dietFilter !== 'all' || searchQuery) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveCategory('all');
+                  setDietFilter('all');
+                  setSearchQuery('');
+                  setDisplayLimit(24);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#f5a623',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  padding: 0,
+                }}
+              >
+                Reset All Filters
+              </button>
+            )}
           </div>
+
+          {/* Dishes Grid */}
+          {visibleDishes.length > 0 ? (
+            <>
+              <div className="dish-luxury-grid" id="menuShowcaseGrid">
+                {visibleDishes.map((dish) => (
+                  <DishCard key={dish.id} dish={dish} />
+                ))}
+              </div>
+
+              {filteredDishes.length > visibleDishes.length && (
+                <div style={{ textAlign: 'center', marginTop: '40px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setDisplayLimit((prev) => prev + 24)}
+                    className="btn-see-more"
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <span>Load More Dishes ({filteredDishes.length - visibleDishes.length} more)</span>
+                    <span className="arrow-circle">↓</span>
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '60px 20px',
+                background: '#f9fafb',
+                borderRadius: '20px',
+                border: '1px dashed #e5e7eb',
+                margin: '20px 0',
+              }}
+            >
+              <div style={{ fontSize: '48px', marginBottom: '14px' }}>🍽️</div>
+              <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', marginBottom: '6px' }}>
+                No dishes found
+              </h3>
+              <p style={{ fontSize: '14px', color: '#6b7280', maxWidth: '420px', margin: '0 auto 18px' }}>
+                We couldn&apos;t find any dishes matching your current search or diet criteria. Try clearing some filters.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveCategory('all');
+                  setDietFilter('all');
+                  setSearchQuery('');
+                  setDisplayLimit(24);
+                }}
+                className="btn-card-action"
+                style={{ display: 'inline-flex' }}
+              >
+                <span>Clear All Filters</span>
+                <span className="arrow-box">↺</span>
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

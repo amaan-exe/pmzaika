@@ -83,11 +83,31 @@ export default function OrderTracker({
     void load();
   }, [load]);
 
-  // Poll while the order is still moving.
+  // Poll while the order is still moving, pausing when the tab is hidden.
   useEffect(() => {
     if (!order || ['delivered', 'served', 'cancelled'].includes(order.status)) return;
-    const timer = setInterval(() => void load(), 15000);
-    return () => clearInterval(timer);
+
+    const timer = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      void load();
+    }, 30000);
+
+    const handleVisibility = () => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        void load();
+      }
+    };
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibility);
+    }
+
+    return () => {
+      clearInterval(timer);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibility);
+      }
+    };
   }, [order, load]);
 
   if (loading) {

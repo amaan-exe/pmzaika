@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   createMenuItem,
@@ -14,7 +14,7 @@ import type { AdminCategory, AdminMenuItem } from '@/lib/admin/types';
 import { Alert, EmptyState, Loading, PageHeader, rupees } from '@/components/admin/ui';
 import { useAsyncData, usePolling } from '@/components/admin/useAsyncData';
 
-const REFRESH_MS = 45_000;
+const REFRESH_MS = 180_000;
 
 const EMPTY_FORM = {
   title: '',
@@ -275,6 +275,19 @@ export default function AdminMenuPage() {
     }),
     [items],
   );
+
+  const PAGE_SIZE = 30;
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [category, search]);
+
+  const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
+  const pagedItems = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return visible.slice(start, start + PAGE_SIZE);
+  }, [visible, page]);
 
   return (
     <>
@@ -717,7 +730,7 @@ export default function AdminMenuPage() {
               </tr>
             </thead>
             <tbody>
-              {visible.map((item) => {
+              {pagedItems.map((item) => {
                 const busy = busyId === item.id;
                 return (
                   <tr key={item.id}>
@@ -793,6 +806,45 @@ export default function AdminMenuPage() {
               })}
             </tbody>
           </table>
+          {totalPages > 1 && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px 18px',
+                borderTop: '1px solid var(--admin-border)',
+                background: 'var(--admin-card-bg)',
+                flexWrap: 'wrap',
+                gap: 12,
+              }}
+            >
+              <span style={{ fontSize: 13, color: 'var(--admin-muted)' }}>
+                Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, visible.length)} of {visible.length} dishes
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn--sm"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  ← Previous
+                </button>
+                <span style={{ fontSize: 13, fontWeight: 600, padding: '0 6px' }}>
+                  Page {page} of {totalPages}
+                </span>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn--sm"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>

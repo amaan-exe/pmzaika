@@ -12,6 +12,9 @@ import SearchModal from '@/components/SearchModal';
 import ToastContainer from '@/components/ToastContainer';
 import AuthModal from '@/components/AuthModal';
 
+import { StoreSettingsProvider } from '@/context/StoreSettingsContext';
+import FloatingCartBar from '@/components/FloatingCartBar';
+
 export const metadata: Metadata = {
   title: 'PM Zaika Restaurant – Taste Bhi Best Bhi | Patna',
   description:
@@ -38,17 +41,20 @@ export default function RootLayout({
       </head>
       <body>
         <AuthProvider>
-          <CartProvider>
-            <Navbar />
-            <main>{children}</main>
-            <Footer />
-            <BottomContactForm />
-            <FloatingCtas />
-            <CartDrawer />
-            <SearchModal />
-            <ToastContainer />
-            <AuthModal />
-          </CartProvider>
+          <StoreSettingsProvider>
+            <CartProvider>
+              <Navbar />
+              <main>{children}</main>
+              <Footer />
+              <BottomContactForm />
+              <FloatingCtas />
+              <FloatingCartBar />
+              <CartDrawer />
+              <SearchModal />
+              <ToastContainer />
+              <AuthModal />
+            </CartProvider>
+          </StoreSettingsProvider>
         </AuthProvider>
       </body>
     </html>

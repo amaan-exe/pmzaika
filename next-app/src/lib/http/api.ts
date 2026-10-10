@@ -17,7 +17,10 @@ const MAX_BODY_BYTES = 64 * 1024;
 
 export function json(data: unknown, init?: ResponseInit): NextResponse {
   const response = NextResponse.json(data, init);
-  response.headers.set('Cache-Control', 'no-store, max-age=0');
+  const customHeaders = init?.headers ? new Headers(init.headers) : null;
+  if (!customHeaders || !customHeaders.has('Cache-Control')) {
+    response.headers.set('Cache-Control', 'no-store, max-age=0');
+  }
   return response;
 }
 

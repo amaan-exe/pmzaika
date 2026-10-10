@@ -237,6 +237,7 @@ export async function createOrder(rawInput: unknown): Promise<CreatedOrder> {
   };
 
   const saved = await (await orders()).set(orderId, order);
+  invalidateStatsCache();
 
   await ensureProfileFromOrder(
     order.userId,
@@ -406,9 +407,20 @@ export interface DashboardStats {
   lowStockCount: number;
 }
 
+let statsCache: { data: DashboardStats; timestamp: number; key: string } | null = null;
+
+export function invalidateStatsCache(): void {
+  statsCache = null;
+}
+
 export async function orderStats(
   range: { from?: string; to?: string } = {}
 ): Promise<DashboardStats> {
+  const cacheKey = `${range.from ?? ''}:${range.to ?? ''}`;
+  if (statsCache && statsCache.key === cacheKey && Date.now() - statsCache.timestamp < 15_000) {
+    return statsCache.data;
+  }
+
   const { orders: all } = await listOrders({
     from: range.from,
     to: range.to,
@@ -432,7 +444,7 @@ export async function orderStats(
 
   const grossPaise = all.reduce((sum, order) => sum + order.totals.grandTotalPaise, 0);
 
-  return {
+  const data: DashboardStats = {
     totalOrders: all.length,
     openOrders: all.filter((order) => !isTerminal(order.status)).length,
     awaitingPayment: all.filter(
@@ -445,6 +457,9 @@ export async function orderStats(
     byPaymentStatus,
     lowStockCount,
   };
+
+  statsCache = { data, timestamp: Date.now(), key: cacheKey };
+  return data;
 }
 
 /** Payment ledger – replaces the Razorpay transaction view with UPI records. */
@@ -584,6 +599,7 @@ export async function transitionOrder(
     );
   }
 
+  invalidateStatsCache();
   return { order: updated, event };
 }
 
@@ -750,12 +766,11 @@ export async function ordersToCsv(filters: OrderFilters): Promise<string> {
   return [header.join(','), ...rows].join('\n');
 }
 
-/** Used by the stats endpoint to count menu items currently unavailable. */
+/** Used by the stats endpoint to count menu items currently unavailable (reuses cached menu). */
 export async function countUnavailableMenuItems(): Promise<number> {
-  const db = await getDb();
-  return db.collection<Doc>(COLLECTIONS.menu).count({
-    filters: [{ field: 'isAvailable', op: '==', value: false }],
-  });
+  const { listMenu } = await import('@/lib/menu/service');
+  const items = await listMenu({ includeUnavailable: true });
+  return items.filter((item) => !item.isAvailable).length;
 }
 
 export { splitList };

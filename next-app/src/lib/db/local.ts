@@ -23,16 +23,24 @@ interface LocalShape {
   [collection: string]: Record<string, Doc>;
 }
 
-const DATA_DIR = path.join(process.cwd(), '.data');
-const DATA_FILE = path.join(DATA_DIR, 'pm-zaika.json');
+import fs from 'node:fs';
+
+function getDataFile(): string {
+  const repoRootNested = path.join(process.cwd(), 'next-app', '.data', 'pm-zaika.json');
+  if (fs.existsSync(repoRootNested)) {
+    return repoRootNested;
+  }
+  return path.join(process.cwd(), '.data', 'pm-zaika.json');
+}
 
 let cache: LocalShape | null = null;
 let queue: Promise<unknown> = Promise.resolve();
 
 async function load(): Promise<LocalShape> {
   if (cache) return cache;
+  const targetFile = getDataFile();
   try {
-    cache = JSON.parse(await readFile(DATA_FILE, 'utf8')) as LocalShape;
+    cache = JSON.parse(await readFile(targetFile, 'utf8')) as LocalShape;
   } catch {
     cache = {};
   }
@@ -40,10 +48,23 @@ async function load(): Promise<LocalShape> {
 }
 
 async function persist(db: LocalShape): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
-  const tmp = `${DATA_FILE}.${process.pid}.tmp`;
-  await writeFile(tmp, JSON.stringify(db, null, 2), 'utf8');
-  await rename(tmp, DATA_FILE);
+  const targetFile = getDataFile();
+  const dir = path.dirname(targetFile);
+  await mkdir(dir, { recursive: true });
+  await writeFile(targetFile, JSON.stringify(db, null, 2), 'utf8');
+
+  // Also keep root .data and next-app .data in sync if possible
+  try {
+    const isInsideNextApp = targetFile.includes(path.join('next-app', '.data'));
+    const altFile = isInsideNextApp
+      ? path.join(process.cwd(), '.data', 'pm-zaika.json')
+      : path.join(process.cwd(), 'next-app', '.data', 'pm-zaika.json');
+    if (fs.existsSync(path.dirname(altFile))) {
+      await writeFile(altFile, JSON.stringify(db, null, 2), 'utf8');
+    }
+  } catch {
+    // best-effort sync
+  }
 }
 
 function withLock<T>(fn: (db: LocalShape) => Promise<T> | T): Promise<T> {

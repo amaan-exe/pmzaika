@@ -5,13 +5,18 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useStoreSettings } from '@/context/StoreSettingsContext';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { totalCount, openDrawer, openSearch } = useCart();
   const { user, loading, openAuth, signOutUser } = useAuth();
+  const { settings, isOpen } = useStoreSettings();
+  const [announcementDismissed, setAnnouncementDismissed] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
+  const [dropdownClosed, setDropdownClosed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -23,10 +28,33 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu on route change
+  // Close mobile menu and dropdown on route change
   useEffect(() => {
     setMobileMenuOpen(false);
+    setMobileCategoriesOpen(false);
+    setDropdownClosed(false);
   }, [pathname]);
+
+  const handleCategorySelect = (categorySlug?: string) => {
+    // 1. Close mobile drawer and accordion immediately
+    setMobileMenuOpen(false);
+    setMobileCategoriesOpen(false);
+    // 2. Hide desktop dropdown immediately
+    setDropdownClosed(true);
+    // 3. Blur element
+    if (typeof document !== 'undefined') {
+      (document.activeElement as HTMLElement)?.blur();
+    }
+    // 4. Smoothly scroll to menu section
+    const el = document.getElementById('menu-showcase');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+    // 5. Notify page to activate the chosen category tab
+    if (categorySlug && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('selectCategory', { detail: categorySlug }));
+    }
+  };
 
   const isActive = (href: string) => {
     if (href === '/' && pathname === '/') return true;
@@ -40,10 +68,48 @@ export default function Navbar() {
 
   return (
     <header className={`site-header ${isScrolled ? 'scrolled' : ''}`}>
+      {/* Top Announcement Bar from Admin Desk */}
+      {!announcementDismissed && settings.announcement?.enabled && settings.announcement?.text && (
+        <div className={`site-announcement-bar announcement--${settings.announcement.type || 'info'}`}>
+          <div className="container announcement-bar-inner">
+            <div className="announcement-bar-content">
+              <span className="announcement-bar-icon">
+                {settings.announcement.type === 'urgent'
+                  ? '🚨'
+                  : settings.announcement.type === 'warning'
+                  ? '⚠️'
+                  : settings.announcement.type === 'success'
+                  ? '🎉'
+                  : '📢'}
+              </span>
+              <span className="announcement-bar-text">{settings.announcement.text}</span>
+            </div>
+            <button
+              type="button"
+              className="announcement-bar-close"
+              onClick={() => setAnnouncementDismissed(true)}
+              aria-label="Dismiss announcement"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Kitchen Closed Banner if store is offline */}
+      {!isOpen && (
+        <div className="site-closed-bar">
+          <div className="container closed-bar-inner">
+            <span>🔴 Kitchen is currently closed for live orders. Table reservations & menu browsing are open!</span>
+            {settings.openingTime && <span className="closed-bar-time">Opens: {settings.openingTime}</span>}
+          </div>
+        </div>
+      )}
+
       <div className="container">
         <nav className="navbar">
           {/* Brand Logo */}
-          <Link href="/" className="brand-logo" title="PM Zaika Restaurant">
+          <Link href="/" prefetch={false} className="brand-logo" title="PM Zaika Restaurant">
             <img
               src="/assets/images/pm_zaika_circular_logo.png"
               alt="PM Zaika Restaurant Logo"
@@ -54,63 +120,196 @@ export default function Navbar() {
 
           {/* Main Navigation Links */}
           <ul className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`} id="navLinks">
+            {/* Mobile Drawer User Card */}
+            <li className="mobile-drawer-user-card">
+              {user ? (
+                <div className="mobile-user-profile">
+                  <div className="mobile-user-avatar">
+                    {(user.displayName || user.email || 'U')[0].toUpperCase()}
+                  </div>
+                  <div className="mobile-user-info">
+                    <span className="mobile-user-name">
+                      {user.displayName || user.email?.split('@')[0] || 'Valued Guest'}
+                    </span>
+                    <span className="mobile-user-email">{user.email}</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="mobile-signout-btn"
+                    onClick={() => {
+                      signOutUser();
+                      setMobileMenuOpen(false);
+                    }}
+                    title="Sign out"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="mobile-signin-banner-btn"
+                  onClick={() => {
+                    openAuth();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <span className="signin-star">✨</span>
+                  <span>Sign in / Create Account</span>
+                  <span className="signin-arrow">→</span>
+                </button>
+              )}
+            </li>
+
             <li className="nav-item">
-              <Link href="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
-                Home
+              <Link
+                href="/"
+                prefetch={false}
+                className={`nav-link ${isActive('/') ? 'active' : ''}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span className="mobile-nav-icon">🏠</span>
+                <span>Home</span>
               </Link>
             </li>
-            <li className="nav-item">
-              <Link href="/#menu-showcase" className="nav-link">
-                Order Online
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', marginLeft: '6px', verticalAlign: 'middle', transition: 'transform 0.2s ease' }}>
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </Link>
+
+            <li
+              className="nav-item"
+              onMouseEnter={() => setDropdownClosed(false)}
+              onMouseLeave={() => setDropdownClosed(false)}
+            >
+              <div className="nav-link-with-toggle">
+                <Link
+                  href="/#menu-showcase"
+                  prefetch={false}
+                  className="nav-link"
+                  onClick={() => handleCategorySelect()}
+                >
+                  <span className="mobile-nav-icon">🍛</span>
+                  <span>Order Online</span>
+                  <svg
+                    className="desktop-arrow"
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ display: 'inline-block', marginLeft: '6px', verticalAlign: 'middle', transition: 'transform 0.2s ease' }}
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </Link>
+                {/* Mobile accordion toggle button */}
+                <button
+                  type="button"
+                  className="mobile-dropdown-arrow"
+                  aria-label="Toggle categories menu"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setMobileCategoriesOpen(!mobileCategoriesOpen);
+                  }}
+                >
+                  <span className="category-count-badge">12</span>
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{
+                      transform: mobileCategoriesOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.25s ease',
+                    }}
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+
               {/* Categories Dropdown Matching index.html */}
-              <div className="dropdown-menu">
-                <Link href="/#menu-showcase" className="dropdown-item">All Dishes <span>🍱</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item">Starters & Appetizers <span>🍢</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item">Royal Biryani <span>🍛</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item">Tandoori Specials <span>🍗</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item">Indian Veg Curry <span>🥦</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item">Indian Non Veg Curry <span>🥘</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item">Chinese & Noodles <span>🥢</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item">Steamed & Fried Momos <span>🥟</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item">Kathi & Egg Rolls <span>🌯</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item">Tandoori Roti & Naan <span>🫓</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item">Special Grand Thali <span>🍽️</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item">Desserts & Drinks <span>🍮</span></Link>
+              <div className={`dropdown-menu ${mobileCategoriesOpen ? 'mobile-expanded' : ''} ${dropdownClosed ? 'dropdown-force-closed' : ''}`}>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('all')}>All Dishes <span>🍱</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('starters')}>Starters & Appetizers <span>🍢</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('biryani')}>Royal Biryani <span>🍛</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('tandoori')}>Tandoori Specials <span>🍗</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('veg-curry')}>Indian Veg Curry <span>🥦</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('non-veg-curry')}>Indian Non Veg Curry <span>🥘</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('chinese')}>Chinese & Noodles <span>🥢</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('momos')}>Steamed & Fried Momos <span>🥟</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('rolls')}>Kathi & Egg Rolls <span>🌯</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('breads')}>Tandoori Roti & Naan <span>🫓</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('thali')}>Special Grand Thali <span>🍽️</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('desserts')}>Desserts & Drinks <span>🍮</span></Link>
               </div>
             </li>
+
             <li className="nav-item">
-              <Link href="/cart" className={`nav-link ${isActive('/cart') ? 'active' : ''}`} id="cartTrigger">
-                Cart
+              <Link href="/cart" prefetch={false} className={`nav-link ${isActive('/cart') ? 'active' : ''}`} id="cartTrigger" onClick={() => setMobileMenuOpen(false)}>
+                <span className="mobile-nav-icon">🛒</span>
+                <span>Cart</span>
+                {mounted && totalCount > 0 && (
+                  <span className="mobile-drawer-badge">{totalCount}</span>
+                )}
               </Link>
             </li>
+
             <li className="nav-item">
-              <Link href="/my-orders" className={`nav-link ${isActive('/my-orders') ? 'active' : ''}`}>
-                My Orders
+              <Link href="/my-orders" prefetch={false} className={`nav-link ${isActive('/my-orders') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                <span className="mobile-nav-icon">📦</span>
+                <span>My Orders</span>
               </Link>
             </li>
+
             <li className="nav-item">
-              <Link href="/reservation" className={`nav-link ${isActive('/reservation') ? 'active' : ''}`}>
-                Reservation
+              <Link href="/reservation" prefetch={false} className={`nav-link ${isActive('/reservation') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                <span className="mobile-nav-icon">🍷</span>
+                <span>Table Reservation</span>
               </Link>
             </li>
+
             <li className="nav-item">
-              <Link href="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`}>
-                Contact-Us
+              <Link href="/contact" prefetch={false} className={`nav-link ${isActive('/contact') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                <span className="mobile-nav-icon">📍</span>
+                <span>Contact & Location</span>
               </Link>
             </li>
+
             <li className="nav-item">
-              <Link href="/about" className={`nav-link ${isActive('/about') ? 'active' : ''}`}>
-                About-Us
+              <Link href="/about" prefetch={false} className={`nav-link ${isActive('/about') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                <span className="mobile-nav-icon">👑</span>
+                <span>Our Heritage</span>
               </Link>
             </li>
+
             <li className="nav-item">
-              <Link href="/gallery" className={`nav-link ${isActive('/gallery') ? 'active' : ''}`}>
-                Gallery
+              <Link href="/gallery" prefetch={false} className={`nav-link ${isActive('/gallery') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                <span className="mobile-nav-icon">📸</span>
+                <span>Food Gallery</span>
               </Link>
+            </li>
+
+            {/* Mobile Drawer Footer Info */}
+            <li className="mobile-drawer-footer">
+              <div className="mobile-footer-status">
+                <span className="status-dot"></span>
+                <span>{isOpen ? 'Kitchen Open for Orders' : 'Kitchen Closed'}</span>
+              </div>
+              {settings.supportPhone && (
+                <a
+                  href={`tel:${settings.supportPhone}`}
+                  className="mobile-footer-call-btn"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>📞 Call: {settings.supportPhone}</span>
+                </a>
+              )}
             </li>
           </ul>
 
@@ -148,7 +347,7 @@ export default function Navbar() {
             </button>
 
             <button
-              className="account-btn"
+              className="account-btn desktop-only-account"
               type="button"
               onClick={user ? signOutUser : openAuth}
               title={user ? `Signed in as ${user.email} (Click to sign out)` : 'Sign in to PM Zaika'}
@@ -164,14 +363,29 @@ export default function Navbar() {
             <button
               className="mobile-toggle"
               id="mobileToggle"
-              aria-label="Open Menu"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Close Menu" : "Open Menu"}
+              onClick={() => {
+                setMobileMenuOpen(!mobileMenuOpen);
+                if (mobileMenuOpen) setMobileCategoriesOpen(false);
+              }}
             >
-              ☰
+              {mobileMenuOpen ? '✕' : '☰'}
             </button>
           </div>
         </nav>
       </div>
+
+      {/* Mobile drawer backdrop overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="mobile-nav-backdrop"
+          onClick={() => {
+            setMobileMenuOpen(false);
+            setMobileCategoriesOpen(false);
+          }}
+          aria-hidden="true"
+        />
+      )}
     </header>
   );
 }

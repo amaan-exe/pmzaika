@@ -25,12 +25,17 @@ export function defaultSettings(): RestaurantSettings {
       'Shersha Road, Gur Ki Mandi, opposite Bank of India, Patna 800007, Bihar',
     announcement: { enabled: false, text: '', type: 'info' },
     autoCloseByTime: false,
+    heroEyebrow: 'Welcome to PM Zaika Restaurant',
+    heroTitle: 'Giving your Hunger a new Option',
+    heroSubtitle:
+      'Freshly prepared royal delicacies crafted with authentic heritage spices and hand-picked ingredients, designed to indulge your palate every single time.',
+    estimatedDeliveryTime: '30-45 mins',
     updatedAt: new Date().toISOString(),
   };
 }
 
-/** Settings change rarely, so a short cache keeps the checkout path cheap. */
-const CACHE_TTL_MS = 10_000;
+/** Settings change rarely, so a 5-minute cache keeps Firestore reads near zero. */
+const CACHE_TTL_MS = 300_000;
 let cache: { value: RestaurantSettings; expiresAt: number } | null = null;
 
 export async function getSettings(): Promise<RestaurantSettings> {
@@ -103,7 +108,7 @@ export function parseTimeToMinutes(value: string): number | null {
   return hours * 60 + minutes;
 }
 
-/** True when `now` falls inside the configured delivery window. */
+/** True when `now` falls inside the configured delivery window (evaluated in IST). */
 export function isWithinOpeningHours(
   settings: RestaurantSettings,
   now = new Date()
@@ -114,7 +119,18 @@ export function isWithinOpeningHours(
   const close = parseTimeToMinutes(settings.closingTime);
   if (open === null || close === null) return true;
 
-  const current = now.getHours() * 60 + now.getMinutes();
+  // Convert `now` to Asia/Kolkata (IST) time
+  const istFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: false,
+  });
+  const parts = istFormatter.formatToParts(now);
+  const hour = Number(parts.find((p) => p.type === 'hour')?.value ?? now.getHours());
+  const minute = Number(parts.find((p) => p.type === 'minute')?.value ?? now.getMinutes());
+  const current = hour * 60 + minute;
+
   // A window that crosses midnight (e.g. 5 PM – 2 AM) is treated as one range.
   return open <= close
     ? current >= open && current <= close
@@ -122,6 +138,7 @@ export function isWithinOpeningHours(
 }
 
 export interface StoreAvailability {
+  isOpen: boolean;
   acceptingOrders: boolean;
   /** Human readable reason shown when orders are blocked. */
   reason: string | null;
@@ -134,6 +151,7 @@ export function storeAvailability(
 ): StoreAvailability {
   if (!settings.isStoreOpen) {
     return {
+      isOpen: false,
       acceptingOrders: false,
       reason:
         'Restaurant is currently closed for online orders. Please check back during operating hours.',
@@ -142,10 +160,11 @@ export function storeAvailability(
 
   if (!isWithinOpeningHours(settings, now)) {
     return {
+      isOpen: false,
       acceptingOrders: false,
       reason: `Online ordering is available between ${settings.openingTime} and ${settings.closingTime}.`,
     };
   }
 
-  return { acceptingOrders: true, reason: null };
+  return { isOpen: true, acceptingOrders: true, reason: null };
 }

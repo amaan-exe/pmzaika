@@ -11,9 +11,16 @@ export const GET = withErrorHandling(async () => {
   const settings = await getSettings();
   const availability = storeAvailability(settings);
 
-  return json({
-    ok: true,
-    settings,
-    availability,
-  });
+  return json(
+    {
+      ok: true,
+      settings,
+      availability,
+    },
+    {
+      headers: {
+        'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+      },
+    }
+  );
 });

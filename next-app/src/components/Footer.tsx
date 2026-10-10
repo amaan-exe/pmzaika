@@ -64,8 +64,8 @@ export default function Footer() {
           <div>
             <h3 className="footer-title-white">Quicklinks</h3>
             <ul className="footer-links-dark">
-              <li><Link href="/">Home</Link></li>
-              <li><Link href="/#menu-showcase">Order Online &#9662;</Link></li>
+              <li><Link href="/" prefetch={false}>Home</Link></li>
+              <li><Link href="/#menu-showcase" prefetch={false}>Order Online &#9662;</Link></li>
               <li><Link href="/cart">Cart</Link></li>
               <li><Link href="/reservation">Reservation</Link></li>
               <li><Link href="/contact">Contact-Us</Link></li>

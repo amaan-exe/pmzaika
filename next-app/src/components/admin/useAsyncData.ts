@@ -77,7 +77,30 @@ export function usePolling(reload: () => void, intervalMs: number): void {
   }, [reload]);
 
   useEffect(() => {
-    const timer = setInterval(() => reloadRef.current(), intervalMs);
-    return () => clearInterval(timer);
+    // Only poll when the tab/window is actively visible
+    const timer = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+      reloadRef.current();
+    }, intervalMs);
+
+    // Refresh immediately when returning to the tab
+    const handleVisibility = () => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        reloadRef.current();
+      }
+    };
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibility);
+    }
+
+    return () => {
+      clearInterval(timer);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibility);
+      }
+    };
   }, [intervalMs]);
 }

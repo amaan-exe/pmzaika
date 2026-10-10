@@ -37,6 +37,10 @@ export interface RestaurantSettings extends Record<string, unknown> {
   announcement: Announcement;
   /** Auto-close the store outside opening hours. */
   autoCloseByTime: boolean;
+  heroEyebrow?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
+  estimatedDeliveryTime?: string;
   updatedAt: string;
   updatedBy?: string;
 }

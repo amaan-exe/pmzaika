@@ -37,9 +37,24 @@ export async function ensureMenuSeeded(): Promise<MenuItem[]> {
   return seedPromise;
 }
 
+interface MenuCache {
+  items: MenuItem[];
+  timestamp: number;
+}
+
+const MENU_CACHE_TTL_MS = 900_000;
+let menuCache: MenuCache | null = null;
+let inFlightFetch: Promise<MenuItem[]> | null = null;
+
+export function invalidateMenuCache(): void {
+  menuCache = null;
+  seedPromise = null;
+  inFlightFetch = null;
+}
+
 /** A deliberate admin re-seed must not be shadowed by the memoised check. */
 export function invalidateMenuSeedCache(): void {
-  seedPromise = null;
+  invalidateMenuCache();
 }
 
 export interface ListMenuOptions {
@@ -47,26 +62,81 @@ export interface ListMenuOptions {
   category?: string;
 }
 
+async function syncMenuCatalog(items?: MenuItem[]): Promise<void> {
+  try {
+    const db = await getDb();
+    let toSave = items;
+    if (!toSave) {
+      const menu = await collection();
+      const { docs } = await menu.list({ orderBy: [{ field: 'sortOrder', direction: 'asc' }] });
+      toSave = docs && docs.length > 0 ? docs : buildSeedMenu();
+    }
+    await db.collection(COLLECTIONS.settings).set('menu_catalog', {
+      id: 'menu_catalog',
+      items: toSave,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.warn('[menu.service] syncMenuCatalog error:', err);
+  }
+}
+
+async function fetchAllRawMenu(): Promise<MenuItem[]> {
+  if (menuCache && Date.now() - menuCache.timestamp < MENU_CACHE_TTL_MS) {
+    return menuCache.items;
+  }
+
+  if (inFlightFetch) {
+    return inFlightFetch;
+  }
+
+  inFlightFetch = (async () => {
+    try {
+      const db = await getDb();
+
+      // Spark Plan Optimization: Read 1 bundled snapshot document (1 read instead of 314 reads)
+      try {
+        const catalog = await db
+          .collection<{ id: string; items: MenuItem[] }>(COLLECTIONS.settings)
+          .get('menu_catalog');
+        if (catalog && Array.isArray(catalog.items) && catalog.items.length > 0) {
+          menuCache = { items: catalog.items, timestamp: Date.now() };
+          return catalog.items;
+        }
+      } catch (catalogErr) {
+        console.warn('[menu.service] menu_catalog snapshot read failed:', catalogErr);
+      }
+
+      await ensureMenuSeeded();
+      const menu = await collection();
+      const { docs } = await menu.list({ orderBy: [{ field: 'sortOrder', direction: 'asc' }] });
+      const items = docs && docs.length > 0 ? docs : buildSeedMenu();
+
+      // Write bundled snapshot so all future fetches cost 1 read
+      void syncMenuCatalog(items);
+
+      menuCache = { items, timestamp: Date.now() };
+      return items;
+    } catch (err) {
+      console.warn('[menu.service] Live menu fetch failed, falling back to seed menu:', err);
+      const fallback = buildSeedMenu();
+      menuCache = { items: fallback, timestamp: Date.now() };
+      return fallback;
+    } finally {
+      inFlightFetch = null;
+    }
+  })();
+
+  return inFlightFetch;
+}
+
 /**
- * Returns the live menu, seeding it from the extracted menu sheet the first time
- * so the restaurant is orderable immediately after a fresh deploy.
+ * Returns the live menu, using in-memory caching (5m TTL) and in-flight deduplication
+ * so repeated requests cost 0 extra document reads.
  */
 export async function listMenu(options: ListMenuOptions = {}): Promise<MenuItem[]> {
-  let items: MenuItem[] = [];
-
-  try {
-    await ensureMenuSeeded();
-    const menu = await collection();
-    const { docs } = await menu.list({ orderBy: [{ field: 'sortOrder', direction: 'asc' }] });
-    items = docs;
-  } catch (err) {
-    console.warn('[menu.service] Live menu fetch failed, falling back to seed menu:', err);
-    items = buildSeedMenu();
-  }
-
-  if (!items || items.length === 0) {
-    items = buildSeedMenu();
-  }
+  const all = await fetchAllRawMenu();
+  let items = [...all];
 
   if (!options.includeUnavailable) {
     items = items.filter((item) => item.isAvailable);
@@ -80,15 +150,20 @@ export async function listMenu(options: ListMenuOptions = {}): Promise<MenuItem[
 
 /** Idempotent: only writes when the collection is empty. */
 export async function seedMenu(): Promise<MenuItem[]> {
+  invalidateMenuCache();
   const menu = await collection();
   const seeded = buildSeedMenu();
 
   await Promise.all(seeded.map((item) => menu.set(item.id, item)));
-
+  menuCache = { items: seeded, timestamp: Date.now() };
+  void syncMenuCatalog(seeded);
   return seeded;
 }
 
 export async function getMenuItem(id: string): Promise<MenuItem | null> {
+  const all = await fetchAllRawMenu();
+  const match = all.find((item) => item.id === id);
+  if (match) return match;
   return (await collection()).get(id);
 }
 
@@ -172,6 +247,15 @@ export async function createMenuItem(input: MenuItemInput, actor: string): Promi
   };
 
   await menu.set(id, item);
+  if (menuCache) {
+    const next = [...menuCache.items.filter((i) => i.id !== id), item].sort(
+      (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)
+    );
+    menuCache = { items: next, timestamp: Date.now() };
+    void syncMenuCatalog(next);
+  } else {
+    invalidateMenuCache();
+  }
   void actor;
   return item;
 }
@@ -198,6 +282,13 @@ export async function updateMenuItem(
   });
 
   if (!updated) throw new MenuError('Dish not found', 404);
+  if (menuCache) {
+    const next = menuCache.items.map((i) => (i.id === id ? updated : i));
+    menuCache = { items: next, timestamp: Date.now() };
+    void syncMenuCatalog(next);
+  } else {
+    invalidateMenuCache();
+  }
   void actor;
   return updated;
 }
@@ -212,6 +303,13 @@ export async function toggleAvailability(id: string): Promise<MenuItem> {
   }));
 
   if (!updated) throw new MenuError('Dish not found', 404);
+  if (menuCache) {
+    const next = menuCache.items.map((i) => (i.id === id ? updated : i));
+    menuCache = { items: next, timestamp: Date.now() };
+    void syncMenuCatalog(next);
+  } else {
+    invalidateMenuCache();
+  }
   return updated;
 }
 
@@ -220,6 +318,13 @@ export async function deleteMenuItem(id: string): Promise<void> {
   const existing = await menu.get(id);
   if (!existing) throw new MenuError('Dish not found', 404);
   await menu.delete(id);
+  if (menuCache) {
+    const next = menuCache.items.filter((i) => i.id !== id);
+    menuCache = { items: next, timestamp: Date.now() };
+    void syncMenuCatalog(next);
+  } else {
+    invalidateMenuCache();
+  }
 }
 
 export interface ResolvedLine {
@@ -244,13 +349,13 @@ export async function resolveOrderLines(
 ): Promise<{ items: ResolvedLine[]; unavailable: string[] }> {
   await ensureMenuSeeded();
 
-  const menu = await collection();
+  const allItems = await fetchAllRawMenu();
   const merged = new Map<string, ResolvedLine>();
   const unavailable: string[] = [];
 
   for (const line of lines) {
     const item =
-      (await menu.get(line.menuItemId)) ??
+      allItems.find((m) => m.id === line.menuItemId) ??
       staticFallback(line.menuItemId);
 
     if (!item) {

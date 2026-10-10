@@ -26,7 +26,7 @@ const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'archive', label: 'Archive' },
 ];
 
-const REFRESH_MS = 20_000;
+const REFRESH_MS = 45_000;
 
 /** Kitchen priority: payment decisions first, then cooking, then done. */
 const PRIORITY: Record<string, number> = {

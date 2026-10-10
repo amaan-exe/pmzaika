@@ -179,6 +179,10 @@ export const settingsSchema = z.object({
   storeUpiName: trimmed(120).optional(),
   restaurantAddress: trimmed(300).optional(),
   autoCloseByTime: z.boolean().optional(),
+  heroEyebrow: trimmed(120).optional(),
+  heroTitle: trimmed(180).optional(),
+  heroSubtitle: trimmed(500).optional(),
+  estimatedDeliveryTime: trimmed(60).optional(),
   announcement: z
     .object({
       enabled: z.boolean(),
