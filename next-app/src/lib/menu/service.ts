@@ -42,7 +42,7 @@ interface MenuCache {
   timestamp: number;
 }
 
-const MENU_CACHE_TTL_MS = 900_000;
+const MENU_CACHE_TTL_MS = 30_000;
 let menuCache: MenuCache | null = null;
 let inFlightFetch: Promise<MenuItem[]> | null = null;
 
@@ -117,29 +117,21 @@ async function fetchAllRawMenu(): Promise<MenuItem[]> {
         return items;
       })();
 
-      // 450ms timeout prevents serverless cold-start hanging
-      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 450));
+      // Allow sufficient time for Firestore single-doc read (6000ms) instead of premature 450ms timeout
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 6000));
       const items = await Promise.race([fetchPromise, timeoutPromise]);
 
-      if (items) {
+      if (items && items.length > 0) {
         menuCache = { items, timestamp: Date.now() };
         return items;
       }
 
-      // If timeout elapsed, return buildSeedMenu() immediately for sub-1.5s response
+      // Only if DB completely unreachable, transient fallback without caching for 15 minutes
       const fallback = buildSeedMenu();
-      menuCache = { items: fallback, timestamp: Date.now() };
-      fetchPromise.then((bgItems) => {
-        if (bgItems && bgItems.length > 0) {
-          menuCache = { items: bgItems, timestamp: Date.now() };
-        }
-      }).catch(() => {});
       return fallback;
     } catch (err) {
       console.warn('[menu.service] Live menu fetch failed, falling back to seed menu:', err);
-      const fallback = buildSeedMenu();
-      menuCache = { items: fallback, timestamp: Date.now() };
-      return fallback;
+      return buildSeedMenu();
     } finally {
       inFlightFetch = null;
     }
