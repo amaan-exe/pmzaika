@@ -51,12 +51,14 @@ async function request<T>(
 }
 
 export const api = {
-  get: <T>(path: string) => request<T>(path),
+  get: <T>(path: string, headers?: HeadersInit) => request<T>(path, { headers }),
   post: <T>(path: string, json?: unknown, headers?: HeadersInit) =>
     request<T>(path, { method: 'POST', json, headers }),
-  put: <T>(path: string, json?: unknown) => request<T>(path, { method: 'PUT', json }),
-  patch: <T>(path: string, json?: unknown) => request<T>(path, { method: 'PATCH', json }),
-  del: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
+  put: <T>(path: string, json?: unknown, headers?: HeadersInit) =>
+    request<T>(path, { method: 'PUT', json, headers }),
+  patch: <T>(path: string, json?: unknown, headers?: HeadersInit) =>
+    request<T>(path, { method: 'PATCH', json, headers }),
+  del: <T>(path: string, headers?: HeadersInit) => request<T>(path, { method: 'DELETE', headers }),
 };
 
 /** Session storage key holding the tracking token issued at checkout. */

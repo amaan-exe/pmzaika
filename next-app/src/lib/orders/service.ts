@@ -99,13 +99,21 @@ export function toPublicOrder(
 // never leak into a public response, log line or shared screenshot.
   const { trackingToken, cartSessionId: _cartSessionId, ...rest } = order;
 
+  const statusMeta =
+    ORDER_STATUS_FLOW[order.status] ?? {
+      label: (order.status || 'Order Placed').replace(/_/g, ' '),
+      description: 'Your order details have been updated.',
+      tone: 'active' as const,
+      step: 3,
+    };
+
   return {
     ...rest,
-    statusMeta: ORDER_STATUS_FLOW[order.status],
-    nextActions: STATUS_ACTIONS[order.status],
+    statusMeta,
+    nextActions: STATUS_ACTIONS[order.status] ?? [],
     trackingPath: `/track/${order.orderId}`,
     trackingUrl: orderTrackingUrl(order),
-    upiAppLinks: upiAppLinks(order.upi.intent),
+    upiAppLinks: order.upi?.intent ? upiAppLinks(order.upi.intent) : [],
     ...(options?.includeToken ? { trackingToken } : {}),
   };
 }

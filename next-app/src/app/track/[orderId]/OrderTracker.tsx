@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 
-import { api, ApiError, findTracking } from '@/lib/client/api';
+import { api, ApiError, findTracking, rememberTracking } from '@/lib/client/api';
+import { useAuth } from '@/context/AuthContext';
 import { toWhatsappNumber } from '@/lib/notifications/whatsapp';
 
 interface TrackItem {
@@ -15,7 +16,7 @@ interface TrackItem {
 interface TrackOrder {
   orderId: string;
   status: string;
-  statusMeta: { label: string; description: string; tone: string; step: number };
+  statusMeta?: { label: string; description: string; tone: string; step: number };
   paymentStatus: string;
   transactionReference: string | null;
   customerMarkedPaid: boolean;
@@ -30,14 +31,14 @@ interface TrackOrder {
     discountPaise: number;
     grandTotalPaise: number;
   };
-  upi: { vpa: string; payeeName: string; amountPaise: number };
+  upi?: { vpa: string; payeeName: string; amountPaise: number };
   upiAppLinks?: Array<{ label: string; href: string }>;
   createdAt: string;
 }
 
-const rupees = (paise: number) =>
-  `₹${(paise / 100).toLocaleString('en-IN', {
-    minimumFractionDigits: paise % 100 === 0 ? 0 : 2,
+const rupees = (paise?: number) =>
+  `₹${((paise ?? 0) / 100).toLocaleString('en-IN', {
+    minimumFractionDigits: (paise ?? 0) % 100 === 0 ? 0 : 2,
     maximumFractionDigits: 2,
   })}`;
 
@@ -49,30 +50,61 @@ export default function OrderTracker({
   orderId: string;
   initialToken?: string;
 }) {
-  // The token is issued once at checkout. Fall back to this browser's stored
-// history so a page reload still works. The first render always shows the
-// loading state, so reading storage during initialisation cannot cause a
-// hydration mismatch.
-  const [token] = useState(() => initialToken || findTracking(orderId)?.token || '');
+  const { user, getIdToken, openAuth, loading: authLoading } = useAuth();
+  const [token, setToken] = useState(() => initialToken || '');
   const [order, setOrder] = useState<TrackOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [remainingSecs, setRemainingSecs] = useState<number>(15 * 60);
 
+  // Sync token from browser session if not provided via props
+  useEffect(() => {
+    if (!token && typeof window !== 'undefined') {
+      const stored = findTracking(orderId)?.token;
+      if (stored) {
+        setToken(stored);
+      }
+    }
+  }, [orderId, token]);
+
   const load = useCallback(async () => {
-    const activeToken = token || findTracking(orderId)?.token;
-    if (!activeToken) {
-      setLoading(false);
-      setError('Private tracking link required to view this order.');
+    // If auth state is still checking and we have no token, wait before failing
+    const activeToken = token || (typeof window !== 'undefined' ? findTracking(orderId)?.token : '') || '';
+    if (!activeToken && authLoading) {
       return;
     }
+
+    let idToken: string | null = null;
+    if (user) {
+      try {
+        idToken = await getIdToken();
+      } catch {
+        idToken = null;
+      }
+    }
+
+    if (!activeToken && !idToken) {
+      setLoading(false);
+      setError('Private tracking link or account sign-in required to view this order.');
+      return;
+    }
+
     try {
-      const response = await api.get<{ order: TrackOrder }>(
-        `/api/orders/${orderId}?token=${encodeURIComponent(activeToken)}`
-      );
+      const url = activeToken
+        ? `/api/orders/${orderId}?token=${encodeURIComponent(activeToken)}`
+        : `/api/orders/${orderId}`;
+      const headers: HeadersInit = idToken ? { Authorization: `Bearer ${idToken}` } : {};
+
+      const response = await api.get<{ order: TrackOrder }>(url, headers);
       setOrder(response.order);
       setError(null);
+
+      // If backend returned tracking token, cache it for convenience
+      const returnedToken = (response.order as { trackingToken?: string }).trackingToken || activeToken;
+      if (returnedToken && typeof window !== 'undefined') {
+        rememberTracking({ orderId, token: returnedToken });
+      }
     } catch (caught) {
       setError(
         caught instanceof ApiError
@@ -82,7 +114,7 @@ export default function OrderTracker({
     } finally {
       setLoading(false);
     }
-  }, [orderId, token]);
+  }, [orderId, token, user, getIdToken, authLoading]);
 
   useEffect(() => {
     // `load` only calls setState after the fetch resolves, so this is an async
@@ -131,21 +163,86 @@ export default function OrderTracker({
     return () => clearInterval(interval);
   }, [order]);
 
-  if (loading) {
+  if (loading || authLoading) {
     return <p className="track-state">Loading your order…</p>;
   }
 
   if (error || !order) {
     return (
-      <div className="track-state">
-        <p>{error ?? 'Order not found.'}</p>
-        <p className="track-hint">
-          This page needs the private link we sent you on WhatsApp. Please open that
-          link again, or call the restaurant with your order number.
+      <div
+        className="track-state"
+        style={{
+          maxWidth: '520px',
+          margin: '40px auto',
+          padding: '36px 24px',
+          background: '#ffffff',
+          borderRadius: '16px',
+          border: '1px solid #e8e2d8',
+          textAlign: 'center',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.04)',
+        }}
+      >
+        <div style={{ fontSize: '36px', marginBottom: '14px' }}>🔒</div>
+        <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#1F2937', marginBottom: '8px' }}>
+          Private Order Tracking
+        </h2>
+        <p style={{ color: '#4B5563', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px' }}>
+          {error ?? 'Order not found.'}
         </p>
-        <Link href="/cart" className="track-link">
-          Back to cart
-        </Link>
+        <p className="track-hint" style={{ fontSize: '13px', color: '#6B7280', marginBottom: '24px' }}>
+          This page requires the private tracking link sent on WhatsApp, or signing into the account used to place the order.
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {!user && (
+            <button
+              type="button"
+              onClick={openAuth}
+              style={{
+                padding: '10px 22px',
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #F5A623 0%, #F05D23 100%)',
+                color: '#fff',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '14px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(240, 93, 35, 0.25)',
+              }}
+            >
+              Sign In to View
+            </button>
+          )}
+          <Link
+            href="/my-orders"
+            style={{
+              padding: '10px 20px',
+              borderRadius: '10px',
+              background: '#F3F4F6',
+              color: '#1F2937',
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: '14px',
+              border: '1px solid #E5E7EB',
+            }}
+          >
+            My Orders
+          </Link>
+          <Link
+            href="/cart"
+            style={{
+              padding: '10px 20px',
+              borderRadius: '10px',
+              background: '#F3F4F6',
+              color: '#1F2937',
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: '14px',
+              border: '1px solid #E5E7EB',
+            }}
+          >
+            Back to Cart
+          </Link>
+        </div>
       </div>
     );
   }
@@ -157,9 +254,14 @@ export default function OrderTracker({
   const timerDisplay = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   const isExpired = remainingSecs === 0;
 
+  const statusLabel = order.statusMeta?.label || order.status.replace(/_/g, ' ');
+  const statusDesc = order.statusMeta?.description || '';
+  const statusTone = order.statusMeta?.tone || 'active';
+
   const handleCopyUpi = () => {
+    const vpa = order.upi?.vpa || 'pmzaika@ybl';
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(order.upi.vpa);
+      navigator.clipboard.writeText(vpa);
       setCopiedUpi(true);
       setTimeout(() => setCopiedUpi(false), 2200);
     }
@@ -168,8 +270,8 @@ export default function OrderTracker({
   const sendProof = async () => {
     const message = [
       `💳 *PAYMENT PROOF - ${order.orderId}*`,
-      `Total: ${rupees(order.totals.grandTotalPaise)}`,
-      `UPI VPA: ${order.upi.vpa}`,
+      `Total: ${rupees(order.totals?.grandTotalPaise)}`,
+      `UPI VPA: ${order.upi?.vpa || 'pmzaika@ybl'}`,
       '📎 Please find my payment screenshot attached.',
     ].join('\n');
 
@@ -185,10 +287,10 @@ export default function OrderTracker({
       <header className="track-head">
         <p className="track-eyebrow">ORDER RECEIVED</p>
         <h1 className="track-title">{order.orderId}</h1>
-        <p className="track-status" data-tone={order.statusMeta.tone}>
-          {order.statusMeta.label}
+        <p className="track-status" data-tone={statusTone}>
+          {statusLabel}
         </p>
-        <p className="track-hint">{order.statusMeta.description}</p>
+        <p className="track-hint">{statusDesc}</p>
       </header>
 
       {awaitingPayment && (
@@ -229,7 +331,7 @@ export default function OrderTracker({
             margin: '6px auto 14px',
             fontSize: '13px'
           }}>
-            <span>UPI ID: <strong>{order.upi.vpa}</strong></span>
+            <span>UPI ID: <strong>{order.upi?.vpa || 'pmzaika@ybl'}</strong></span>
             <button
               type="button"
               onClick={handleCopyUpi}
@@ -298,33 +400,33 @@ export default function OrderTracker({
       <section className="track-panel">
         <h2 className="track-panel-title">Order Items</h2>
         <ul className="track-items">
-          {order.items.map((item, index) => (
+          {(order.items || []).map((item, index) => (
             <li key={`${item.title}-${index}`} className="track-item">
               <span className="track-item-name">
                 {item.title} <span className="track-item-qty">× {item.qty}</span>
               </span>
-              <span className="track-item-price">{rupees(item.lineTotalPaise)}</span>
+              <span className="track-item-price">{rupees(item.lineTotalPaise || 0)}</span>
             </li>
           ))}
         </ul>
 
         <div className="track-total-row">
           <span>Subtotal</span>
-          <span>{rupees(order.totals.subtotalPaise)}</span>
+          <span>{rupees(order.totals?.subtotalPaise || 0)}</span>
         </div>
-        {order.totals.discountPaise > 0 && (
+        {(order.totals?.discountPaise || 0) > 0 && (
           <div className="track-total-row">
             <span>Discount</span>
             <span>− {rupees(order.totals.discountPaise)}</span>
           </div>
         )}
-        {order.totals.deliveryChargePaise > 0 && (
+        {(order.totals?.deliveryChargePaise || 0) > 0 && (
           <div className="track-total-row">
             <span>Delivery</span>
             <span>{rupees(order.totals.deliveryChargePaise)}</span>
           </div>
         )}
-        {order.totals.taxPaise > 0 && (
+        {(order.totals?.taxPaise || 0) > 0 && (
           <div className="track-total-row">
             <span>GST</span>
             <span>{rupees(order.totals.taxPaise)}</span>
@@ -332,12 +434,19 @@ export default function OrderTracker({
         )}
         <div className="track-total-row track-total-row--grand">
           <span>Total</span>
-          <span>{rupees(order.totals.grandTotalPaise)}</span>
+          <span>{rupees(order.totals?.grandTotalPaise || 0)}</span>
         </div>
       </section>
 
       <p className="track-hint">
-        Placed {new Date(order.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+        Placed{' '}
+        {(() => {
+          try {
+            return new Date(order.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+          } catch {
+            return order.createdAt || '';
+          }
+        })()}
       </p>
     </div>
   );

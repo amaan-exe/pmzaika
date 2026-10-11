@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { readTrackingHistory } from '@/lib/client/api';
+import { readTrackingHistory, rememberTracking } from '@/lib/client/api';
 import type { PublicOrder } from '@/lib/orders/service';
 
 export default function MyOrdersPage() {
@@ -38,7 +38,13 @@ export default function MyOrdersPage() {
 
         const data = await res.json();
         if (!cancelled && data.ok) {
-          setOrders(data.orders || []);
+          const loadedOrders = data.orders || [];
+          setOrders(loadedOrders);
+          loadedOrders.forEach((ord: any) => {
+            if (ord.orderId && ord.trackingToken) {
+              rememberTracking({ orderId: ord.orderId, token: ord.trackingToken });
+            }
+          });
         }
       } catch (err) {
         if (!cancelled) {
