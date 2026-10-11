@@ -4,6 +4,7 @@ import { json, withErrorHandling } from '@/lib/http/api';
 import { listCategories, listMenu } from '@/lib/menu/service';
 
 export const runtime = 'nodejs';
+export const revalidate = 300;
 
 /** Live menu. Prices come from the database so admin edits apply immediately. */
 export const GET = withErrorHandling(async (request: NextRequest) => {
@@ -22,6 +23,8 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     {
       headers: {
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=1800',
+        'CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=1800',
+        'Vercel-CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=1800',
       },
     }
   );
