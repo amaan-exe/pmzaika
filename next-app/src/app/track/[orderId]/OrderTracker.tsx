@@ -57,6 +57,8 @@ export default function OrderTracker({
   const [order, setOrder] = useState<TrackOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copiedUpi, setCopiedUpi] = useState(false);
+  const [remainingSecs, setRemainingSecs] = useState<number>(15 * 60);
 
   const load = useCallback(async () => {
     const activeToken = token || findTracking(orderId)?.token;
@@ -116,6 +118,19 @@ export default function OrderTracker({
     };
   }, [order, load]);
 
+  // Payment timer countdown: runs unconditionally above early returns
+  useEffect(() => {
+    if (!order || order.status !== 'payment_verification_pending') return;
+    const elapsed = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 1000);
+    setRemainingSecs(Math.max(0, 15 * 60 - elapsed));
+
+    const interval = setInterval(() => {
+      const currentElapsed = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 1000);
+      setRemainingSecs(Math.max(0, 15 * 60 - currentElapsed));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [order]);
+
   if (loading) {
     return <p className="track-state">Loading your order…</p>;
   }
@@ -137,21 +152,6 @@ export default function OrderTracker({
 
   const awaitingPayment = order.status === 'payment_verification_pending';
   const qrSrc = '/assets/images/pm_zaika_phonepe_qr.png';
-  const [copiedUpi, setCopiedUpi] = useState(false);
-  const [remainingSecs, setRemainingSecs] = useState<number>(() => {
-    const elapsed = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 1000);
-    return Math.max(0, 15 * 60 - elapsed);
-  });
-
-  useEffect(() => {
-    if (!awaitingPayment) return;
-    const interval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 1000);
-      setRemainingSecs(Math.max(0, 15 * 60 - elapsed));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [awaitingPayment, order.createdAt]);
-
   const mins = Math.floor(remainingSecs / 60);
   const secs = remainingSecs % 60;
   const timerDisplay = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
