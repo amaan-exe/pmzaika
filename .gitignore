@@ -33,3 +33,6 @@ Thumbs.db
 *.pem
 refrence/
 menu-items/
+
+.vercel
+.env*
