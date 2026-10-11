@@ -715,8 +715,8 @@ export default function CartPage() {
                   <div className="advisory-item">
                     <span className="advisory-icon">🍲</span>
                     <div className="advisory-text">
-                      <strong>Dietary &amp; Halal Advisory:</strong>
-                      <span> 100% Halal certified meat. Please specify any allergy (nuts, dairy) or spice preferences in Chef Notes.</span>
+                      <strong>Dietary &amp; Freshness Notice:</strong>
+                      <span> 100% Fresh, hygienic &amp; authentic royal preparation. Please specify any allergy (nuts, dairy) or spice preferences in Chef Notes.</span>
                     </div>
                   </div>
                 </div>

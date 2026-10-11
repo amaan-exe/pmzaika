@@ -110,11 +110,11 @@ export default function Navbar() {
       {isOpen && (!settings.announcement?.enabled || !settings.announcement?.text) && (
         <div className="site-operating-notice-bar">
           <div className="container operating-notice-inner">
-            <span>🟢 <strong>Kitchen Open for Live Delivery</strong> • Patna Doorstep (35–45 mins)</span>
+            <span className="notice-item-status">🟢 <strong>Kitchen Open</strong><span className="notice-desk-only"> for Live Delivery • Patna Doorstep (35–45m)</span></span>
             <span className="notice-sep">•</span>
-            <span>🛵 Free Delivery above ₹499</span>
-            <span className="notice-sep">•</span>
-            <span>✨ 100% Halal Royal Delicacies</span>
+            <span className="notice-item-delivery">🛵 Free Delivery above ₹499</span>
+            <span className="notice-sep notice-desk-only">•</span>
+            <span className="notice-item-extra notice-desk-only">✨ Authentic Royal Delicacies</span>
           </div>
         </div>
       )}
@@ -122,7 +122,7 @@ export default function Navbar() {
       <div className="container">
         <nav className="navbar">
           {/* Brand Logo */}
-          <Link href="/" prefetch={false} className="brand-logo" title="PM Zaika Restaurant">
+          <Link href="/" className="brand-logo" title="PM Zaika Restaurant">
             <img
               src="/assets/images/pm_zaika_circular_logo.png"
               alt="PM Zaika Restaurant Logo"
@@ -177,7 +177,7 @@ export default function Navbar() {
             <li className="nav-item">
               <Link
                 href="/"
-                prefetch={false}
+               
                 className={`nav-link ${isActive('/') ? 'active' : ''}`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -194,7 +194,7 @@ export default function Navbar() {
               <div className="nav-link-with-toggle">
                 <Link
                   href="/#menu-showcase"
-                  prefetch={false}
+                 
                   className="nav-link"
                   onClick={() => handleCategorySelect()}
                 >
@@ -248,23 +248,23 @@ export default function Navbar() {
 
               {/* Categories Dropdown Matching index.html */}
               <div className={`dropdown-menu ${mobileCategoriesOpen ? 'mobile-expanded' : ''} ${dropdownClosed ? 'dropdown-force-closed' : ''}`}>
-                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('all')}>All Dishes <span>🍱</span></Link>
-                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('starters')}>Starters & Appetizers <span>🍢</span></Link>
-                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('biryani')}>Royal Biryani <span>🍛</span></Link>
-                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('tandoori')}>Tandoori Specials <span>🍗</span></Link>
-                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('veg-curry')}>Indian Veg Curry <span>🥦</span></Link>
-                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('non-veg-curry')}>Indian Non Veg Curry <span>🥘</span></Link>
-                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('chinese')}>Chinese & Noodles <span>🥢</span></Link>
-                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('momos')}>Steamed & Fried Momos <span>🥟</span></Link>
-                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('rolls')}>Kathi & Egg Rolls <span>🌯</span></Link>
-                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('breads')}>Tandoori Roti & Naan <span>🫓</span></Link>
-                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('thali')}>Special Grand Thali <span>🍽️</span></Link>
-                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('desserts')}>Desserts & Drinks <span>🍮</span></Link>
+                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('all')}>All Dishes <span>🍱</span></Link>
+                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('starters')}>Starters & Appetizers <span>🍢</span></Link>
+                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('biryani')}>Royal Biryani <span>🍛</span></Link>
+                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('tandoori')}>Tandoori Specials <span>🍗</span></Link>
+                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('veg-curry')}>Indian Veg Curry <span>🥦</span></Link>
+                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('non-veg-curry')}>Indian Non Veg Curry <span>🥘</span></Link>
+                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('chinese')}>Chinese & Noodles <span>🥢</span></Link>
+                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('momos')}>Steamed & Fried Momos <span>🥟</span></Link>
+                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('rolls')}>Kathi & Egg Rolls <span>🌯</span></Link>
+                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('breads')}>Tandoori Roti & Naan <span>🫓</span></Link>
+                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('thali')}>Special Grand Thali <span>🍽️</span></Link>
+                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('desserts')}>Desserts & Drinks <span>🍮</span></Link>
               </div>
             </li>
 
             <li className="nav-item">
-              <Link href="/cart" prefetch={false} className={`nav-link ${isActive('/cart') ? 'active' : ''}`} id="cartTrigger" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/cart" className={`nav-link ${isActive('/cart') ? 'active' : ''}`} id="cartTrigger" onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon">🛒</span>
                 <span>Cart</span>
                 {mounted && totalCount > 0 && (
@@ -274,35 +274,35 @@ export default function Navbar() {
             </li>
 
             <li className="nav-item">
-              <Link href="/my-orders" prefetch={false} className={`nav-link ${isActive('/my-orders') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/my-orders" className={`nav-link ${isActive('/my-orders') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon">📦</span>
                 <span>My Orders</span>
               </Link>
             </li>
 
             <li className="nav-item">
-              <Link href="/reservation" prefetch={false} className={`nav-link ${isActive('/reservation') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/reservation" className={`nav-link ${isActive('/reservation') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon">🍷</span>
                 <span>Table Reservation</span>
               </Link>
             </li>
 
             <li className="nav-item">
-              <Link href="/contact" prefetch={false} className={`nav-link ${isActive('/contact') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon">📍</span>
                 <span>Contact & Location</span>
               </Link>
             </li>
 
             <li className="nav-item">
-              <Link href="/about" prefetch={false} className={`nav-link ${isActive('/about') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/about" className={`nav-link ${isActive('/about') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon">👑</span>
                 <span>Our Heritage</span>
               </Link>
             </li>
 
             <li className="nav-item">
-              <Link href="/gallery" prefetch={false} className={`nav-link ${isActive('/gallery') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/gallery" className={`nav-link ${isActive('/gallery') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon">📸</span>
                 <span>Food Gallery</span>
               </Link>

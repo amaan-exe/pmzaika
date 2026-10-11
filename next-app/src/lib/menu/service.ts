@@ -92,31 +92,49 @@ async function fetchAllRawMenu(): Promise<MenuItem[]> {
 
   inFlightFetch = (async () => {
     try {
-      const db = await getDb();
+      const fetchPromise = (async () => {
+        const db = await getDb();
 
-      // Spark Plan Optimization: Read 1 bundled snapshot document (1 read instead of 314 reads)
-      try {
-        const catalog = await db
-          .collection<{ id: string; items: MenuItem[] }>(COLLECTIONS.settings)
-          .get('menu_catalog');
-        if (catalog && Array.isArray(catalog.items) && catalog.items.length > 0) {
-          menuCache = { items: catalog.items, timestamp: Date.now() };
-          return catalog.items;
+        // Spark Plan Optimization: Read 1 bundled snapshot document (1 read instead of 314 reads)
+        try {
+          const catalog = await db
+            .collection<{ id: string; items: MenuItem[] }>(COLLECTIONS.settings)
+            .get('menu_catalog');
+          if (catalog && Array.isArray(catalog.items) && catalog.items.length > 0) {
+            return catalog.items;
+          }
+        } catch (catalogErr) {
+          console.warn('[menu.service] menu_catalog snapshot read failed:', catalogErr);
         }
-      } catch (catalogErr) {
-        console.warn('[menu.service] menu_catalog snapshot read failed:', catalogErr);
+
+        await ensureMenuSeeded();
+        const menu = await collection();
+        const { docs } = await menu.list({ orderBy: [{ field: 'sortOrder', direction: 'asc' }] });
+        const items = docs && docs.length > 0 ? docs : buildSeedMenu();
+
+        // Write bundled snapshot so all future fetches cost 1 read
+        void syncMenuCatalog(items);
+        return items;
+      })();
+
+      // 1.5s timeout prevents serverless cold-start hanging
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500));
+      const items = await Promise.race([fetchPromise, timeoutPromise]);
+
+      if (items) {
+        menuCache = { items, timestamp: Date.now() };
+        return items;
       }
 
-      await ensureMenuSeeded();
-      const menu = await collection();
-      const { docs } = await menu.list({ orderBy: [{ field: 'sortOrder', direction: 'asc' }] });
-      const items = docs && docs.length > 0 ? docs : buildSeedMenu();
-
-      // Write bundled snapshot so all future fetches cost 1 read
-      void syncMenuCatalog(items);
-
-      menuCache = { items, timestamp: Date.now() };
-      return items;
+      // If timeout elapsed, return buildSeedMenu() immediately for sub-1.5s response
+      const fallback = buildSeedMenu();
+      menuCache = { items: fallback, timestamp: Date.now() };
+      fetchPromise.then((bgItems) => {
+        if (bgItems && bgItems.length > 0) {
+          menuCache = { items: bgItems, timestamp: Date.now() };
+        }
+      }).catch(() => {});
+      return fallback;
     } catch (err) {
       console.warn('[menu.service] Live menu fetch failed, falling back to seed menu:', err);
       const fallback = buildSeedMenu();

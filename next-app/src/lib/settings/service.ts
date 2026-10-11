@@ -42,16 +42,31 @@ export async function getSettings(): Promise<RestaurantSettings> {
   if (cache && cache.expiresAt > Date.now()) return cache.value;
 
   try {
-    const db = await getDb();
-    const doc = await db
-      .collection<RestaurantSettings>(COLLECTIONS.settings)
-      .get('restaurant');
+    const fetchPromise = (async () => {
+      const db = await getDb();
+      return db.collection<RestaurantSettings>(COLLECTIONS.settings).get('restaurant');
+    })();
+
+    // 1.5s timeout prevents serverless cold-start delays from blocking responses
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500));
+    const doc = await Promise.race([fetchPromise, timeoutPromise]);
 
     const value: RestaurantSettings = { ...defaultSettings(), ...(doc ?? {}) };
-    // Guard against a partially written announcement sub-object.
     value.announcement = { ...defaultSettings().announcement, ...(doc?.announcement ?? {}) };
 
-    cache = { value, expiresAt: Date.now() + CACHE_TTL_MS };
+    if (doc) {
+      cache = { value, expiresAt: Date.now() + CACHE_TTL_MS };
+    } else {
+      // Continue background resolution without blocking current response
+      fetchPromise.then((backgroundDoc) => {
+        if (backgroundDoc) {
+          const bgValue: RestaurantSettings = { ...defaultSettings(), ...(backgroundDoc ?? {}) };
+          bgValue.announcement = { ...defaultSettings().announcement, ...(backgroundDoc?.announcement ?? {}) };
+          cache = { value: bgValue, expiresAt: Date.now() + CACHE_TTL_MS };
+        }
+      }).catch(() => {});
+    }
+
     return value;
   } catch (err) {
     console.warn('[settings.service] Failed to fetch settings, returning defaults:', err);

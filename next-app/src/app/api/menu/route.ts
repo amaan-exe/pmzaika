@@ -21,7 +21,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     { ok: true, count: items.length, categories, items },
     {
       headers: {
-        'Cache-Control': 'public, max-age=180, stale-while-revalidate=600',
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=1800',
       },
     }
   );

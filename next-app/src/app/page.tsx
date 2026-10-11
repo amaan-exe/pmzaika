@@ -228,17 +228,17 @@ export default function HomePage() {
               </p>
 
               <div className="hero-buttons">
-                <Link href="/reservation" className="btn-hero-primary">
-                  <span>Make Reservation</span>
-                  <div className="btn-icon-circle">→</div>
-                </Link>
                 <button
                   type="button"
                   onClick={() => scrollToMenu('all')}
-                  className="btn-hero-ghost"
+                  className="btn-hero-primary"
                 >
-                  Order Online
+                  <span>Order Online</span>
+                  <div className="btn-icon-circle">🍲</div>
                 </button>
+                <Link href="/reservation" className="btn-hero-ghost">
+                  Book Table
+                </Link>
               </div>
 
               <div className="hero-stats-bar">
@@ -282,17 +282,38 @@ export default function HomePage() {
               <div className="hero-dishes-composition">
                 {/* 1. Top-Right Raspberry Plate */}
                 <div className="dish-item dish-berries">
-                  <img src="/assets/images/hero_plate_berries.png" alt="Fresh Berry Garnish" className="dish-img" />
+                  <img
+                    src="/assets/images/hero_plate_berries.png"
+                    alt="Fresh Berry Garnish"
+                    className="dish-img"
+                    width={200}
+                    height={200}
+                    decoding="async"
+                  />
                 </div>
 
                 {/* 2. Center Signature Fresh Salad Platter */}
                 <div className="dish-item dish-salad">
-                  <img src="/assets/images/hero_plate_salad.png" alt="Fresh Healthy Salad Platter" className="dish-img" />
+                  <img
+                    src="/assets/images/hero_plate_salad.png"
+                    alt="Fresh Healthy Salad Platter"
+                    className="dish-img"
+                    width={400}
+                    height={400}
+                    decoding="async"
+                  />
                 </div>
 
                 {/* 3. Bottom-Left Salmon Poke Bowl with Chopsticks */}
                 <div className="dish-item dish-salmon">
-                  <img src="/assets/images/hero_plate_salmon.png" alt="Signature Poke Bowl" className="dish-img" />
+                  <img
+                    src="/assets/images/hero_plate_salmon.png"
+                    alt="Signature Poke Bowl"
+                    className="dish-img"
+                    width={250}
+                    height={250}
+                    decoding="async"
+                  />
                 </div>
               </div>
             </div>

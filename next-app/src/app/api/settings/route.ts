@@ -19,7 +19,7 @@ export const GET = withErrorHandling(async () => {
     },
     {
       headers: {
-        'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+        'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=600',
       },
     }
   );

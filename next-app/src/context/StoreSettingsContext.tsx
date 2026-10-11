@@ -45,6 +45,22 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     let cancelled = false;
 
+    // 1. Instant hydration from sessionStorage if available
+    try {
+      const cached = sessionStorage.getItem('pm_zaika_store_settings');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed?.settings && Date.now() - (parsed.ts || 0) < 300_000) {
+          setSettings(parsed.settings);
+          if (typeof parsed.isOpen === 'boolean') setIsOpen(parsed.isOpen);
+          if (parsed.closedReason !== undefined) setClosedReason(parsed.closedReason);
+          setLoading(false);
+        }
+      }
+    } catch {
+      // sessionStorage unavailable
+    }
+
     async function fetchSettings() {
       try {
         const res = await fetch('/api/settings');
@@ -52,17 +68,34 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
         const data = await res.json();
         if (!cancelled && data.ok && data.settings) {
           setSettings(data.settings);
+          let storeIsOpen = true;
+          let storeClosedReason: string | null = null;
+
           if (data.availability) {
-            const isStoreOpen =
+            storeIsOpen =
               typeof data.availability.isOpen === 'boolean'
                 ? data.availability.isOpen
                 : typeof data.availability.acceptingOrders === 'boolean'
                 ? data.availability.acceptingOrders
                 : Boolean(data.settings?.isStoreOpen ?? true);
 
-            setIsOpen(isStoreOpen);
-            setClosedReason(data.availability.reason);
+            storeClosedReason = data.availability.reason ?? null;
+            setIsOpen(storeIsOpen);
+            setClosedReason(storeClosedReason);
           }
+
+          // Cache in sessionStorage for instant 0ms repeat loads
+          try {
+            sessionStorage.setItem(
+              'pm_zaika_store_settings',
+              JSON.stringify({
+                settings: data.settings,
+                isOpen: storeIsOpen,
+                closedReason: storeClosedReason,
+                ts: Date.now(),
+              })
+            );
+          } catch {}
         }
       } catch (err) {
         // Silently use defaults
