@@ -261,16 +261,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (items.length === 0) {
       throw new Error('Your cart is empty! Add some delicious dishes first.');
     }
-    if (!user) {
-      openAuth();
-      throw new Error('Please sign in before placing your order.');
-    }
-
     setIsPlacingOrder(true);
     setOrderError(null);
 
     try {
-      const idToken = await getIdToken();
+      let idToken: string | undefined;
+      if (user) {
+        try {
+          idToken = await getIdToken();
+        } catch {
+          // If token refresh fails, continue gracefully rather than blocking the customer order
+        }
+      }
+
+      const headers: Record<string, string> = {};
+      if (idToken) {
+        headers.Authorization = `Bearer ${idToken}`;
+      }
+
       const response = await api.post<{
         order: { orderId: string; totals: { grandTotalPaise: number } };
         trackingToken: string;
@@ -289,12 +297,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           },
           notes: input.notes,
           couponCode: input.couponCode,
-          userId: user.uid,
-          userEmail: user.email ?? undefined,
+          userId: user?.uid,
+          userEmail: user?.email ?? undefined,
         },
-        {
-          Authorization: `Bearer ${idToken}`,
-        }
+        headers
       );
 
       rememberTracking({

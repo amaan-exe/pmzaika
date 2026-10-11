@@ -243,23 +243,26 @@ export async function createOrder(rawInput: unknown): Promise<CreatedOrder> {
   const saved = await (await orders()).set(orderId, order);
   invalidateStatsCache();
 
-  await ensureProfileFromOrder(
+  // Run secondary side-effects in background so customer gets instant checkout response
+  void ensureProfileFromOrder(
     order.userId,
     order.userEmail,
     order.customerName,
     order.customerPhone
-  );
+  ).catch((error) => console.error('[pm-zaika] profile update failed', error));
 
-  // Usage is only recorded once the order actually exists.
   if (order.appliedCoupon) {
-    await trackCouponUsage(order.appliedCoupon, order.userId).catch((error) =>
+    void trackCouponUsage(order.appliedCoupon, order.userId).catch((error) =>
       console.error('[pm-zaika] coupon usage tracking failed', error)
     );
   }
 
   const paymentProofUrl = paymentProofWhatsAppUrl(saved);
 
-  await dispatchOrderNotification(saved, 'order.created');
+  // Dispatch notifications asynchronously to prevent any third-party webhook/telegram latency from delaying customer
+  void dispatchOrderNotification(saved, 'order.created').catch((error) =>
+    console.error('[pm-zaika] notification dispatch failed', error)
+  );
 
   return { order: saved, paymentProofUrl, trackingUrl: orderTrackingUrl(saved) };
 }

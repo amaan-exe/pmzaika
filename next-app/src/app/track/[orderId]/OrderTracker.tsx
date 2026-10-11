@@ -59,10 +59,15 @@ export default function OrderTracker({
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
-    if (!token) return;
+    const activeToken = token || findTracking(orderId)?.token;
+    if (!activeToken) {
+      setLoading(false);
+      setError('Private tracking link required to view this order.');
+      return;
+    }
     try {
       const response = await api.get<{ order: TrackOrder }>(
-        `/api/orders/${orderId}?token=${encodeURIComponent(token)}`
+        `/api/orders/${orderId}?token=${encodeURIComponent(activeToken)}`
       );
       setOrder(response.order);
       setError(null);

@@ -197,8 +197,12 @@ export default function CartPage() {
       // Direct user straight to order tracking with payment QR code.
       // WhatsApp redirect is stopped so the customer can pay via UPI first.
       router.push(`/track/${result.orderId}?token=${result.trackingToken}&new=1`);
-    } catch {
-      // The context already surfaced the message through a toast.
+    } catch (err) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : 'Could not place your order right now. Please check your network connection or try again.';
+      setFormAlert(msg);
     }
   };
 
