@@ -1,10 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import QRCode from 'qrcode';
 import type { NextRequest } from 'next/server';
-
 import { requireAdmin } from '@/lib/auth/admin';
 import { findOrderAnywhere, getOrderForCustomer, OrderError } from '@/lib/orders/service';
+import { PHONEPE_QR_BASE64 } from '@/lib/payments/phonepeQrBase64';
 
 export const runtime = 'nodejs';
 
@@ -52,18 +51,12 @@ export async function GET(
       }
     }
 
-    const svg = await QRCode.toString(order.upi.intent, {
-      type: 'svg',
-      errorCorrectionLevel: 'M',
-      margin: 1,
-      width: 512,
-      color: { dark: '#141414', light: '#ffffff' },
-    });
-
-    return new Response(svg, {
+    // Guaranteed fallback: return official PhonePe QR code directly
+    const buffer = Buffer.from(PHONEPE_QR_BASE64, 'base64');
+    return new Response(buffer, {
       headers: {
-        'Content-Type': 'image/svg+xml; charset=utf-8',
-        'Cache-Control': 'private, max-age=300',
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, max-age=86400',
       },
     });
   } catch (error) {
