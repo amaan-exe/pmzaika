@@ -318,15 +318,21 @@ nextjs-portal {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-heading);
-  background: var(--bg-secondary);
+  color: #1F2937;
+  background: #F8F9FA;
+  border: 1px solid #E5E7EB;
   position: relative;
   transition: var(--transition-smooth);
+}
+
+.icon-btn svg {
+  stroke: currentColor;
 }
 
 .icon-btn:hover {
   background: var(--primary-amber);
   color: #FFFFFF;
+  border-color: var(--primary-amber);
   transform: translateY(-2px);
 }
 
@@ -2320,9 +2326,25 @@ textarea.form-input {
   .icon-btn {
     width: 38px !important;
     height: 38px !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    color: #F3F4F6 !important;
+    background: #F3F4F6 !important;
+    border: 1px solid #E5E7EB !important;
+    color: #1F2937 !important;
+  }
+
+  .icon-btn svg {
+    color: #1F2937 !important;
+    stroke: #1F2937 !important;
+  }
+
+  .icon-btn:active {
+    background: rgba(245, 166, 35, 0.15) !important;
+    border-color: rgba(245, 166, 35, 0.35) !important;
+    color: #D97706 !important;
+  }
+
+  .icon-btn:active svg {
+    color: #D97706 !important;
+    stroke: #D97706 !important;
   }
 
   .mobile-toggle {

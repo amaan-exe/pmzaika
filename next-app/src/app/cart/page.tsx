@@ -691,13 +691,7 @@ export default function CartPage() {
                   <div className="advisories-header">
                     <span>⚠️ Important Order Notices</span>
                   </div>
-                  <div className="advisory-item">
-                    <span className="advisory-icon">📍</span>
-                    <div className="advisory-text">
-                      <strong>Patna Delivery Radius:</strong>
-                      <span> Serving within ~8 km radius from Gur Ki Mandi / Shershah Road. Please ensure full address with landmark.</span>
-                    </div>
-                  </div>
+
                   <div className="advisory-item">
                     <span className="advisory-icon">👨‍🍳</span>
                     <div className="advisory-text">
