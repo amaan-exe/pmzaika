@@ -5089,6 +5089,66 @@ textarea.form-input {
   color: #EA580C;
 }
 
+/* Primary Place Order CTA */
+.btn-place-order-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #F05D23 0%, #D84E17 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 18px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(240, 93, 35, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-bottom: 20px;
+}
+
+.btn-place-order-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(240, 93, 35, 0.48);
+}
+
+.btn-place-order-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-place-order-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.2);
+}
+
+.order-btn-icon-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.order-btn-text {
+  flex-grow: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+
+.order-arrow-trailing {
+  font-size: 20px;
+  font-weight: 700;
+  transition: transform 0.25s ease;
+}
+
+.btn-place-order-primary:hover:not(:disabled) .order-arrow-trailing {
+  transform: translateX(4px);
+}
+
 /* Primary WhatsApp Checkout CTA */
 .btn-whatsapp-order-primary {
   width: 100%;

@@ -24,7 +24,11 @@ import { createOrderSchema, type CreateOrderInput } from '@/lib/orders/schema';
 import { resolveOrderLines } from '@/lib/menu/service';
 import { getSettings, storeAvailability } from '@/lib/settings/service';
 import { trackCouponUsage, validateCoupon } from '@/lib/coupons/service';
-import { buildPaymentProofRequest, whatsappUrl } from '@/lib/notifications/whatsapp';
+import {
+  buildPaymentProofRequest,
+  paymentProofWhatsAppUrl,
+  whatsappUrl,
+} from '@/lib/notifications/whatsapp';
 import { dispatchOrderNotification } from '@/lib/notifications/dispatcher';
 
 export class OrderError extends Error {
@@ -253,10 +257,7 @@ export async function createOrder(rawInput: unknown): Promise<CreatedOrder> {
     );
   }
 
-  const paymentProofUrl = whatsappUrl(
-    order.customerPhone,
-    buildPaymentProofRequest(saved)
-  );
+  const paymentProofUrl = paymentProofWhatsAppUrl(saved);
 
   await dispatchOrderNotification(saved, 'order.created');
 

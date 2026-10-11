@@ -176,4 +176,4 @@ export const kitchenWhatsAppUrl = (order: Order): string =>
   whatsappUrl(RESTAURANT.whatsapp, buildKitchenNotification(order));
 
 export const paymentProofWhatsAppUrl = (order: Order): string =>
-  whatsappUrl(order.customerPhone, buildPaymentProofRequest(order));
+  whatsappUrl(RESTAURANT.whatsapp, buildPaymentProofRequest(order));

@@ -120,9 +120,8 @@ export default function CartPage() {
         notes: specialNotes.trim() || undefined,
       });
 
-      // Open WhatsApp with the full order + proof request, then show the payment
-      // QR and live tracking on the order page.
-      window.open(result.paymentProofUrl, '_blank');
+      // Direct user straight to order tracking with payment QR code.
+      // WhatsApp redirect is stopped so the customer can pay via UPI first.
       router.push(`/track/${result.orderId}?token=${result.trackingToken}&new=1`);
     } catch {
       // The context already surfaced the message through a toast.
@@ -439,19 +438,18 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                {/* Primary WhatsApp Order Action */}
+                {/* Primary Place Order & Pay CTA */}
                 <button
                   type="button"
-                  className="btn-whatsapp-order-primary"
+                  className="btn-place-order-primary"
                   onClick={handleCustomWhatsAppCheckout}
                   disabled={!canCheckout}
+                  id="cartPlaceOrderBtn"
                 >
-                  <div className="wa-icon-circle">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z" />
-                    </svg>
+                  <div className="order-btn-icon-circle">
+                    <span style={{ fontSize: '20px' }}>⚡</span>
                   </div>
-                  <div className="wa-btn-text">
+                  <div className="order-btn-text">
                     <span className="btn-main-label">
                       {isPlacingOrder
                         ? 'Placing Your Order…'
@@ -462,10 +460,10 @@ export default function CartPage() {
                     <span className="btn-sub-label">
                       {orderError
                         ? orderError
-                        : 'Instant Kitchen Confirmation'}
+                        : 'Scan UPI QR on next screen'}
                     </span>
                   </div>
-                  <span className="wa-arrow-trailing">→</span>
+                  <span className="order-arrow-trailing">→</span>
                 </button>
 
                 {!meetsMinOrder && (

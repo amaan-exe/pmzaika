@@ -31,6 +31,7 @@ interface TrackOrder {
     grandTotalPaise: number;
   };
   upi: { vpa: string; payeeName: string; amountPaise: number };
+  upiAppLinks?: Array<{ label: string; href: string }>;
   createdAt: string;
 }
 
@@ -140,10 +141,10 @@ export default function OrderTracker({
       '📎 Please find my payment screenshot attached.',
     ].join('\n');
 
+    // Send screenshot directly to the restaurant's WhatsApp desk (917488260572)
     window.open(
-      `https://wa.me/${toWhatsappNumber(order.customerPhone)}?text=${encodeURIComponent(
-        message
-      )}`
+      `https://wa.me/917488260572?text=${encodeURIComponent(message)}`,
+      '_blank'
     );
   };
 
@@ -162,12 +163,30 @@ export default function OrderTracker({
         <section className="track-panel track-panel--pay">
           <h2 className="track-panel-title">Scan &amp; Pay ₹{order.upi.amountPaise / 100}</h2>
           <p className="track-hint">
-            Pay to <strong>{order.upi.vpa}</strong>, then share the screenshot on
-            WhatsApp so our team can verify it.
+            Pay to <strong>{order.upi.vpa}</strong> using any UPI app or scan the QR below.
           </p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={qrSrc} alt={`UPI QR for order ${order.orderId}`} className="track-qr" />
           <div className="track-amount">{rupees(order.totals.grandTotalPaise)}</div>
+
+          {order.upiAppLinks && order.upiAppLinks.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', margin: '14px 0' }}>
+              {order.upiAppLinks.map((app) => (
+                <a
+                  key={app.label}
+                  href={app.href}
+                  className="admin-btn admin-btn--sm"
+                  style={{ textDecoration: 'none', fontSize: '13px', padding: '6px 12px' }}
+                >
+                  Pay via {app.label}
+                </a>
+              ))}
+            </div>
+          )}
+
+          <p className="track-hint" style={{ marginTop: '12px' }}>
+            After paying, share your payment screenshot on WhatsApp so our kitchen can verify and prepare your food:
+          </p>
           <button type="button" className="track-wa" onClick={sendProof}>
             Share payment proof on WhatsApp →
           </button>
