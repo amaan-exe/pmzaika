@@ -2,17 +2,27 @@ import type { NextRequest } from 'next/server';
 
 import { clientIp, json, rateLimit, readJson, withErrorHandling } from '@/lib/http/api';
 import { clearCart, hydrateCart, readCart, writeCart } from '@/lib/cart/service';
-import { ensureCartSession } from '@/lib/cart/session';
+import { ensureCartSession, readCartSession } from '@/lib/cart/session';
 import { cartSyncSchema } from '@/lib/orders/schema';
 
 export const runtime = 'nodejs';
 
 /** Hydrates the cart from the server so it survives a new device or cleared storage. */
 export const GET = withErrorHandling(async () => {
-  const sessionId = await ensureCartSession();
-  const cart = (await readCart(sessionId)) ?? (await hydrateCart([]));
+  const existingSession = await readCartSession();
+  if (!existingSession) {
+    const sessionId = await ensureCartSession();
+    const emptyCart = await hydrateCart([]);
+    return json({ ok: true, sessionId, cart: emptyCart });
+  }
 
-  return json({ ok: true, sessionId, cart });
+  // If a session cookie exists, fetch with 1.2s timeout protection
+  const fetchPromise = readCart(existingSession);
+  const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1200));
+  const cartDoc = await Promise.race([fetchPromise, timeoutPromise]);
+  const cart = cartDoc ?? (await hydrateCart([]));
+
+  return json({ ok: true, sessionId: existingSession, cart });
 });
 
 /** Mirrors the client cart to the server (debounced from the cart context). */
