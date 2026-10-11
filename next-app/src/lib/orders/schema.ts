@@ -87,6 +87,7 @@ export const paymentProofSchema = z.object({
   /** UTR / 12-digit reference from the customer's UPI app. */
   transactionReference: trimmed(40).optional(),
   note: trimmed(300).optional(),
+  token: trimmed(120).optional(),
 });
 
 export const cancelOrderSchema = z.object({

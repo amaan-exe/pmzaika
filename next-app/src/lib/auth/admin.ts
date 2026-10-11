@@ -92,9 +92,12 @@ export async function verifyAdminIdToken(idToken: string): Promise<AdminSession>
   return { uid: decoded.uid, email, provider: 'firebase' };
 }
 
-/** Reads and verifies the admin cookie on the incoming request. */
+/** Reads and verifies the admin cookie or Bearer token on the incoming request. */
 export async function requireAdmin(request: NextRequest): Promise<AdminSession> {
-  const token = request.cookies.get(ADMIN_COOKIE)?.value;
+  const cookieToken = request.cookies.get(ADMIN_COOKIE)?.value;
+  const authHeader = request.headers.get('authorization');
+  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : undefined;
+  const token = cookieToken || bearerToken;
 
   if (!token) {
     throw new AuthError('Please sign in to the kitchen dashboard.', 401);

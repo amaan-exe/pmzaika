@@ -60,6 +60,7 @@ function buildQuery(name: string, spec: QuerySpec = {}): FirestoreQuery {
 function isQuotaExhausted(err: unknown): boolean {
   if (!err) return false;
   const msg = err instanceof Error ? err.message : String(err);
+  const code = (err as { code?: number })?.code;
   return (
     msg.includes('RESOURCE_EXHAUSTED') ||
     msg.includes('Quota exceeded') ||
@@ -68,7 +69,14 @@ function isQuotaExhausted(err: unknown): boolean {
     msg.includes('Firestore is not configured') ||
     msg.includes('DECODER routines') ||
     msg.includes('invalid-credential') ||
-    (err as { code?: number })?.code === 8
+    msg.includes('UNAVAILABLE') ||
+    msg.includes('DEADLINE_EXCEEDED') ||
+    msg.includes('ETIMEDOUT') ||
+    msg.includes('ECONNRESET') ||
+    msg.includes('Could not load the default credentials') ||
+    code === 8 || // RESOURCE_EXHAUSTED
+    code === 14 || // UNAVAILABLE
+    code === 4 // DEADLINE_EXCEEDED
   );
 }
 

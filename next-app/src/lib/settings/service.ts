@@ -41,17 +41,22 @@ let cache: { value: RestaurantSettings; expiresAt: number } | null = null;
 export async function getSettings(): Promise<RestaurantSettings> {
   if (cache && cache.expiresAt > Date.now()) return cache.value;
 
-  const db = await getDb();
-  const doc = await db
-    .collection<RestaurantSettings>(COLLECTIONS.settings)
-    .get('restaurant');
+  try {
+    const db = await getDb();
+    const doc = await db
+      .collection<RestaurantSettings>(COLLECTIONS.settings)
+      .get('restaurant');
 
-  const value: RestaurantSettings = { ...defaultSettings(), ...(doc ?? {}) };
-  // Guard against a partially written announcement sub-object.
-  value.announcement = { ...defaultSettings().announcement, ...(doc?.announcement ?? {}) };
+    const value: RestaurantSettings = { ...defaultSettings(), ...(doc ?? {}) };
+    // Guard against a partially written announcement sub-object.
+    value.announcement = { ...defaultSettings().announcement, ...(doc?.announcement ?? {}) };
 
-  cache = { value, expiresAt: Date.now() + CACHE_TTL_MS };
-  return value;
+    cache = { value, expiresAt: Date.now() + CACHE_TTL_MS };
+    return value;
+  } catch (err) {
+    console.warn('[settings.service] Failed to fetch settings, returning defaults:', err);
+    return defaultSettings();
+  }
 }
 
 export function invalidateSettingsCache(): void {

@@ -354,8 +354,10 @@ export async function resolveOrderLines(
   const unavailable: string[] = [];
 
   for (const line of lines) {
+    const needle = line.menuItemId.trim().toLowerCase();
     const item =
       allItems.find((m) => m.id === line.menuItemId) ??
+      allItems.find((m) => m.id.toLowerCase() === needle || m.title.toLowerCase() === needle) ??
       staticFallback(line.menuItemId);
 
     if (!item) {
@@ -387,7 +389,10 @@ export async function resolveOrderLines(
 }
 
 function staticFallback(id: string): MenuItem | null {
-  const dish = MENU_DATA.find((entry) => entry.id === id);
+  const needle = id.trim().toLowerCase();
+  const dish =
+    MENU_DATA.find((entry) => entry.id === id) ??
+    MENU_DATA.find((entry) => entry.id.toLowerCase() === needle || entry.name.toLowerCase() === needle);
   if (!dish) return null;
 
   return {

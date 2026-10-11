@@ -8,9 +8,18 @@ import { CouponError } from '@/lib/coupons/service';
 import { MenuError } from '@/lib/menu/service';
 import { ProfileError } from '@/lib/users/service';
 import { OrderError } from '@/lib/orders/service';
+import { ReservationError } from '@/lib/reservations/service';
 
 /** Domain errors that map cleanly onto an HTTP status + JSON body. */
-const KNOWN_ERRORS = [OrderError, AuthError, UserAuthError, MenuError, CouponError, ProfileError] as const;
+const KNOWN_ERRORS = [
+  OrderError,
+  AuthError,
+  UserAuthError,
+  MenuError,
+  CouponError,
+  ProfileError,
+  ReservationError,
+] as const;
 
 /** Sensible ceiling for our JSON payloads; keeps memory use predictable. */
 const MAX_BODY_BYTES = 64 * 1024;

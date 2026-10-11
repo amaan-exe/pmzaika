@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
 /** Order history for the signed-in customer, newest first. */
 export const GET = withErrorHandling(async (request: NextRequest) => {
   const session = await requireCustomer(request);
-  const orders = await listUserOrders(session.uid);
+  const orders = await listUserOrders(session.uid, session.email);
 
   return json({
     ok: true,

@@ -27,7 +27,7 @@ export class UserAuthError extends Error {
 import { isFirebaseConfigured } from '@/lib/env';
 
 export async function requireCustomer(request: NextRequest): Promise<CustomerSession> {
-  const token = readBearerToken(request);
+  const token = readSessionToken(request);
   if (!token) throw new UserAuthError('Please sign in to continue', 401);
 
   if (!isFirebaseConfigured()) {
@@ -73,7 +73,7 @@ export async function requireCustomer(request: NextRequest): Promise<CustomerSes
 export async function optionalCustomer(
   request: NextRequest
 ): Promise<CustomerSession | null> {
-  if (!readBearerToken(request)) return null;
+  if (!readSessionToken(request)) return null;
   try {
     return await requireCustomer(request);
   } catch {

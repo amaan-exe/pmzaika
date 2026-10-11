@@ -591,9 +591,10 @@ export async function transitionOrder(
           ? 'order.payment_verified'
           : 'order.status_changed';
 
-  // Progress updates are intentionally not deduplicated; only the initial
-  // "new order" alert uses the idempotency flag.
-  await dispatchOrderNotification(updated, event, { idempotent: false });
+  // Progress updates are dispatched asynchronously so admin UI is instant
+  void dispatchOrderNotification(updated, event, { idempotent: false }).catch((error) =>
+    console.error('[pm-zaika] transition notification dispatch failed', error)
+  );
 
   // Terminal orders move out of the live kitchen queue, mirroring the reference.
   if (completing || options.status === 'cancelled') {

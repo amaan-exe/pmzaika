@@ -26,8 +26,8 @@ export const POST = withErrorHandling(
     }
 
     const { orderId } = await params;
-    const token = request.nextUrl.searchParams.get('token') ?? '';
     const payload = paymentProofSchema.parse(await readJson(request));
+    const token = request.nextUrl.searchParams.get('token') || payload.token || '';
 
     const order = await attachPaymentProof(orderId, token, {
       transactionReference: payload.transactionReference,

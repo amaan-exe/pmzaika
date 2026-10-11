@@ -113,15 +113,34 @@ export async function ensureProfileFromOrder(
 }
 
 /** Full order history for a signed-in customer, newest first. */
-export async function listUserOrders(uid: string, limit = 50): Promise<Order[]> {
+export async function listUserOrders(uid: string, email?: string, limit = 50): Promise<Order[]> {
   const db = await getDb();
 
   const collected: Order[] = [];
+  const seenIds = new Set<string>();
+
   for (const name of [COLLECTIONS.orders, COLLECTIONS.orderArchive]) {
-    const { docs } = await db
+    const { docs: byUid } = await db
       .collection<Order>(name)
       .list({ filters: [{ field: 'userId', op: '==', value: uid }] });
-    collected.push(...docs);
+    for (const d of byUid) {
+      if (!seenIds.has(d.id)) {
+        seenIds.add(d.id);
+        collected.push(d);
+      }
+    }
+
+    if (email) {
+      const { docs: byEmail } = await db
+        .collection<Order>(name)
+        .list({ filters: [{ field: 'userEmail', op: '==', value: email.toLowerCase() }] });
+      for (const d of byEmail) {
+        if (!seenIds.has(d.id)) {
+          seenIds.add(d.id);
+          collected.push(d);
+        }
+      }
+    }
   }
 
   return collected
