@@ -60,6 +60,9 @@ export default function DishCard({ dish }: DishCardProps) {
           alt={displayName}
           className="dish-main-photo"
           loading="lazy"
+          decoding="async"
+          width={320}
+          height={220}
         />
 
         {/* Floating Category / Chef Badge */}

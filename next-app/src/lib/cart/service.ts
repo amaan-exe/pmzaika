@@ -49,6 +49,23 @@ export async function hydrateCart(
   settings?: RestaurantSettings
 ): Promise<CartSnapshot> {
   const resolved = settings ?? (await getSettings());
+
+  // Fast-path: 0 database lookups when the cart is empty (e.g. initial visitor loads)
+  if (!items || items.length === 0) {
+    const totals = computeTotals({
+      lines: [],
+      orderType: 'delivery',
+      settings: resolved,
+    });
+    return {
+      items: [],
+      totals,
+      delivery: deliveryProgress(0, resolved),
+      meetsMinimumOrder: true,
+      updatedAt: null,
+    };
+  }
+
   const menu = await listMenu({ includeUnavailable: true });
   const byId = new Map(menu.map((item) => [item.id, item]));
 

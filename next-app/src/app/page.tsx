@@ -343,6 +343,9 @@ export default function HomePage() {
                   alt="Tandoori Starters & Appetizers"
                   className="variety-img-inner"
                   loading="lazy"
+                  decoding="async"
+                  width={400}
+                  height={260}
                 />
                 <span className="variety-tag-pill">Appetizers</span>
               </div>
@@ -370,6 +373,9 @@ export default function HomePage() {
                   alt="Rich Mughlai Main Courses"
                   className="variety-img-inner"
                   loading="lazy"
+                  decoding="async"
+                  width={400}
+                  height={260}
                 />
                 <span className="variety-tag-pill">Main Feast</span>
               </div>
@@ -397,6 +403,9 @@ export default function HomePage() {
                   alt="Authentic Dum Biryani Dinner"
                   className="variety-img-inner"
                   loading="lazy"
+                  decoding="async"
+                  width={400}
+                  height={260}
                 />
                 <span className="variety-tag-pill">Royal Dum</span>
               </div>
@@ -441,6 +450,9 @@ export default function HomePage() {
                   alt="Steaming Momos & Hakka Noodles"
                   className="popular-img-content"
                   loading="lazy"
+                  decoding="async"
+                  width={400}
+                  height={260}
                 />
                 <div className="popular-badge-overlay">
                   <span>Fast Food & Chinese</span>
@@ -477,6 +489,9 @@ export default function HomePage() {
                   alt="Paneer Butter Masala"
                   className="popular-img-content"
                   loading="lazy"
+                  decoding="async"
+                  width={400}
+                  height={260}
                 />
                 <div className="popular-badge-overlay veg-tag">
                   <span>100% Pure Veg</span>
@@ -513,6 +528,9 @@ export default function HomePage() {
                   alt="Charcoal Tandoori Chicken Tikka"
                   className="popular-img-content"
                   loading="lazy"
+                  decoding="async"
+                  width={400}
+                  height={260}
                 />
                 <div className="popular-badge-overlay special-tag">
                   <span>Signature Special</span>

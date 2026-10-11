@@ -194,7 +194,7 @@ export default function Navbar() {
               <div className="nav-link-with-toggle">
                 <Link
                   href="/#menu-showcase"
-                 
+                  prefetch={false}
                   className="nav-link"
                   onClick={() => handleCategorySelect()}
                 >
@@ -248,18 +248,18 @@ export default function Navbar() {
 
               {/* Categories Dropdown Matching index.html */}
               <div className={`dropdown-menu ${mobileCategoriesOpen ? 'mobile-expanded' : ''} ${dropdownClosed ? 'dropdown-force-closed' : ''}`}>
-                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('all')}>All Dishes <span>🍱</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('starters')}>Starters & Appetizers <span>🍢</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('biryani')}>Royal Biryani <span>🍛</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('tandoori')}>Tandoori Specials <span>🍗</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('veg-curry')}>Indian Veg Curry <span>🥦</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('non-veg-curry')}>Indian Non Veg Curry <span>🥘</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('chinese')}>Chinese & Noodles <span>🥢</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('momos')}>Steamed & Fried Momos <span>🥟</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('rolls')}>Kathi & Egg Rolls <span>🌯</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('breads')}>Tandoori Roti & Naan <span>🫓</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('thali')}>Special Grand Thali <span>🍽️</span></Link>
-                <Link href="/#menu-showcase" className="dropdown-item" onClick={() => handleCategorySelect('desserts')}>Desserts & Drinks <span>🍮</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('all')}>All Dishes <span>🍱</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('starters')}>Starters & Appetizers <span>🍢</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('biryani')}>Royal Biryani <span>🍛</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('tandoori')}>Tandoori Specials <span>🍗</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('veg-curry')}>Indian Veg Curry <span>🥦</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('non-veg-curry')}>Indian Non Veg Curry <span>🥘</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('chinese')}>Chinese & Noodles <span>🥢</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('momos')}>Steamed & Fried Momos <span>🥟</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('rolls')}>Kathi & Egg Rolls <span>🌯</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('breads')}>Tandoori Roti & Naan <span>🫓</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('thali')}>Special Grand Thali <span>🍽️</span></Link>
+                <Link href="/#menu-showcase" prefetch={false} className="dropdown-item" onClick={() => handleCategorySelect('desserts')}>Desserts & Drinks <span>🍮</span></Link>
               </div>
             </li>
 

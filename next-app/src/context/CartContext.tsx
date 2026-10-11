@@ -121,46 +121,48 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isMounted]);
 
-  // Merge the server-side cart on first load so a new device (or cleared
-  // storage) picks up where the customer left off.
+  // Merge the server-side cart in background idle time so it doesn't block initial page load
   useEffect(() => {
     if (!isMounted) return;
     let cancelled = false;
 
-    api
-      .get<{ cart?: { items?: Array<{ menuItemId: string; quantity: number }> } }>(
-        '/api/cart'
-      )
-      .then(({ cart }) => {
-        if (cancelled) return;
-        const remote = cart?.items ?? [];
-        if (remote.length === 0) return;
+    const timer = setTimeout(() => {
+      api
+        .get<{ cart?: { items?: Array<{ menuItemId: string; quantity: number }> } }>(
+          '/api/cart'
+        )
+        .then(({ cart }) => {
+          if (cancelled) return;
+          const remote = cart?.items ?? [];
+          if (remote.length === 0) return;
 
-        setItems((prev) => {
-          const merged = new Map(prev.map((item) => [item.id, item.quantity]));
+          setItems((prev) => {
+            const merged = new Map(prev.map((item) => [item.id, item.quantity]));
 
-          for (const line of remote) {
-            const localQty = merged.get(line.menuItemId) ?? 0;
-            merged.set(line.menuItemId, Math.max(localQty, line.quantity));
-          }
+            for (const line of remote) {
+              const localQty = merged.get(line.menuItemId) ?? 0;
+              merged.set(line.menuItemId, Math.max(localQty, line.quantity));
+            }
 
-          return [...merged.entries()]
-            .map(([id, quantity]) => {
-              const prevItem = prev.find((p) => p.id === id);
-              return toCartItem(id, quantity, prevItem);
-            })
-            .filter((item): item is CartItem => item !== null);
+            return [...merged.entries()]
+              .map(([id, quantity]) => {
+                const prevItem = prev.find((p) => p.id === id);
+                return toCartItem(id, quantity, prevItem);
+              })
+              .filter((item): item is CartItem => item !== null);
+          });
+        })
+        .catch(() => {
+          // Server cart unavailable – localStorage remains the source of truth.
+        })
+        .finally(() => {
+          if (!cancelled) setIsCartSynced(true);
         });
-      })
-      .catch(() => {
-        // Server cart unavailable – localStorage remains the source of truth.
-      })
-      .finally(() => {
-        if (!cancelled) setIsCartSynced(true);
-      });
+    }, 1200);
 
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
   }, [isMounted]);
 
