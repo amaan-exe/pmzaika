@@ -5,7 +5,7 @@ import { listCategories, listMenu } from '@/lib/menu/service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const revalidate = 300;
+export const revalidate = 0;
 
 /** Live menu. Prices come from the database so admin edits apply immediately. */
 export const GET = withErrorHandling(async (request: NextRequest) => {
@@ -45,9 +45,9 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     { ok: true, count: items.length, categories, items },
     {
       headers: {
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=1800',
-        'CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=1800',
-        'Vercel-CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=1800',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'CDN-Cache-Control': 'no-store',
+        'Vercel-CDN-Cache-Control': 'no-store',
       },
     }
   );

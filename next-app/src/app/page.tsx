@@ -60,7 +60,7 @@ export default function HomePage() {
 
     async function fetchLiveMenu() {
       try {
-        const res = await fetch('/api/menu');
+        const res = await fetch(`/api/menu?_t=${Date.now()}`, { cache: 'no-store' });
         if (!res.ok) return;
         const data = await res.json();
         if (!cancelled && data.ok && Array.isArray(data.items) && data.items.length > 0) {
