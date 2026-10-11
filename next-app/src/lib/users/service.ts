@@ -29,6 +29,9 @@ function emptyProfile(uid: string, email: string): UserProfile {
 }
 
 export async function getProfile(uid: string, email = ''): Promise<UserProfile> {
+  if (!uid || uid.startsWith('guest:')) {
+    return emptyProfile(uid || 'unauthenticated', email);
+  }
   const collection = await users();
   const existing = await collection.get(uid);
   if (existing) return existing;
@@ -57,6 +60,9 @@ export async function updateProfile(
   email: string,
   patch: ProfilePatch
 ): Promise<UserProfile> {
+  if (!uid || uid.startsWith('guest:')) {
+    throw new ProfileError('Valid customer account required', 401);
+  }
   const collection = await users();
   const current = (await collection.get(uid)) ?? emptyProfile(uid, email);
 
@@ -96,7 +102,10 @@ export async function ensureProfileFromOrder(
   email: string,
   displayName: string,
   phone: string
-): Promise<UserProfile> {
+): Promise<UserProfile | null> {
+  if (!uid || uid.startsWith('guest:')) {
+    return null;
+  }
   const collection = await users();
   const current = (await collection.get(uid)) ?? emptyProfile(uid, email);
 

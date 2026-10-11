@@ -204,10 +204,14 @@ export async function createOrder(rawInput: unknown): Promise<CreatedOrder> {
     amountPaise: 0,
   };
 
+  if (!input.userId || input.userId.startsWith('guest:')) {
+    throw new OrderError('Please sign in or create an account to place your order.', 401);
+  }
+
   const order: Order = {
     id: orderId,
     orderId,
-    userId: input.userId ?? `guest:${input.customer.phone}`,
+    userId: input.userId,
     userEmail: input.userEmail ?? '',
     customerName: input.customer.name,
     customerPhone: input.customer.phone,

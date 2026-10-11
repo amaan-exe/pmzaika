@@ -36,9 +36,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    return onAuthStateChanged(auth, (nextUser) => {
+    return onAuthStateChanged(auth, async (nextUser) => {
       setUser(nextUser);
       setLoading(false);
+      if (typeof document !== 'undefined') {
+        if (nextUser) {
+          try {
+            const token = await nextUser.getIdToken();
+            document.cookie = `pm_user_token=${token}; path=/; max-age=3600; SameSite=Lax`;
+          } catch {}
+        } else {
+          document.cookie = 'pm_user_token=; path=/; max-age=0; SameSite=Lax';
+        }
+      }
     });
   }, []);
 
@@ -59,6 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOutUser = async () => {
     const auth = firebaseAuth();
     if (auth) await signOut(auth);
+    if (typeof document !== 'undefined') {
+      document.cookie = 'pm_user_token=; path=/; max-age=0; SameSite=Lax';
+    }
   };
 
   const getIdToken = async () => {

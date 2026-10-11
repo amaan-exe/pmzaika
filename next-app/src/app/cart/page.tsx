@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { MENU_DATA } from '@/data/menuData';
 import { api } from '@/lib/client/api';
 
@@ -27,6 +28,7 @@ export default function CartPage() {
     isPlacingOrder,
     orderError,
   } = useCart();
+  const { user, openAuth } = useAuth();
 
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -63,6 +65,12 @@ export default function CartPage() {
       }
     } catch {}
   }, []);
+
+  useEffect(() => {
+    if (user && !customerName && user.displayName) {
+      setCustomerName(user.displayName);
+    }
+  }, [user, customerName]);
 
   // Live pricing + open/closed state come from the backend so the summary can
   // never disagree with what checkout actually charges.
@@ -155,6 +163,12 @@ export default function CartPage() {
    */
   const handleCustomWhatsAppCheckout = async () => {
     if (items.length === 0) return;
+
+    if (!user) {
+      setFormAlert('Please sign in or create an account to place your order.');
+      openAuth();
+      return;
+    }
 
     setTouched({
       customerName: true,
@@ -440,6 +454,63 @@ export default function CartPage() {
 
                 {/* Customer Details Form with Inline Warnings */}
                 <div className="customer-info-fields">
+                  {user ? (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      background: '#F0FDF4',
+                      border: '1px solid #BBF7D0',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      color: '#166534',
+                      marginBottom: '12px',
+                    }}>
+                      <span>👤 Signed in as <strong>{user.email || user.displayName || 'Customer'}</strong></span>
+                      <span style={{ fontSize: '11px', color: '#15803D', fontWeight: 600 }}>✓ Verified Account</span>
+                    </div>
+                  ) : (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      background: '#FFFBEB',
+                      border: '1px solid #FCD34D',
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      fontSize: '12.5px',
+                      color: '#92400E',
+                      marginBottom: '14px',
+                      gap: '12px',
+                    }}>
+                      <div>
+                        <span style={{ fontWeight: 700 }}>🔒 Sign In Required to Order</span>
+                        <p style={{ margin: '2px 0 0 0', fontSize: '11.5px', color: '#B45309' }}>
+                          Please log in or create an account before checkout.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={openAuth}
+                        style={{
+                          background: 'linear-gradient(135deg, #F5A623 0%, #F05D23 100%)',
+                          color: '#FFFFFF',
+                          border: 'none',
+                          padding: '6px 14px',
+                          borderRadius: '6px',
+                          fontWeight: 600,
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          boxShadow: '0 2px 6px rgba(240, 93, 35, 0.25)',
+                        }}
+                      >
+                        Sign In / Register
+                      </button>
+                    </div>
+                  )}
+
                   {isAutoFilled && (
                     <div style={{
                       display: 'flex',
@@ -645,7 +716,7 @@ export default function CartPage() {
                   id="cartPlaceOrderBtn"
                 >
                   <div className="order-btn-icon-circle">
-                    <span style={{ fontSize: '20px' }}>⚡</span>
+                    <span style={{ fontSize: '20px' }}>{user ? '⚡' : '🔒'}</span>
                   </div>
                   <div className="order-btn-text">
                     <span className="btn-main-label">
@@ -653,12 +724,16 @@ export default function CartPage() {
                         ? 'Placing Your Order…'
                         : isStoreClosed
                           ? 'Restaurant Closed'
-                          : 'Place Order & Pay via UPI'}
+                          : !user
+                            ? 'Sign In to Place Order'
+                            : 'Place Order & Pay via UPI'}
                     </span>
                     <span className="btn-sub-label">
                       {orderError
                         ? orderError
-                        : 'Scan UPI QR on next screen'}
+                        : !user
+                          ? 'Login or register to complete your order'
+                          : 'Scan UPI QR on next screen'}
                     </span>
                   </div>
                   <span className="order-arrow-trailing">→</span>
