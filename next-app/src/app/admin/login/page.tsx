@@ -171,16 +171,6 @@ export default function AdminLoginPage() {
               <label className="admin-form-label" htmlFor="admin-password">
                 {usesPassword ? 'Kitchen Password' : 'Password'}
               </label>
-              {usesPassword && (
-                <button
-                  type="button"
-                  className="admin-quick-fill-btn"
-                  onClick={() => setPassword('zaika-admin')}
-                  title="Auto-fill default kitchen password"
-                >
-                  ⚡ Use Default (zaika-admin)
-                </button>
-              )}
             </div>
 
             <div className="admin-input-group">
@@ -240,15 +230,6 @@ export default function AdminLoginPage() {
             )}
           </button>
 
-          {/* Quick credentials card */}
-          {usesPassword && (
-            <div className="admin-login-hint-card">
-              <div className="admin-hint-title">🔑 Default Credentials</div>
-              <div className="admin-hint-content">
-                Password: <code>zaika-admin</code>
-              </div>
-            </div>
-          )}
 
           <div className="admin-login-foot">
             <div className="admin-login-badges">
