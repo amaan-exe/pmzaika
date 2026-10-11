@@ -132,6 +132,33 @@ export default function OrderTracker({
 
   const awaitingPayment = order.status === 'payment_verification_pending';
   const qrSrc = '/assets/images/pm_zaika_phonepe_qr.png';
+  const [copiedUpi, setCopiedUpi] = useState(false);
+  const [remainingSecs, setRemainingSecs] = useState<number>(() => {
+    const elapsed = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 1000);
+    return Math.max(0, 15 * 60 - elapsed);
+  });
+
+  useEffect(() => {
+    if (!awaitingPayment) return;
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 1000);
+      setRemainingSecs(Math.max(0, 15 * 60 - elapsed));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [awaitingPayment, order.createdAt]);
+
+  const mins = Math.floor(remainingSecs / 60);
+  const secs = remainingSecs % 60;
+  const timerDisplay = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const isExpired = remainingSecs === 0;
+
+  const handleCopyUpi = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(order.upi.vpa);
+      setCopiedUpi(true);
+      setTimeout(() => setCopiedUpi(false), 2200);
+    }
+  };
 
   const sendProof = async () => {
     const message = [
@@ -162,21 +189,64 @@ export default function OrderTracker({
       {awaitingPayment && (
         <section className="track-panel track-panel--pay">
           {/* Urgent Payment & Verification Warning Banner */}
-          <div className="track-payment-warning-banner">
-            <div className="warning-banner-title">
-              <span>⏱️ 15-Minute Payment Window Active</span>
+          <div className="track-payment-warning-banner" style={{ borderLeft: isExpired ? '4px solid #DC2626' : '4px solid #F59E0B' }}>
+            <div className="warning-banner-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <span>⏱️ 15-Minute Payment Window</span>
+              <span style={{
+                background: isExpired ? '#FEE2E2' : '#FEF3C7',
+                color: isExpired ? '#DC2626' : '#B45309',
+                padding: '3px 10px',
+                borderRadius: '999px',
+                fontSize: '13px',
+                fontWeight: 700,
+                border: isExpired ? '1px solid #FCA5A5' : '1px solid #FCD34D'
+              }}>
+                {isExpired ? '⚠️ Time Expired' : `⏳ ${timerDisplay} remaining`}
+              </span>
             </div>
-            <p className="warning-banner-text">
-              Please complete your UPI transfer and share your payment screenshot below within 15 minutes. Food preparation begins only after our kitchen staff verifies your payment.
+            <p className="warning-banner-text" style={{ marginTop: '6px' }}>
+              {isExpired
+                ? 'Your 15-minute payment window has expired. If you have already transferred the money, please click the WhatsApp button below immediately so our kitchen can verify it.'
+                : 'Please complete your UPI transfer and share your payment screenshot on WhatsApp within 15 minutes. Food preparation begins only after our kitchen staff verifies your payment.'}
             </p>
           </div>
 
-          <h2 className="track-panel-title">Scan &amp; Pay ₹{order.upi.amountPaise / 100}</h2>
-          <p className="track-hint">
-            Pay to <strong>{order.upi.vpa}</strong> using any UPI app or scan the QR below.
-          </p>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={qrSrc} alt={`UPI QR for order ${order.orderId}`} className="track-qr" />
+          <h2 className="track-panel-title">Scan &amp; Pay {rupees(order.totals.grandTotalPaise)}</h2>
+
+          {/* UPI ID with quick copy button */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: 'rgba(0, 0, 0, 0.04)',
+            padding: '6px 14px',
+            borderRadius: '8px',
+            margin: '6px auto 14px',
+            fontSize: '13px'
+          }}>
+            <span>UPI ID: <strong>{order.upi.vpa}</strong></span>
+            <button
+              type="button"
+              onClick={handleCopyUpi}
+              style={{
+                background: copiedUpi ? '#10B981' : '#F59E0B',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '3px 8px',
+                fontSize: '11px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              {copiedUpi ? '✓ Copied' : 'Copy'}
+            </button>
+          </div>
+
+          <div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={qrSrc} alt={`Official PhonePe UPI QR for order ${order.orderId}`} className="track-qr" />
+          </div>
           <div className="track-amount">{rupees(order.totals.grandTotalPaise)}</div>
 
           {order.upiAppLinks && order.upiAppLinks.length > 0 && (
@@ -194,12 +264,29 @@ export default function OrderTracker({
             </div>
           )}
 
-          <p className="track-hint" style={{ marginTop: '12px' }}>
-            After paying, share your payment screenshot on WhatsApp so our kitchen can verify and prepare your food:
-          </p>
-          <button type="button" className="track-wa" onClick={sendProof}>
+          {/* Critical Mandatory Step Warning */}
+          <div style={{
+            background: '#EFF6FF',
+            border: '1.5px solid #3B82F6',
+            borderRadius: '10px',
+            padding: '12px 14px',
+            margin: '16px 0 14px',
+            textAlign: 'left',
+            fontSize: '12.5px',
+            color: '#1E40AF',
+            lineHeight: 1.5
+          }}>
+            <strong>📸 Step 2 (Mandatory):</strong> After completing your UPI transfer, take a screenshot of the successful transaction and send it on WhatsApp so kitchen staff can confirm and start cooking immediately:
+          </div>
+
+          <button type="button" className="track-wa" onClick={sendProof} style={{ width: '100%', maxWidth: '380px', margin: '0 auto', display: 'block' }}>
             Share payment proof on WhatsApp →
           </button>
+
+          {/* Fraud Security Notice */}
+          <p style={{ marginTop: '14px', fontSize: '11.5px', color: '#6B7280', textAlign: 'center' }}>
+            🔒 <em>Security Notice: Verify payee is <strong>PM Zaika</strong> (<code>pmzaika@ybl</code>). Our staff will never ask for your UPI PIN or OTP.</em>
+          </p>
         </section>
       )}
 

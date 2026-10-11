@@ -46,6 +46,8 @@ export default function CartPage() {
     customerPhone?: boolean;
     deliveryAddress?: boolean;
   }>({});
+  const [isAutoFilled, setIsAutoFilled] = useState(false);
+  const [formAlert, setFormAlert] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -53,9 +55,11 @@ export default function CartPage() {
       const saved = localStorage.getItem('pm_zaika_customer_info');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.name) setCustomerName(parsed.name);
-        if (parsed.phone) setCustomerPhone(parsed.phone);
-        if (parsed.address) setDeliveryAddress(parsed.address);
+        let filled = false;
+        if (parsed.name) { setCustomerName(parsed.name); filled = true; }
+        if (parsed.phone) { setCustomerPhone(parsed.phone); filled = true; }
+        if (parsed.address) { setDeliveryAddress(parsed.address); filled = true; }
+        if (filled) setIsAutoFilled(true);
       }
     } catch {}
   }, []);
@@ -134,8 +138,14 @@ export default function CartPage() {
       errors.deliveryAddress = 'Please enter your complete delivery address in Patna with landmark';
     }
 
+    const isValid = Object.keys(errors).length === 0;
     setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
+    if (!isValid) {
+      setFormAlert('Please complete all required fields highlighted above before placing order.');
+    } else {
+      setFormAlert(null);
+    }
+    return isValid;
   };
 
   /**
@@ -426,6 +436,43 @@ export default function CartPage() {
 
                 {/* Customer Details Form with Inline Warnings */}
                 <div className="customer-info-fields">
+                  {isAutoFilled && (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      background: '#F0FDF4',
+                      border: '1px solid #BBF7D0',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      color: '#166534',
+                      marginBottom: '12px'
+                    }}>
+                      <span>✨ Contact details auto-filled from your previous order</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCustomerName('');
+                          setCustomerPhone('');
+                          setDeliveryAddress('');
+                          setIsAutoFilled(false);
+                          try { localStorage.removeItem('pm_zaika_customer_info'); } catch {}
+                        }}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#15803D',
+                          textDecoration: 'underline',
+                          fontSize: '11px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  )}
+
                   <div className="form-group-item">
                     <label htmlFor="custName">
                       Your Name <span style={{ color: '#EF4444' }}>*</span>
@@ -467,9 +514,16 @@ export default function CartPage() {
                       placeholder="e.g. 9876543210 (10 digits)"
                       value={customerPhone}
                       onChange={(e) => {
-                        setCustomerPhone(e.target.value);
+                        // Clean non-digits and normalize +91 prefixes
+                        let clean = e.target.value.replace(/\D/g, '');
+                        if (clean.startsWith('91') && clean.length > 10) {
+                          clean = clean.slice(2);
+                        }
+                        if (clean.length > 10) {
+                          clean = clean.slice(0, 10);
+                        }
+                        setCustomerPhone(clean);
                         if (touched.customerPhone) {
-                          const clean = e.target.value.replace(/\D/g, '');
                           setFieldErrors((prev) => ({
                             ...prev,
                             customerPhone: clean.length === 10 && /^[6-9]\d{9}$/.test(clean) ? undefined : 'Enter a valid 10-digit Indian mobile number',
@@ -557,6 +611,26 @@ export default function CartPage() {
                     <span className="total-number">₹{grandTotal}</span>
                   </div>
                 </div>
+
+                {/* Form Validation Warning Banner */}
+                {formAlert && (
+                  <div style={{
+                    background: '#FEF2F2',
+                    border: '1.5px solid #EF4444',
+                    borderRadius: '10px',
+                    padding: '10px 14px',
+                    color: '#991B1B',
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                    marginBottom: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <span>⚠️</span>
+                    <span>{formAlert}</span>
+                  </div>
+                )}
 
                 {/* Primary Place Order & Pay CTA */}
                 <button
