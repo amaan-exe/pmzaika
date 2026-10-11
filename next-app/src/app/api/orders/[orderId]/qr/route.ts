@@ -1,5 +1,3 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import type { NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/auth/admin';
 import { findOrderAnywhere, getOrderForCustomer, OrderError } from '@/lib/orders/service';
@@ -35,23 +33,7 @@ export async function GET(
       order = await getOrderForCustomer(orderId, token);
     }
 
-    const candidatePaths = [
-      path.join(process.cwd(), 'public', 'assets', 'images', 'pm_zaika_phonepe_qr.png'),
-      path.join(process.cwd(), 'next-app', 'public', 'assets', 'images', 'pm_zaika_phonepe_qr.png'),
-    ];
-    for (const p of candidatePaths) {
-      if (fs.existsSync(p)) {
-        const buffer = fs.readFileSync(p);
-        return new Response(buffer, {
-          headers: {
-            'Content-Type': 'image/png',
-            'Cache-Control': 'public, max-age=86400',
-          },
-        });
-      }
-    }
-
-    // Guaranteed fallback: return official PhonePe QR code directly
+    // Return official PhonePe QR code directly from memory
     const buffer = Buffer.from(PHONEPE_QR_BASE64, 'base64');
     return new Response(buffer, {
       headers: {
