@@ -36,9 +36,28 @@ export default function CartPage() {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [specialNotes, setSpecialNotes] = useState('');
   const [settings, setSettings] = useState<StorefrontSettings | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{
+    customerName?: string;
+    customerPhone?: string;
+    deliveryAddress?: string;
+  }>({});
+  const [touched, setTouched] = useState<{
+    customerName?: boolean;
+    customerPhone?: boolean;
+    deliveryAddress?: boolean;
+  }>({});
 
   useEffect(() => {
     setMounted(true);
+    try {
+      const saved = localStorage.getItem('pm_zaika_customer_info');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.name) setCustomerName(parsed.name);
+        if (parsed.phone) setCustomerPhone(parsed.phone);
+        if (parsed.address) setDeliveryAddress(parsed.address);
+      }
+    } catch {}
   }, []);
 
   // Live pricing + open/closed state come from the backend so the summary can
@@ -98,6 +117,27 @@ export default function CartPage() {
     },
   ];
 
+  const validateForm = () => {
+    const errors: { customerName?: string; customerPhone?: string; deliveryAddress?: string } = {};
+
+    if (!customerName.trim() || customerName.trim().length < 2) {
+      errors.customerName = 'Please enter your name (at least 2 characters)';
+    }
+
+    const cleanPhone = customerPhone.replace(/\D/g, '');
+    const validPhone = cleanPhone.length === 10 && /^[6-9]\d{9}$/.test(cleanPhone);
+    if (!validPhone) {
+      errors.customerPhone = 'Please enter a valid 10-digit Indian mobile number (e.g. 9876543210)';
+    }
+
+    if (orderType === 'delivery' && (!deliveryAddress.trim() || deliveryAddress.trim().length < 5)) {
+      errors.deliveryAddress = 'Please enter your complete delivery address in Patna with landmark';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   /**
    * Checkout hands off to the backend, which re-prices the cart, records the
    * order and returns the tracking link plus a WhatsApp deep link asking the
@@ -106,15 +146,39 @@ export default function CartPage() {
   const handleCustomWhatsAppCheckout = async () => {
     if (items.length === 0) return;
 
-    if (!customerName.trim() || !customerPhone.trim()) {
+    setTouched({
+      customerName: true,
+      customerPhone: true,
+      deliveryAddress: true,
+    });
+
+    if (!validateForm()) {
+      const firstInvalid = document.querySelector('.input-has-error');
+      if (firstInvalid) {
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
 
+    // Auto-save customer details for effortless repeat orders
     try {
+      const cleanPhone = customerPhone.replace(/\D/g, '').slice(-10);
+      localStorage.setItem(
+        'pm_zaika_customer_info',
+        JSON.stringify({
+          name: customerName.trim(),
+          phone: cleanPhone,
+          address: deliveryAddress.trim(),
+        })
+      );
+    } catch {}
+
+    try {
+      const cleanPhone = customerPhone.replace(/\D/g, '').slice(-10);
       const result = await placeOrder({
         orderType,
         customerName: customerName.trim(),
-        customerPhone: customerPhone.trim(),
+        customerPhone: cleanPhone,
         address: orderType === 'delivery' ? deliveryAddress.trim() : undefined,
         tableNote: orderType === 'dinein' ? deliveryAddress.trim() : undefined,
         notes: specialNotes.trim() || undefined,
@@ -145,11 +209,7 @@ export default function CartPage() {
   const isStoreClosed = settings?.isStoreOpen === false;
   const minimumOrder = settings ? settings.minimumOrderPaise / 100 : 0;
   const meetsMinOrder = minimumOrder === 0 || subtotal >= minimumOrder;
-  const missingDetails =
-    !customerName.trim() ||
-    !customerPhone.trim() ||
-    (orderType === 'delivery' && !deliveryAddress.trim());
-  const canCheckout = !isPlacingOrder && !isStoreClosed && !missingDetails && meetsMinOrder;
+  const canCheckout = !isPlacingOrder && !isStoreClosed && meetsMinOrder;
 
   return (
     <div className="cart-page-wrapper">
@@ -364,44 +424,104 @@ export default function CartPage() {
                   </button>
                 </div>
 
-                {/* Customer Details Form */}
+                {/* Customer Details Form with Inline Warnings */}
                 <div className="customer-info-fields">
                   <div className="form-group-item">
-                    <label htmlFor="custName">Your Name</label>
+                    <label htmlFor="custName">
+                      Your Name <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
                     <input
                       type="text"
                       id="custName"
                       placeholder="e.g. Rahul Kumar"
                       value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="cust-input"
+                      onChange={(e) => {
+                        setCustomerName(e.target.value);
+                        if (touched.customerName) {
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            customerName: e.target.value.trim().length >= 2 ? undefined : 'Please enter your name (at least 2 characters)',
+                          }));
+                        }
+                      }}
+                      onBlur={() => {
+                        setTouched((prev) => ({ ...prev, customerName: true }));
+                        if (!customerName.trim() || customerName.trim().length < 2) {
+                          setFieldErrors((prev) => ({ ...prev, customerName: 'Please enter your name (at least 2 characters)' }));
+                        }
+                      }}
+                      className={`cust-input ${touched.customerName && fieldErrors.customerName ? 'input-has-error' : ''}`}
                     />
+                    {touched.customerName && fieldErrors.customerName && (
+                      <p className="field-error-msg">⚠️ {fieldErrors.customerName}</p>
+                    )}
                   </div>
 
                   <div className="form-group-item">
-                    <label htmlFor="custPhone">Phone / WhatsApp Number</label>
+                    <label htmlFor="custPhone">
+                      Phone / WhatsApp Number <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
                     <input
                       type="tel"
                       id="custPhone"
-                      placeholder="e.g. 9876543210"
+                      placeholder="e.g. 9876543210 (10 digits)"
                       value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="cust-input"
+                      onChange={(e) => {
+                        setCustomerPhone(e.target.value);
+                        if (touched.customerPhone) {
+                          const clean = e.target.value.replace(/\D/g, '');
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            customerPhone: clean.length === 10 && /^[6-9]\d{9}$/.test(clean) ? undefined : 'Enter a valid 10-digit Indian mobile number',
+                          }));
+                        }
+                      }}
+                      onBlur={() => {
+                        setTouched((prev) => ({ ...prev, customerPhone: true }));
+                        const clean = customerPhone.replace(/\D/g, '');
+                        if (clean.length !== 10 || !/^[6-9]\d{9}$/.test(clean)) {
+                          setFieldErrors((prev) => ({ ...prev, customerPhone: 'Enter a valid 10-digit Indian mobile number (e.g. 9876543210)' }));
+                        }
+                      }}
+                      className={`cust-input ${touched.customerPhone && fieldErrors.customerPhone ? 'input-has-error' : ''}`}
                     />
+                    {touched.customerPhone && fieldErrors.customerPhone && (
+                      <p className="field-error-msg">⚠️ {fieldErrors.customerPhone}</p>
+                    )}
                   </div>
 
                   <div className="form-group-item">
                     <label htmlFor="custAddress">
-                      {orderType === 'delivery' ? 'Delivery Address (Patna)' : 'Table Number / Dine-in Notes'}
+                      {orderType === 'delivery' ? 'Delivery Address (Patna)' : 'Table Number / Dine-in Notes'}{' '}
+                      {orderType === 'delivery' && <span style={{ color: '#EF4444' }}>*</span>}
                     </label>
                     <input
                       type="text"
                       id="custAddress"
                       placeholder={orderType === 'delivery' ? 'House / Flat no, Colony, Landmark' : 'Table 4 / Window Side'}
                       value={deliveryAddress}
-                      onChange={(e) => setDeliveryAddress(e.target.value)}
-                      className="cust-input"
+                      onChange={(e) => {
+                        setDeliveryAddress(e.target.value);
+                        if (orderType === 'delivery' && touched.deliveryAddress) {
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            deliveryAddress: e.target.value.trim().length >= 5 ? undefined : 'Please enter full delivery address with landmark',
+                          }));
+                        }
+                      }}
+                      onBlur={() => {
+                        if (orderType === 'delivery') {
+                          setTouched((prev) => ({ ...prev, deliveryAddress: true }));
+                          if (!deliveryAddress.trim() || deliveryAddress.trim().length < 5) {
+                            setFieldErrors((prev) => ({ ...prev, deliveryAddress: 'Please enter full delivery address with landmark' }));
+                          }
+                        }
+                      }}
+                      className={`cust-input ${orderType === 'delivery' && touched.deliveryAddress && fieldErrors.deliveryAddress ? 'input-has-error' : ''}`}
                     />
+                    {orderType === 'delivery' && touched.deliveryAddress && fieldErrors.deliveryAddress && (
+                      <p className="field-error-msg">⚠️ {fieldErrors.deliveryAddress}</p>
+                    )}
                   </div>
                 </div>
 
@@ -484,7 +604,42 @@ export default function CartPage() {
                   </div>
                   <div className="trust-item">
                     <span className="trust-icon">💵</span>
-                    <span>UPI &amp; Cash on Delivery</span>
+                    <span>UPI &amp; Instant Verification</span>
+                  </div>
+                </div>
+
+                {/* Restaurant Warnings & Kitchen Policies */}
+                <div className="order-advisories-card">
+                  <div className="advisories-header">
+                    <span>⚠️ Important Order Notices</span>
+                  </div>
+                  <div className="advisory-item">
+                    <span className="advisory-icon">📍</span>
+                    <div className="advisory-text">
+                      <strong>Patna Delivery Radius:</strong>
+                      <span> Serving within ~8 km radius from Gur Ki Mandi / Shershah Road. Please ensure full address with landmark.</span>
+                    </div>
+                  </div>
+                  <div className="advisory-item">
+                    <span className="advisory-icon">👨‍🍳</span>
+                    <div className="advisory-text">
+                      <strong>Cancellation Policy:</strong>
+                      <span> Orders are freshly cooked immediately upon payment verification and cannot be cancelled or modified once preparation begins.</span>
+                    </div>
+                  </div>
+                  <div className="advisory-item">
+                    <span className="advisory-icon">🛡️</span>
+                    <div className="advisory-text">
+                      <strong>Fraud &amp; Payment Security:</strong>
+                      <span> Pay only via UPI to official ID <code>pmzaika@ybl</code>. PM Zaika staff will never call to ask for your UPI PIN or OTP.</span>
+                    </div>
+                  </div>
+                  <div className="advisory-item">
+                    <span className="advisory-icon">🍲</span>
+                    <div className="advisory-text">
+                      <strong>Dietary &amp; Halal Advisory:</strong>
+                      <span> 100% Halal certified meat. Please specify any allergy (nuts, dairy) or spice preferences in Chef Notes.</span>
+                    </div>
                   </div>
                 </div>
               </div>

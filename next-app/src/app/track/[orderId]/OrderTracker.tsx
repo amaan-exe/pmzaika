@@ -161,6 +161,16 @@ export default function OrderTracker({
 
       {awaitingPayment && (
         <section className="track-panel track-panel--pay">
+          {/* Urgent Payment & Verification Warning Banner */}
+          <div className="track-payment-warning-banner">
+            <div className="warning-banner-title">
+              <span>⏱️ 15-Minute Payment Window Active</span>
+            </div>
+            <p className="warning-banner-text">
+              Please complete your UPI transfer and share your payment screenshot below within 15 minutes. Food preparation begins only after our kitchen staff verifies your payment.
+            </p>
+          </div>
+
           <h2 className="track-panel-title">Scan &amp; Pay ₹{order.upi.amountPaise / 100}</h2>
           <p className="track-hint">
             Pay to <strong>{order.upi.vpa}</strong> using any UPI app or scan the QR below.

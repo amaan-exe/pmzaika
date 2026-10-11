@@ -106,6 +106,19 @@ export default function Navbar() {
         </div>
       )}
 
+      {/* Live Operational Notice Bar when open (if no custom announcement is active) */}
+      {isOpen && (!settings.announcement?.enabled || !settings.announcement?.text) && (
+        <div className="site-operating-notice-bar">
+          <div className="container operating-notice-inner">
+            <span>🟢 <strong>Kitchen Open for Live Delivery</strong> • Patna Doorstep (35–45 mins)</span>
+            <span className="notice-sep">•</span>
+            <span>🛵 Free Delivery above ₹499</span>
+            <span className="notice-sep">•</span>
+            <span>✨ 100% Halal Royal Delicacies</span>
+          </div>
+        </div>
+      )}
+
       <div className="container">
         <nav className="navbar">
           {/* Brand Logo */}
