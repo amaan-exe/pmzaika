@@ -18,14 +18,14 @@ import FloatingCartBar from '@/components/FloatingCartBar';
 
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-poppins',
   display: 'swap',
 });
 
 const outfit = Outfit({
   subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
+  weight: ['600', '700'],
   variable: '--font-outfit',
   display: 'swap',
 });

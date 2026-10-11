@@ -26,7 +26,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 142,
     badge: "Bestseller",
     description: "Long-grain aromatic basmati rice dum-cooked with succulent chicken, saffron, and authentic Mughlai spices.",
-    image: "/assets/images/food_royal_biryani.jpg"
+    image: "/assets/images/food_royal_biryani.webp"
   },
   {
     id: "biryani-2",
@@ -40,7 +40,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 98,
     badge: "Chef's Special",
     description: "Tender pieces of mutton slow-cooked in sealed clay handi with aged Basmati rice and whole aromatic spices.",
-    image: "/assets/images/food_royal_biryani.jpg"
+    image: "/assets/images/food_royal_biryani.webp"
   },
   {
     id: "starter-1",
@@ -54,7 +54,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 184,
     badge: "Popular",
     description: "Whole chicken marinated in hung curd, Kashmiri red chili, and mustard oil, charred to perfection in clay oven.",
-    image: "/assets/images/food_tandoori_kebab.jpg"
+    image: "/assets/images/food_tandoori_kebab.webp"
   },
   {
     id: "starter-2",
@@ -68,7 +68,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 76,
     badge: "Hot",
     description: "Finely minced chicken spiced with green herbs, mint, and toasted spices, skewered and roasted over embers.",
-    image: "/assets/images/food_tandoori_kebab.jpg"
+    image: "/assets/images/food_tandoori_kebab.webp"
   },
   {
     id: "starter-3",
@@ -96,7 +96,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 165,
     badge: "Bestseller",
     description: "Soft cottage cheese cubes simmered in rich creamy tomato, cashew butter gravy with hint of kasuri methi.",
-    image: "/assets/images/food_butter_curry.jpg"
+    image: "/assets/images/food_butter_curry.webp"
   },
   {
     id: "veg-2",
@@ -124,7 +124,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 220,
     badge: "Must Try",
     description: "Clay-oven grilled tandoori chicken cooked in velvety, mildly sweetened butter and fresh tomato cream sauce.",
-    image: "/assets/images/food_butter_curry.jpg"
+    image: "/assets/images/food_butter_curry.webp"
   },
   {
     id: "non-veg-2",
@@ -138,7 +138,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 140,
     badge: "Chef's Special",
     description: "Homestyle spicy chicken curry simmered slowly in an earthen pot with hand-ground spices and fried onions.",
-    image: "/assets/images/uliana-kopanytsia-ooL2YwOwWC0-unsplash-1.png"
+    image: "/assets/images/uliana-kopanytsia-ooL2YwOwWC0-unsplash-1.webp"
   },
   {
     id: "chinese-1",
@@ -152,7 +152,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 88,
     badge: "Hot",
     description: "Wok-tossed noodles with shredded vegetables, tender chicken strips, and dark soy garlic glaze.",
-    image: "/assets/images/food_momos_noodles.jpg"
+    image: "/assets/images/food_momos_noodles.webp"
   },
   {
     id: "chinese-2",
@@ -166,7 +166,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 115,
     badge: "Popular",
     description: "Crispy batter-fried chicken bites tossed with crunchy bell peppers, onions, green chilies, and tangy soy sauce.",
-    image: "/assets/images/WhatsApp-Image-2026-02-03-at-8.01.46-PM-1-300x300.jpeg"
+    image: "/assets/images/WhatsApp-Image-2026-02-03-at-8.01.46-PM-1-300x300.webp"
   },
   {
     id: "momos-1",
@@ -180,7 +180,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 175,
     badge: "Bestseller",
     description: "Juicy minced chicken and herb dumplings served piping hot with authentic spicy red chili garlic dip.",
-    image: "/assets/images/food_momos_noodles.jpg"
+    image: "/assets/images/food_momos_noodles.webp"
   },
   {
     id: "momos-2",
@@ -194,7 +194,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 92,
     badge: "Trending",
     description: "Crunchy crumb-coated fried paneer momos seasoned with peri-peri masala, served with mint mayo dip.",
-    image: "/assets/images/IMAGE23.jpg"
+    image: "/assets/images/IMAGE23.webp"
   },
   {
     id: "rolls-1",
@@ -208,7 +208,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 210,
     badge: "Student Favorite",
     description: "Flaky layered paratha lined with two eggs, loaded with tender spiced chicken tikka, onions, and tangy mint sauces.",
-    image: "/assets/images/WhatsApp-Image-2026-02-03-at-8.01.46-PM-300x300.jpeg"
+    image: "/assets/images/WhatsApp-Image-2026-02-03-at-8.01.46-PM-300x300.webp"
   },
   {
     id: "thali-1",
@@ -222,7 +222,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 195,
     badge: "Grand Feast",
     description: "Lavish platter with Butter Chicken, Dal Makhani, Paneer Tikka, Jeera Rice, 2 Butter Naans, Raita, Salad & Gulab Jamun.",
-    image: "/assets/images/food_royal_thali.jpg"
+    image: "/assets/images/food_royal_thali.webp"
   },
   {
     id: "tandoori-2",
@@ -236,7 +236,7 @@ export const MENU_DATA: MenuItem[] = [
     reviewsCount: 88,
     badge: "Popular",
     description: "Boneless chicken chunks marinated in mustard oil, roasted gram flour, and spicy curd, charred in bhatti.",
-    image: "/assets/images/food_tandoori_kebab.jpg"
+    image: "/assets/images/food_tandoori_kebab.webp"
   }
 ];
 

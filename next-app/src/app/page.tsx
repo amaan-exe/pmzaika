@@ -283,36 +283,39 @@ export default function HomePage() {
                 {/* 1. Top-Right Raspberry Plate */}
                 <div className="dish-item dish-berries">
                   <img
-                    src="/assets/images/hero_plate_berries.png"
+                    src="/assets/images/hero_plate_berries.webp"
                     alt="Fresh Berry Garnish"
                     className="dish-img"
                     width={200}
                     height={200}
                     decoding="async"
+                    fetchPriority="high"
                   />
                 </div>
 
                 {/* 2. Center Signature Fresh Salad Platter */}
                 <div className="dish-item dish-salad">
                   <img
-                    src="/assets/images/hero_plate_salad.png"
+                    src="/assets/images/hero_plate_salad.webp"
                     alt="Fresh Healthy Salad Platter"
                     className="dish-img"
                     width={400}
                     height={400}
                     decoding="async"
+                    fetchPriority="high"
                   />
                 </div>
 
                 {/* 3. Bottom-Left Salmon Poke Bowl with Chopsticks */}
                 <div className="dish-item dish-salmon">
                   <img
-                    src="/assets/images/hero_plate_salmon.png"
+                    src="/assets/images/hero_plate_salmon.webp"
                     alt="Signature Poke Bowl"
                     className="dish-img"
                     width={250}
                     height={250}
                     decoding="async"
+                    fetchPriority="high"
                   />
                 </div>
               </div>
@@ -369,7 +372,7 @@ export default function HomePage() {
             <div className="variety-luxury-card group">
               <div className="variety-img-outer">
                 <img
-                  src="/assets/images/food_butter_curry.jpg"
+                  src="/assets/images/food_butter_curry.webp"
                   alt="Rich Mughlai Main Courses"
                   className="variety-img-inner"
                   loading="lazy"
@@ -399,7 +402,7 @@ export default function HomePage() {
             <div className="variety-luxury-card group">
               <div className="variety-img-outer">
                 <img
-                  src="/assets/images/food_royal_biryani.jpg"
+                  src="/assets/images/food_royal_biryani.webp"
                   alt="Authentic Dum Biryani Dinner"
                   className="variety-img-inner"
                   loading="lazy"
@@ -446,7 +449,7 @@ export default function HomePage() {
             <div className="popular-luxury-card group">
               <div className="popular-img-frame">
                 <img
-                  src="/assets/images/food_momos_noodles.jpg"
+                  src="/assets/images/food_momos_noodles.webp"
                   alt="Steaming Momos & Hakka Noodles"
                   className="popular-img-content"
                   loading="lazy"
@@ -485,7 +488,7 @@ export default function HomePage() {
             <div className="popular-luxury-card group">
               <div className="popular-img-frame">
                 <img
-                  src="/assets/images/food_butter_curry.jpg"
+                  src="/assets/images/food_butter_curry.webp"
                   alt="Paneer Butter Masala"
                   className="popular-img-content"
                   loading="lazy"
@@ -524,7 +527,7 @@ export default function HomePage() {
             <div className="popular-luxury-card group">
               <div className="popular-img-frame">
                 <img
-                  src="/assets/images/food_tandoori_kebab.jpg"
+                  src="/assets/images/food_tandoori_kebab.webp"
                   alt="Charcoal Tandoori Chicken Tikka"
                   className="popular-img-content"
                   loading="lazy"
@@ -893,9 +896,13 @@ export default function HomePage() {
               </p>
               <div className="reviewer-profile-bar">
                 <img
-                  src="/assets/images/WhatsApp-Image-2026-02-03-at-2.39.05-PM-2.jpeg"
+                  src="/assets/images/WhatsApp-Image-2026-02-03-at-2.39.05-PM-2.webp"
                   alt="Verified Diner"
                   className="reviewer-avatar"
+                  width={48}
+                  height={48}
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div>
                   <div className="reviewer-name">Amit Kumar</div>
@@ -915,9 +922,13 @@ export default function HomePage() {
               </p>
               <div className="reviewer-profile-bar">
                 <img
-                  src="/assets/images/WhatsApp-Image-2026-02-03-at-2.39.04-PM.jpeg"
+                  src="/assets/images/WhatsApp-Image-2026-02-03-at-2.39.04-PM.webp"
                   alt="Verified Diner"
                   className="reviewer-avatar"
+                  width={48}
+                  height={48}
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div>
                   <div className="reviewer-name">Rahul Sharma</div>
@@ -937,9 +948,13 @@ export default function HomePage() {
               </p>
               <div className="reviewer-profile-bar">
                 <img
-                  src="/assets/images/WhatsApp-Image-2026-02-03-at-2.39.04-PM-1.jpeg"
+                  src="/assets/images/WhatsApp-Image-2026-02-03-at-2.39.04-PM-1.webp"
                   alt="Verified Diner"
                   className="reviewer-avatar"
+                  width={48}
+                  height={48}
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div>
                   <div className="reviewer-name">Priya Singh</div>
@@ -959,9 +974,13 @@ export default function HomePage() {
               </p>
               <div className="reviewer-profile-bar">
                 <img
-                  src="/assets/images/WhatsApp-Image-2026-02-03-at-2.39.05-PM-1.jpeg"
+                  src="/assets/images/WhatsApp-Image-2026-02-03-at-2.39.05-PM-1.webp"
                   alt="Verified Diner"
                   className="reviewer-avatar"
+                  width={48}
+                  height={48}
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div>
                   <div className="reviewer-name">Vikram Malhotra</div>

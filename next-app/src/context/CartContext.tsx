@@ -126,6 +126,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!isMounted) return;
     let cancelled = false;
 
+    // Fast-path: If the visitor has no cart session cookie, there is no remote cart to fetch.
+    const hasCartCookie = typeof document !== 'undefined' && document.cookie.includes('pmz_cart=');
+    if (!hasCartCookie) {
+      setIsCartSynced(true);
+      return;
+    }
+
     const timer = setTimeout(() => {
       api
         .get<{ cart?: { items?: Array<{ menuItemId: string; quantity: number }> } }>(

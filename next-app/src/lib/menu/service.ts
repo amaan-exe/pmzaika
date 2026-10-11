@@ -117,8 +117,8 @@ async function fetchAllRawMenu(): Promise<MenuItem[]> {
         return items;
       })();
 
-      // 1.5s timeout prevents serverless cold-start hanging
-      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500));
+      // 450ms timeout prevents serverless cold-start hanging
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 450));
       const items = await Promise.race([fetchPromise, timeoutPromise]);
 
       if (items) {

@@ -39,7 +39,24 @@ const CACHE_TTL_MS = 300_000;
 let cache: { value: RestaurantSettings; expiresAt: number } | null = null;
 
 export async function getSettings(): Promise<RestaurantSettings> {
-  if (cache && cache.expiresAt > Date.now()) return cache.value;
+  const now = Date.now();
+  if (cache && cache.expiresAt > now) return cache.value;
+
+  // Stale-while-revalidate: return stale cache instantly in 0ms, refresh in background
+  if (cache && cache.value) {
+    void (async () => {
+      try {
+        const db = await getDb();
+        const doc = await db.collection<RestaurantSettings>(COLLECTIONS.settings).get('restaurant');
+        if (doc) {
+          const value: RestaurantSettings = { ...defaultSettings(), ...(doc ?? {}) };
+          value.announcement = { ...defaultSettings().announcement, ...(doc?.announcement ?? {}) };
+          cache = { value, expiresAt: Date.now() + CACHE_TTL_MS };
+        }
+      } catch {}
+    })();
+    return cache.value;
+  }
 
   try {
     const fetchPromise = (async () => {
@@ -47,8 +64,8 @@ export async function getSettings(): Promise<RestaurantSettings> {
       return db.collection<RestaurantSettings>(COLLECTIONS.settings).get('restaurant');
     })();
 
-    // 1.5s timeout prevents serverless cold-start delays from blocking responses
-    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500));
+    // 450ms timeout prevents serverless cold-start delays from blocking responses
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 450));
     const doc = await Promise.race([fetchPromise, timeoutPromise]);
 
     const value: RestaurantSettings = { ...defaultSettings(), ...(doc ?? {}) };

@@ -66,11 +66,11 @@ export default function Footer() {
             <ul className="footer-links-dark">
               <li><Link href="/">Home</Link></li>
               <li><Link href="/#menu-showcase" prefetch={false}>Order Online &#9662;</Link></li>
-              <li><Link href="/cart">Cart</Link></li>
-              <li><Link href="/reservation">Reservation</Link></li>
-              <li><Link href="/contact">Contact-Us</Link></li>
-              <li><Link href="/about">About-Us</Link></li>
-              <li><Link href="/gallery">Gallery</Link></li>
+              <li><Link href="/cart" prefetch={false}>Cart</Link></li>
+              <li><Link href="/reservation" prefetch={false}>Reservation</Link></li>
+              <li><Link href="/contact" prefetch={false}>Contact-Us</Link></li>
+              <li><Link href="/about" prefetch={false}>About-Us</Link></li>
+              <li><Link href="/gallery" prefetch={false}>Gallery</Link></li>
             </ul>
           </div>
 

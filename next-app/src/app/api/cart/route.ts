@@ -16,9 +16,9 @@ export const GET = withErrorHandling(async () => {
     return json({ ok: true, sessionId, cart: emptyCart });
   }
 
-  // If a session cookie exists, fetch with 1.2s timeout protection
+  // If a session cookie exists, fetch with 450ms timeout protection
   const fetchPromise = readCart(existingSession);
-  const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1200));
+  const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 450));
   const cartDoc = await Promise.race([fetchPromise, timeoutPromise]);
   const cart = cartDoc ?? (await hydrateCart([]));
 

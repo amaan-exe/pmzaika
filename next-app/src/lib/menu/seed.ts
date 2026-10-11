@@ -21,42 +21,42 @@ const EXISTING_BY_NAME = new Map<string, string>(
  * by `menuItemsSource.ts`.
  */
 const CATEGORY_FALLBACK: Record<string, string> = {
-  biryani: '/assets/images/food_royal_biryani.jpg',
-  rice: '/assets/images/food_royal_biryani.jpg',
-  thali: '/assets/images/food_royal_thali.jpg',
-  buffet: '/assets/images/food_royal_thali.jpg',
+  biryani: '/assets/images/food_royal_biryani.webp',
+  rice: '/assets/images/food_royal_biryani.webp',
+  thali: '/assets/images/food_royal_thali.webp',
+  buffet: '/assets/images/food_royal_thali.webp',
 
-  'veg-curry': '/assets/images/food_butter_curry.jpg',
-  'non-veg-curry': '/assets/images/food_butter_curry.jpg',
-  dal: '/assets/images/food_butter_curry.jpg',
+  'veg-curry': '/assets/images/food_butter_curry.webp',
+  'non-veg-curry': '/assets/images/food_butter_curry.webp',
+  dal: '/assets/images/food_butter_curry.webp',
 
-  tandoori: '/assets/images/food_tandoori_kebab.jpg',
-  'tandoori-veg': '/assets/images/food_tandoori_kebab.jpg',
-  kebab: '/assets/images/food_tandoori_kebab.jpg',
-  kawab: '/assets/images/food_tandoori_kebab.jpg',
-  'starters-non-veg': '/assets/images/food_tandoori_kebab.jpg',
+  tandoori: '/assets/images/food_tandoori_kebab.webp',
+  'tandoori-veg': '/assets/images/food_tandoori_kebab.webp',
+  kebab: '/assets/images/food_tandoori_kebab.webp',
+  kawab: '/assets/images/food_tandoori_kebab.webp',
+  'starters-non-veg': '/assets/images/food_tandoori_kebab.webp',
 
-  momos: '/assets/images/food_momos_noodles.jpg',
-  noodles: '/assets/images/food_momos_noodles.jpg',
-  'chinese-veg': '/assets/images/food_momos_noodles.jpg',
-  'chinese-non-veg': '/assets/images/food_momos_noodles.jpg',
+  momos: '/assets/images/food_momos_noodles.webp',
+  noodles: '/assets/images/food_momos_noodles.webp',
+  'chinese-veg': '/assets/images/food_momos_noodles.webp',
+  'chinese-non-veg': '/assets/images/food_momos_noodles.webp',
 
   // Bread sits best on a full thali shot.
-  naan: '/assets/images/food_royal_thali.jpg',
-  kulcha: '/assets/images/food_royal_thali.jpg',
-  roti: '/assets/images/food_royal_thali.jpg',
+  naan: '/assets/images/food_royal_thali.webp',
+  kulcha: '/assets/images/food_royal_thali.webp',
+  roti: '/assets/images/food_royal_thali.webp',
 
   starters: '/assets/images/image2.webp',
   soup: '/assets/images/image2.webp',
   rolls: '/assets/images/image2.webp',
   accompaniment: '/assets/images/image2.webp',
 
-  desserts: '/assets/images/IMAGE23.jpg',
-  'tea-coffee': '/assets/images/IMAGE23.jpg',
-  beverage: '/assets/images/IMAGE23.jpg',
+  desserts: '/assets/images/IMAGE23.webp',
+  'tea-coffee': '/assets/images/IMAGE23.webp',
+  beverage: '/assets/images/IMAGE23.webp',
 };
 
-const GENERIC_FALLBACK = '/assets/images/food_royal_biryani.jpg';
+const GENERIC_FALLBACK = '/assets/images/food_royal_biryani.webp';
 
 export function normalise(value: string): string {
   return value

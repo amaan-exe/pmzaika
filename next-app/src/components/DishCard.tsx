@@ -32,7 +32,7 @@ export default function DishCard({ dish }: DishCardProps) {
     dish.price !== undefined
       ? dish.price
       : Math.round((dish.pricePaise || 0) / 100);
-  const displayImg = dish.image || '/assets/images/food_royal_biryani.jpg';
+  const displayImg = dish.image || '/assets/images/food_royal_biryani.webp';
   const isVegetarian =
     dish.isVeg !== undefined ? dish.isVeg : dish.vegNonVeg === 'veg';
   const rating = dish.rating ?? 4.8;

@@ -264,7 +264,7 @@ export default function Navbar() {
             </li>
 
             <li className="nav-item">
-              <Link href="/cart" className={`nav-link ${isActive('/cart') ? 'active' : ''}`} id="cartTrigger" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/cart" prefetch={false} className={`nav-link ${isActive('/cart') ? 'active' : ''}`} id="cartTrigger" onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon">🛒</span>
                 <span>Cart</span>
                 {mounted && totalCount > 0 && (
@@ -274,35 +274,35 @@ export default function Navbar() {
             </li>
 
             <li className="nav-item">
-              <Link href="/my-orders" className={`nav-link ${isActive('/my-orders') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/my-orders" prefetch={false} className={`nav-link ${isActive('/my-orders') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon">📦</span>
                 <span>My Orders</span>
               </Link>
             </li>
 
             <li className="nav-item">
-              <Link href="/reservation" className={`nav-link ${isActive('/reservation') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/reservation" prefetch={false} className={`nav-link ${isActive('/reservation') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon">🍷</span>
                 <span>Table Reservation</span>
               </Link>
             </li>
 
             <li className="nav-item">
-              <Link href="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/contact" prefetch={false} className={`nav-link ${isActive('/contact') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon">📍</span>
                 <span>Contact & Location</span>
               </Link>
             </li>
 
             <li className="nav-item">
-              <Link href="/about" className={`nav-link ${isActive('/about') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/about" prefetch={false} className={`nav-link ${isActive('/about') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon">👑</span>
                 <span>Our Heritage</span>
               </Link>
             </li>
 
             <li className="nav-item">
-              <Link href="/gallery" className={`nav-link ${isActive('/gallery') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/gallery" prefetch={false} className={`nav-link ${isActive('/gallery') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon">📸</span>
                 <span>Food Gallery</span>
               </Link>
