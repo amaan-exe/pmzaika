@@ -40,6 +40,7 @@ export const COLLECTIONS = {
   webhookLogs: 'webhook_logs',
   couponsArchive: 'coupons_archive',
   reservations: 'reservations',
+  uploads: 'uploads',
 } as const;
 
 export type CollectionName = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];

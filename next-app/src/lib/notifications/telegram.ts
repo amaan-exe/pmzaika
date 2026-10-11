@@ -1,10 +1,11 @@
 import type { Order } from '@/lib/domain/types';
-import { RESTAURANT } from '@/lib/env';
+import { RESTAURANT, SITE_URL } from '@/lib/env';
 import { formatRupees } from '@/lib/orders/pricing';
+import { orderTrackingUrl } from '@/lib/orders/links';
 
 /** Escapes the characters Telegram's HTML parse mode treats as markup. */
 export function escapeHtml(value: string): string {
-  return value
+  return (value || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
@@ -15,112 +16,202 @@ export function orderSummaryHtml(order: Order): string {
   const phone = escapeHtml(order.customerPhone || 'Not provided');
   const address = escapeHtml(
     order.orderType === 'delivery'
-      ? order.deliveryAddress || 'Pickup / Direct Order'
-      : order.seatingNote || 'Walk-in'
+      ? order.deliveryAddress || 'Delivery (Address pending)'
+      : order.seatingNote || 'Dine-in / Takeaway'
   );
 
-  const items = order.items.length
+  const items = order.items && order.items.length
     ? order.items
         .map(
           (item) =>
-            `   • ${escapeHtml(item.title)} × ${item.qty} (${formatRupees(
-              item.lineTotalPaise
+            `   • <b>${escapeHtml(item.title)}</b> × ${item.qty} (₹${Math.round(
+              item.lineTotalPaise / 100
             )})`
         )
         .join('\n')
-    : '   • Order items unavailable';
+    : '   • Order items details';
 
   const coupon = order.appliedCoupon
-    ? `\n🎁 <b>Coupon:</b> ${escapeHtml(order.appliedCoupon)} (− ${formatRupees(
-        order.totals.discountPaise
+    ? `\n🎁 <b>Coupon Applied:</b> <code>${escapeHtml(order.appliedCoupon)}</code> (− ₹${Math.round(
+        order.totals.discountPaise / 100
       )})`
     : '';
 
+  const cleanPhone = (order.customerPhone || '').replace(/\D/g, '').slice(-10);
+
   return `
-🍗 <b>NEW ORDER - ${escapeHtml(RESTAURANT.name)}</b>
-━━━━━━━━━━━━━━━━━━
+🔔 <b>NEW ORDER RECEIVED - ${escapeHtml(RESTAURANT.name)}</b>
+━━━━━━━━━━━━━━━━━━━━━━━━━
 🆔 <b>Order ID:</b> <code>${escapeHtml(order.orderId)}</code>
-💰 <b>Total:</b> ${formatRupees(order.totals.grandTotalPaise)}
-💳 <b>Payment:</b> ${escapeHtml(order.paymentStatus.replace(/_/g, ' '))}
+💰 <b>Grand Total:</b> <b>${formatRupees(order.totals.grandTotalPaise)}</b>
+💳 <b>Payment:</b> ${escapeHtml((order.paymentStatus || 'awaiting').replace(/_/g, ' ').toUpperCase())}
+📦 <b>Type:</b> ${order.orderType === 'delivery' ? '🛵 Doorstep Delivery' : '🍽️ Dine-in / Takeaway'}
+
 👤 <b>Customer:</b> ${customer}
 📞 <b>Phone:</b> <code>${phone}</code>
-📍 <b>${order.orderType === 'delivery' ? 'Address' : 'Seating'}:</b> ${address}
+📍 <b>${order.orderType === 'delivery' ? 'Delivery Address' : 'Dine-in Note'}:</b> ${address}
 
-📦 <b>Order Items:</b>
+📋 <b>Items Ordered:</b>
 ${items}
-${order.notes ? `\n📝 <b>Chef Note:</b> ${escapeHtml(order.notes)}` : ''}${coupon}
+${order.notes ? `\n📝 <b>Special Instructions:</b> <i>${escapeHtml(order.notes)}</i>` : ''}${coupon}
 
-⏰ <b>Time:</b> ${new Date(order.createdAt).toLocaleString('en-IN', {
+⏰ <b>Placed At:</b> ${new Date(order.createdAt).toLocaleString('en-IN', {
     timeZone: 'Asia/Kolkata',
   })}
-━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━
 `.trim();
 }
 
-interface TelegramResult {
+export interface TelegramResult {
   success: boolean;
   reason?: string;
   messageId?: number;
 }
 
+export interface TelegramInlineButton {
+  text: string;
+  url: string;
+}
+
+/** Resolves chat ID from process.env or restaurant settings in database. */
+export async function resolveTelegramChatId(): Promise<string | null> {
+  const envChatId = process.env.TELEGRAM_CHAT_ID;
+  if (envChatId && envChatId.trim()) {
+    return envChatId.trim();
+  }
+
+  try {
+    const { getSettings } = await import('@/lib/settings/service');
+    const settings = await getSettings();
+    const stored = (settings as Record<string, unknown>).telegramChatId;
+    if (typeof stored === 'string' && stored.trim()) {
+      return stored.trim();
+    }
+  } catch {
+    // Database read fallback silently ignored
+  }
+
+  return null;
+}
+
 /**
- * Free, instant order alerts to the kitchen's Telegram group.
- *
- * Mirrors the reference implementation: silently no-ops when the bot credentials
- * are absent so notification problems can never block an order.
+ * Free, instant order alerts to the restaurant's Telegram bot / group.
+ * Includes interactive action buttons to view in admin, live tracking, and 1-tap WhatsApp customer.
  */
 export async function sendTelegramOrderNotification(
   order: Order
 ): Promise<TelegramResult> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const chatId = await resolveTelegramChatId();
 
   if (!token || !chatId) {
-    return { success: false, reason: 'Telegram credentials not configured' };
+    return {
+      success: false,
+      reason: !token
+        ? 'TELEGRAM_BOT_TOKEN not configured'
+        : 'TELEGRAM_CHAT_ID not configured',
+    };
   }
 
-  return sendTelegramMessage(orderSummaryHtml(order));
+  const cleanPhone = (order.customerPhone || '').replace(/\D/g, '').slice(-10);
+  const waUrl = cleanPhone
+    ? `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(
+        `Hello ${order.customerName || 'there'}! We have received your PM Zaika order (${order.orderId}). We are preparing your delicious food!`
+      )}`
+    : undefined;
+
+  let base = SITE_URL.replace(/\/$/, '');
+  if (!base.startsWith('https://')) {
+    base = 'https://pmzaika.vercel.app';
+  }
+  const adminUrl = `${base}/admin/orders?order=${encodeURIComponent(order.orderId)}`;
+  const trackUrl = `${base}/track/${encodeURIComponent(order.orderId)}?token=${encodeURIComponent(order.trackingToken)}`;
+
+  const inlineKeyboard: TelegramInlineButton[][] = [
+    [
+      { text: '📋 View in Admin Desk', url: adminUrl },
+      { text: '🛵 Live Tracking', url: trackUrl },
+    ],
+  ];
+
+  if (waUrl) {
+    inlineKeyboard.push([{ text: '💬 WhatsApp Customer', url: waUrl }]);
+  }
+
+  return sendTelegramMessage(orderSummaryHtml(order), {
+    inline_keyboard: inlineKeyboard,
+  });
 }
 
-export async function sendTelegramMessage(text: string): Promise<TelegramResult> {
+export async function sendTelegramMessage(
+  text: string,
+  replyMarkup?: { inline_keyboard: TelegramInlineButton[][] },
+  explicitChatId?: string
+): Promise<TelegramResult> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const chatId = explicitChatId || (await resolveTelegramChatId());
 
   if (!token || !chatId) {
-    return { success: false, reason: 'Telegram credentials not configured' };
+    return {
+      success: false,
+      reason: !token
+        ? 'TELEGRAM_BOT_TOKEN not configured'
+        : 'TELEGRAM_CHAT_ID not configured',
+    };
   }
 
   try {
-    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const payload: Record<string, unknown> = {
+      chat_id: chatId,
+      text,
+      parse_mode: 'HTML',
+      disable_web_page_preview: true,
+    };
+    if (replyMarkup) {
+      payload.reply_markup = replyMarkup;
+    }
+
+    let response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-        parse_mode: 'HTML',
-        disable_web_page_preview: true,
-      }),
-      signal: AbortSignal.timeout(6000),
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(8000),
     });
 
-    const payload = (await response.json()) as {
+    let resData = (await response.json()) as {
       ok?: boolean;
       description?: string;
       result?: { message_id?: number };
     };
 
-    if (!response.ok || !payload.ok) {
-      return {
-        success: false,
-        reason: payload.description ?? response.statusText,
+    // If reply_markup failed (e.g. invalid button URL), retry without reply_markup
+    if ((!response.ok || !resData.ok) && replyMarkup) {
+      delete payload.reply_markup;
+      response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(8000),
+      });
+      resData = (await response.json()) as {
+        ok?: boolean;
+        description?: string;
+        result?: { message_id?: number };
       };
     }
 
-    return { success: true, messageId: payload.result?.message_id };
+    if (!response.ok || !resData.ok) {
+      return {
+        success: false,
+        reason: resData.description ?? response.statusText,
+      };
+    }
+
+    return { success: true, messageId: resData.result?.message_id };
   } catch (error) {
     return {
       success: false,
       reason: error instanceof Error ? error.message : 'Unknown Telegram error',
     };
   }
-}
+}
