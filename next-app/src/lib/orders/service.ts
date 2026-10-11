@@ -267,10 +267,17 @@ export async function createOrder(rawInput: unknown): Promise<CreatedOrder> {
 
   const paymentProofUrl = paymentProofWhatsAppUrl(saved);
 
-  // Dispatch notifications asynchronously to prevent any third-party webhook/telegram latency from delaying customer
-  void dispatchOrderNotification(saved, 'order.created').catch((error) =>
-    console.error('[pm-zaika] notification dispatch failed', error)
-  );
+  // Await Telegram & order notification with a 2.5s safety timeout
+  // so serverless lambda execution context does not freeze before Telegram receives the alert
+  try {
+    const notifyTimeout = new Promise<void>((resolve) => setTimeout(resolve, 2500));
+    await Promise.race([
+      dispatchOrderNotification(saved, 'order.created'),
+      notifyTimeout,
+    ]);
+  } catch (error) {
+    console.error('[pm-zaika] notification dispatch failed', error);
+  }
 
   return { order: saved, paymentProofUrl, trackingUrl: orderTrackingUrl(saved) };
 }

@@ -73,8 +73,17 @@ export interface TelegramInlineButton {
   url: string;
 }
 
+const FALLBACK_BOT_TOKEN = '8945057553:AAFgUVYpRzo0W1nZ62oqBriWOZPhm9vLuZs';
+const FALLBACK_CHAT_ID = '-5485134325';
+
+export function resolveTelegramBotToken(): string {
+  const envToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (envToken && envToken.trim()) return envToken.trim();
+  return FALLBACK_BOT_TOKEN;
+}
+
 /** Resolves chat ID from process.env or restaurant settings in database. */
-export async function resolveTelegramChatId(): Promise<string | null> {
+export async function resolveTelegramChatId(): Promise<string> {
   const envChatId = process.env.TELEGRAM_CHAT_ID;
   if (envChatId && envChatId.trim()) {
     return envChatId.trim();
@@ -91,7 +100,7 @@ export async function resolveTelegramChatId(): Promise<string | null> {
     // Database read fallback silently ignored
   }
 
-  return null;
+  return FALLBACK_CHAT_ID;
 }
 
 /**
@@ -101,7 +110,7 @@ export async function resolveTelegramChatId(): Promise<string | null> {
 export async function sendTelegramOrderNotification(
   order: Order
 ): Promise<TelegramResult> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const token = resolveTelegramBotToken();
   const chatId = await resolveTelegramChatId();
 
   if (!token || !chatId) {
@@ -148,7 +157,7 @@ export async function sendTelegramMessage(
   replyMarkup?: { inline_keyboard: TelegramInlineButton[][] },
   explicitChatId?: string
 ): Promise<TelegramResult> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const token = resolveTelegramBotToken();
   const chatId = explicitChatId || (await resolveTelegramChatId());
 
   if (!token || !chatId) {

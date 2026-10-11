@@ -128,11 +128,18 @@ export async function dispatchOrderNotification(
   const channels: DispatchChannel[] = [];
 
   const [telegram, push, webhook] = await Promise.all([
-    sendTelegramOrderNotification(order)
+    // Telegram alerts are sent STRICTLY when a new order is placed by a customer
+    (event === 'order.created'
+      ? sendTelegramOrderNotification(order)
+      : Promise.resolve<import('@/lib/notifications/telegram').TelegramResult>({
+          success: true,
+          reason: 'skipped: telegram only sent on new orders',
+        })
+    )
       .then((result) => {
         const channel: DispatchChannel = {
           name: 'telegram',
-          attempted: true,
+          attempted: event === 'order.created',
           success: result.success,
           detail: result.reason ?? `message ${result.messageId ?? '?'}`,
         };
