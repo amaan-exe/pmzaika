@@ -3,7 +3,7 @@ import type { Doc } from '@/lib/db/types';
 import type { RestaurantSettings } from '@/lib/domain/types';
 import { listMenu, resolveOrderLines } from '@/lib/menu/service';
 import { computeTotals, deliveryProgress } from '@/lib/orders/pricing';
-import { getSettings } from '@/lib/settings/service';
+import { defaultSettings, getSettings } from '@/lib/settings/service';
 import { PRICING } from '@/lib/env';
 import { OrderError } from '@/lib/orders/service';
 
@@ -48,10 +48,9 @@ export async function hydrateCart(
   items: Array<{ menuItemId: string; quantity: number }>,
   settings?: RestaurantSettings
 ): Promise<CartSnapshot> {
-  const resolved = settings ?? (await getSettings());
-
   // Fast-path: 0 database lookups when the cart is empty (e.g. initial visitor loads)
   if (!items || items.length === 0) {
+    const resolved = settings ?? defaultSettings();
     const totals = computeTotals({
       lines: [],
       orderType: 'delivery',
@@ -65,6 +64,8 @@ export async function hydrateCart(
       updatedAt: null,
     };
   }
+
+  const resolved = settings ?? (await getSettings());
 
   const menu = await listMenu({ includeUnavailable: true });
   const byId = new Map(menu.map((item) => [item.id, item]));
