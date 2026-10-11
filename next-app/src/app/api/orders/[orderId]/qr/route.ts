@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import QRCode from 'qrcode';
 import type { NextRequest } from 'next/server';
 
@@ -32,6 +34,22 @@ export async function GET(
 
     if (!order) {
       order = await getOrderForCustomer(orderId, token);
+    }
+
+    const candidatePaths = [
+      path.join(process.cwd(), 'public', 'assets', 'images', 'pm_zaika_phonepe_qr.png'),
+      path.join(process.cwd(), 'next-app', 'public', 'assets', 'images', 'pm_zaika_phonepe_qr.png'),
+    ];
+    for (const p of candidatePaths) {
+      if (fs.existsSync(p)) {
+        const buffer = fs.readFileSync(p);
+        return new Response(buffer, {
+          headers: {
+            'Content-Type': 'image/png',
+            'Cache-Control': 'public, max-age=86400',
+          },
+        });
+      }
     }
 
     const svg = await QRCode.toString(order.upi.intent, {

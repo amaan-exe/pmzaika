@@ -131,7 +131,7 @@ export default function OrderTracker({
   }
 
   const awaitingPayment = order.status === 'payment_verification_pending';
-  const qrSrc = `/api/orders/${order.orderId}/qr?token=${encodeURIComponent(token)}`;
+  const qrSrc = '/assets/images/pm_zaika_phonepe_qr.png';
 
   const sendProof = async () => {
     const message = [
