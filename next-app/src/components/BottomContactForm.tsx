@@ -10,7 +10,7 @@ export default function BottomContactForm() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (pathname.startsWith('/admin')) {
+  if (pathname.startsWith('/admin') || pathname !== '/') {
     return null;
   }
 

@@ -52,8 +52,8 @@ export default function RootLayout({
             <CartProvider>
               <Navbar />
               <main>{children}</main>
-              <Footer />
               <BottomContactForm />
+              <Footer />
               <FloatingCtas />
               <FloatingCartBar />
               <CartDrawer />
