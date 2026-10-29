@@ -14,6 +14,10 @@ export interface Announcement {
   enabled: boolean;
   text: string;
   type: 'info' | 'warning' | 'success' | 'urgent';
+  linkUrl?: string;
+  linkLabel?: string;
+  marquee?: boolean;
+  highlightBadge?: string;
 }
 
 export interface RestaurantSettings extends Record<string, unknown> {

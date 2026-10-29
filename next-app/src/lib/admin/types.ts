@@ -147,7 +147,15 @@ export interface AdminSettings {
   storeUpiName: string;
   restaurantAddress: string;
   autoCloseByTime: boolean;
-  announcement: { enabled: boolean; text: string; type: 'info' | 'warning' | 'success' | 'urgent' };
+  announcement: {
+    enabled: boolean;
+    text: string;
+    type: 'info' | 'warning' | 'success' | 'urgent';
+    linkUrl?: string;
+    linkLabel?: string;
+    marquee?: boolean;
+    highlightBadge?: string;
+  };
   heroEyebrow?: string;
   heroTitle?: string;
   heroSubtitle?: string;

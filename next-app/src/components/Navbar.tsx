@@ -12,7 +12,31 @@ export default function Navbar() {
   const { totalCount, openDrawer, openSearch } = useCart();
   const { user, loading, openAuth, signOutUser } = useAuth();
   const { settings, isOpen } = useStoreSettings();
-  const [announcementDismissed, setAnnouncementDismissed] = useState(false);
+  const [dismissedText, setDismissedText] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('pm_zaika_dismissed_announcement');
+      if (stored) setDismissedText(stored);
+    } catch {
+      // Ignore
+    }
+  }, []);
+
+  const isAnnouncementVisible =
+    Boolean(settings.announcement?.enabled && settings.announcement?.text) &&
+    dismissedText !== settings.announcement?.text;
+
+  const handleDismissAnnouncement = () => {
+    if (settings.announcement?.text) {
+      setDismissedText(settings.announcement.text);
+      try {
+        sessionStorage.setItem('pm_zaika_dismissed_announcement', settings.announcement.text);
+      } catch {
+        // Ignore
+      }
+    }
+  };
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
@@ -69,31 +93,74 @@ export default function Navbar() {
   return (
     <header className={`site-header ${isScrolled ? 'scrolled' : ''}`}>
       {/* Top Announcement Bar from Admin Desk */}
-      {!announcementDismissed && settings.announcement?.enabled && settings.announcement?.text && (
-        <div className={`site-announcement-bar announcement--${settings.announcement.type || 'info'}`}>
+      {isAnnouncementVisible && settings.announcement?.text && (
+        <aside
+          className={`site-announcement-bar announcement--${settings.announcement.type || 'info'} ${
+            settings.announcement.marquee ? 'announcement--marquee' : ''
+          }`}
+          role="banner"
+          aria-label="Restaurant Announcement"
+        >
           <div className="container announcement-bar-inner">
             <div className="announcement-bar-content">
-              <span className="announcement-bar-icon">
-                {settings.announcement.type === 'urgent'
-                  ? '🚨'
-                  : settings.announcement.type === 'warning'
-                  ? '⚠️'
-                  : settings.announcement.type === 'success'
-                  ? '🎉'
-                  : '📢'}
+              <span className="announcement-bar-icon-wrap" aria-hidden="true">
+                <span className="announcement-bar-icon">
+                  {settings.announcement.type === 'urgent'
+                    ? '🚨'
+                    : settings.announcement.type === 'warning'
+                    ? '⚠️'
+                    : settings.announcement.type === 'success'
+                    ? '🎉'
+                    : '📢'}
+                </span>
+                {settings.announcement.type === 'urgent' && <span className="announcement-pulse-dot" />}
               </span>
-              <span className="announcement-bar-text">{settings.announcement.text}</span>
+
+              {settings.announcement.highlightBadge && (
+                <span className="announcement-highlight-badge">
+                  {settings.announcement.highlightBadge}
+                </span>
+              )}
+
+              {settings.announcement.marquee ? (
+                <div className="announcement-marquee-wrapper">
+                  <div className="announcement-marquee-track">
+                    <span className="announcement-bar-text">{settings.announcement.text}</span>
+                    <span className="announcement-bar-text" aria-hidden="true">
+                      {settings.announcement.text}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <span className="announcement-bar-text">{settings.announcement.text}</span>
+              )}
+
+              {settings.announcement.linkUrl && (
+                <Link
+                  href={settings.announcement.linkUrl}
+                  className="announcement-cta-btn"
+                  prefetch={false}
+                >
+                  <span>{settings.announcement.linkLabel || 'View Details'}</span>
+                  <span className="announcement-cta-arrow" aria-hidden="true">↗</span>
+                </Link>
+              )}
             </div>
+
             <button
               type="button"
               className="announcement-bar-close"
-              onClick={() => setAnnouncementDismissed(true)}
+              onClick={handleDismissAnnouncement}
               aria-label="Dismiss announcement"
+              title="Dismiss announcement"
             >
-              ×
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
             </button>
           </div>
-        </div>
+        </aside>
       )}
 
       {/* Kitchen Closed Banner if store is offline */}
@@ -107,7 +174,7 @@ export default function Navbar() {
       )}
 
       {/* Live Operational Notice Bar when open (if no custom announcement is active) */}
-      {isOpen && (!settings.announcement?.enabled || !settings.announcement?.text) && (
+      {isOpen && !isAnnouncementVisible && (
         <div className="site-operating-notice-bar">
           <div className="container operating-notice-inner">
             <span className="notice-item-status">🟢 <strong>Kitchen Open</strong><span className="notice-desk-only"> for Live Delivery • Patna Doorstep (35–45m)</span></span>

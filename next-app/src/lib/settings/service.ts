@@ -23,7 +23,15 @@ export function defaultSettings(): RestaurantSettings {
     storeUpiName: UPI.payeeName,
     restaurantAddress:
       'Shersha Road, Gur Ki Mandi, opposite Bank of India, Patna 800007, Bihar',
-    announcement: { enabled: false, text: '', type: 'info' },
+    announcement: {
+      enabled: false,
+      text: '',
+      type: 'info',
+      linkUrl: '',
+      linkLabel: '',
+      marquee: false,
+      highlightBadge: '',
+    },
     autoCloseByTime: false,
     heroEyebrow: 'Welcome to PM Zaika Restaurant',
     heroTitle: 'Giving your Hunger a new Option',

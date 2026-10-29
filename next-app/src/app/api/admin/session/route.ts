@@ -48,17 +48,19 @@ const capabilities = () => ({
  * password is accepted so the dashboard stays usable out of the box.
  */
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const { limited, retryAfterSeconds } = rateLimit(
-    `admin-login:${clientIp(request)}`,
-    8,
-    10 * 60 * 1000
-  );
-
-  if (limited) {
-    return json(
-      { ok: false, error: 'Too many sign-in attempts. Please try again shortly.' },
-      { status: 429, headers: { 'Retry-After': String(retryAfterSeconds) } }
+  if (process.env.NODE_ENV === 'production') {
+    const { limited, retryAfterSeconds } = rateLimit(
+      `admin-login:${clientIp(request)}`,
+      8,
+      10 * 60 * 1000
     );
+
+    if (limited) {
+      return json(
+        { ok: false, error: 'Too many sign-in attempts. Please try again shortly.' },
+        { status: 429, headers: { 'Retry-After': String(retryAfterSeconds) } }
+      );
+    }
   }
 
   const payload = adminLoginSchema.parse(await readJson(request));

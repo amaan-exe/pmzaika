@@ -189,6 +189,10 @@ export const settingsSchema = z.object({
       enabled: z.boolean(),
       text: trimmed(5000),
       type: z.enum(['info', 'warning', 'success', 'urgent']),
+      linkUrl: trimmed(300).optional(),
+      linkLabel: trimmed(60).optional(),
+      marquee: z.boolean().optional(),
+      highlightBadge: trimmed(60).optional(),
     })
     .partial()
     .optional(),

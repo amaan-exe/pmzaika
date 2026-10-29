@@ -26,6 +26,10 @@ const DEFAULT_SETTINGS: Partial<RestaurantSettings> = {
     enabled: false,
     text: '',
     type: 'info',
+    linkUrl: '',
+    linkLabel: '',
+    marquee: false,
+    highlightBadge: '',
   },
 };
 

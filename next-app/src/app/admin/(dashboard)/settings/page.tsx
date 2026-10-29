@@ -23,17 +23,102 @@ interface SettingsFormState {
   announcementEnabled: boolean;
   announcementType: 'info' | 'warning' | 'success' | 'urgent';
   announcementText: string;
+  announcementLinkUrl: string;
+  announcementLinkLabel: string;
+  announcementMarquee: boolean;
+  announcementHighlightBadge: string;
   heroEyebrow: string;
   heroTitle: string;
   heroSubtitle: string;
   estimatedDeliveryTime: string;
 }
 
-const ANNOUNCEMENT_TYPES: Array<{ id: SettingsFormState['announcementType']; label: string }> = [
-  { id: 'info', label: 'Info' },
-  { id: 'warning', label: 'Warning' },
-  { id: 'success', label: 'Success' },
-  { id: 'urgent', label: 'Urgent' },
+const ANNOUNCEMENT_TYPES: Array<{ id: SettingsFormState['announcementType']; label: string; icon: string }> = [
+  { id: 'info', label: 'Info (Blue)', icon: '📢' },
+  { id: 'warning', label: 'Warning (Amber)', icon: '⚠️' },
+  { id: 'success', label: 'Offer / Deal (Green)', icon: '🎉' },
+  { id: 'urgent', label: 'Urgent Alert (Red)', icon: '🚨' },
+];
+
+interface AnnouncementPreset {
+  id: string;
+  icon: string;
+  name: string;
+  badge: string;
+  text: string;
+  type: SettingsFormState['announcementType'];
+  linkUrl: string;
+  linkLabel: string;
+  marquee: boolean;
+}
+
+const ANNOUNCEMENT_PRESETS: AnnouncementPreset[] = [
+  {
+    id: 'biryani-offer',
+    icon: '🍛',
+    name: 'Weekend Biryani Deal',
+    badge: 'FLASH OFFER',
+    text: 'Flat 20% OFF on all Handi & Dum Biryanis today! Use code ZAIKA20 at checkout.',
+    type: 'success',
+    linkUrl: '/#menu-showcase',
+    linkLabel: 'Order Biryani',
+    marquee: false,
+  },
+  {
+    id: 'free-delivery',
+    icon: '🛵',
+    name: 'Free Express Delivery',
+    badge: 'FREE DELIVERY',
+    text: 'Enjoy Zero Delivery Fee on all direct orders above ₹399 anywhere in Patna!',
+    type: 'info',
+    linkUrl: '/#menu-showcase',
+    linkLabel: 'Explore Menu',
+    marquee: false,
+  },
+  {
+    id: 'late-night-ticker',
+    icon: '⚡',
+    name: 'Midnight Ticker',
+    badge: 'LATE NIGHT DEAL',
+    text: '⚡ Midnight Biryani Craving? Complimentary Gulab Jamun on all family meals placed before 11:30 PM!',
+    type: 'success',
+    linkUrl: '/#menu-showcase',
+    linkLabel: 'Claim Offer',
+    marquee: true,
+  },
+  {
+    id: 'kitchen-rush',
+    icon: '🚨',
+    name: 'High Kitchen Volume',
+    badge: 'KITCHEN RUSH',
+    text: 'Kitchen is currently experiencing peak dinner order volume. Please allow 15–20 min cooking buffer.',
+    type: 'urgent',
+    linkUrl: '',
+    linkLabel: '',
+    marquee: false,
+  },
+  {
+    id: 'monsoon-alert',
+    icon: '🌧️',
+    name: 'Monsoon Advisory',
+    badge: 'WEATHER ADVISORY',
+    text: 'Heavy rainfall in Patna: Rider safety prioritized, delivery times may be slightly extended.',
+    type: 'warning',
+    linkUrl: '/contact',
+    linkLabel: 'Live Support',
+    marquee: false,
+  },
+  {
+    id: 'table-reservation',
+    icon: '👑',
+    name: 'Royal Dine-In',
+    badge: 'TABLE BOOKING',
+    text: 'Host your family dinner at PM Zaika! Weekend Mughlai table reservations are now open.',
+    type: 'info',
+    linkUrl: '/reservation',
+    linkLabel: 'Book Table',
+    marquee: false,
+  },
 ];
 
 /** Money boundary: the form shows rupees, the API stores paise. */
@@ -55,6 +140,10 @@ function toFormState(settings: AdminSettings): SettingsFormState {
     announcementEnabled: settings.announcement.enabled,
     announcementType: settings.announcement.type,
     announcementText: settings.announcement.text,
+    announcementLinkUrl: settings.announcement.linkUrl || '',
+    announcementLinkLabel: settings.announcement.linkLabel || '',
+    announcementMarquee: Boolean(settings.announcement.marquee),
+    announcementHighlightBadge: settings.announcement.highlightBadge || '',
     heroEyebrow: settings.heroEyebrow || 'Welcome to PM Zaika Restaurant',
     heroTitle: settings.heroTitle || 'Giving your Hunger a new Option',
     heroSubtitle:
@@ -78,6 +167,7 @@ function SettingsForm({
   onSaved: () => void;
 }) {
   const [form, setForm] = useState<SettingsFormState>(() => toFormState(settings));
+  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -107,6 +197,10 @@ function SettingsForm({
             enabled: form.announcementEnabled,
             type: form.announcementType,
             text: form.announcementText.trim(),
+            linkUrl: form.announcementLinkUrl.trim(),
+            linkLabel: form.announcementLinkLabel.trim(),
+            marquee: form.announcementMarquee,
+            highlightBadge: form.announcementHighlightBadge.trim(),
           },
           heroEyebrow: form.heroEyebrow.trim(),
           heroTitle: form.heroTitle.trim(),
@@ -123,6 +217,19 @@ function SettingsForm({
     },
     [form, onSaved],
   );
+
+  const applyPreset = (preset: AnnouncementPreset) => {
+    setForm((current) => ({
+      ...current,
+      announcementEnabled: true,
+      announcementType: preset.type,
+      announcementText: preset.text,
+      announcementHighlightBadge: preset.badge,
+      announcementLinkUrl: preset.linkUrl,
+      announcementLinkLabel: preset.linkLabel,
+      announcementMarquee: preset.marquee,
+    }));
+  };
 
   const set = <K extends keyof SettingsFormState>(key: K, value: SettingsFormState[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
@@ -399,48 +506,171 @@ function SettingsForm({
         </div>
 
         {/* Announcement */}
-        <div className="admin-card">
-          <div className="admin-card-head">
-            <h2 className="admin-card-title">Announcement</h2>
+        <div className="admin-card" style={{ gridColumn: '1 / -1' }}>
+          <div className="announcement-card-header">
+            <div>
+              <h2 className="admin-card-title" style={{ fontSize: 18, marginBottom: 2 }}>
+                Store Announcement Banner
+              </h2>
+              <p style={{ margin: 0, fontSize: 12.5, color: 'var(--admin-muted)' }}>
+                Configure real-time top-of-page notifications, promotions, and kitchen advisories across the storefront.
+              </p>
+            </div>
+            {form.announcementEnabled ? (
+              <span className="announcement-status-pill announcement-status-pill--active">
+                ● Live on Storefront
+              </span>
+            ) : (
+              <span className="announcement-status-pill announcement-status-pill--inactive">
+                ○ Inactive / Off
+              </span>
+            )}
           </div>
 
-          <label
-            className="admin-form-label"
-            style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-          >
-            <input
-              type="checkbox"
-              checked={form.announcementEnabled}
-              onChange={(e) => set('announcementEnabled', e.target.checked)}
-            />
-            Show the banner on the storefront
-          </label>
-
-          <div className="admin-field" style={{ marginTop: 14 }}>
-            <label className="admin-form-label" htmlFor="announcement-type">
-              Banner style
+          {/* Master Enable Toggle */}
+          <div className="announcement-toggle-row">
+            <div className="announcement-toggle-info">
+              <span className="announcement-toggle-title">Show announcement on website</span>
+              <span className="announcement-toggle-desc">
+                When active, displays a polished top announcement bar above the navigation on all storefront pages.
+              </span>
+            </div>
+            <label className="admin-switch-label">
+              <input
+                type="checkbox"
+                checked={form.announcementEnabled}
+                onChange={(e) => set('announcementEnabled', e.target.checked)}
+              />
+              <span className="admin-switch-slider"></span>
             </label>
-            <select
-              id="announcement-type"
-              className="admin-select"
-              value={form.announcementType}
-              onChange={(e) =>
-                set('announcementType', e.target.value as SettingsFormState['announcementType'])
-              }
-              disabled={!form.announcementEnabled}
-            >
-              {ANNOUNCEMENT_TYPES.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.label}
-                </option>
+          </div>
+
+          {/* Quick Presets Grid */}
+          <div className="announcement-presets-section">
+            <div className="announcement-presets-head">
+              <span className="announcement-presets-title">
+                ⚡ 1-Click Fast Presets (Click to autofill)
+              </span>
+              <span style={{ fontSize: 11, color: 'var(--admin-muted)' }}>
+                Instantly pre-fill high-converting banners
+              </span>
+            </div>
+            <div className="announcement-presets-grid">
+              {ANNOUNCEMENT_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  className="announcement-preset-btn"
+                  onClick={() => applyPreset(preset)}
+                  title={preset.text}
+                >
+                  <span className="announcement-preset-top">
+                    <span>{preset.icon}</span>
+                    <span>{preset.name}</span>
+                  </span>
+                  <span className="announcement-preset-desc">
+                    [{preset.badge}] {preset.text}
+                  </span>
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
+          {/* Theme Style Segmented Cards */}
           <div className="admin-field">
-            <label className="admin-form-label" htmlFor="announcement-text">
-              Message
+            <label className="admin-form-label">
+              Banner Style & Tone
             </label>
+            <div className="announcement-themes-grid">
+              {ANNOUNCEMENT_TYPES.map((type) => {
+                const isSelected = form.announcementType === type.id;
+                return (
+                  <button
+                    key={type.id}
+                    type="button"
+                    className={`announcement-theme-card announcement-theme-card--${type.id} ${
+                      isSelected ? 'active' : ''
+                    }`}
+                    onClick={() => set('announcementType', type.id)}
+                    disabled={!form.announcementEnabled}
+                  >
+                    <span>{type.icon}</span>
+                    <span>{type.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: 16,
+              marginTop: 14,
+            }}
+          >
+            {/* Highlight Tag / Badge */}
+            <div className="admin-field">
+              <label className="admin-form-label" htmlFor="announcement-badge">
+                Highlight Badge / Tag (Optional)
+              </label>
+              <input
+                id="announcement-badge"
+                className="admin-input"
+                value={form.announcementHighlightBadge}
+                onChange={(e) => set('announcementHighlightBadge', e.target.value)}
+                placeholder="e.g. FLASH OFFER, FREE DELIVERY, NOTICE"
+                maxLength={40}
+                disabled={!form.announcementEnabled}
+              />
+              <span style={{ fontSize: 11.5, color: 'var(--admin-muted)', marginTop: 4, display: 'block' }}>
+                Shows as a stylish pill badge next to the icon.
+              </span>
+            </div>
+
+            {/* Continuous Marquee Ticker Toggle */}
+            <div className="admin-field">
+              <label className="admin-form-label">
+                Display Mode
+              </label>
+              <div className="announcement-toggle-row" style={{ marginTop: 0, padding: '9px 12px' }}>
+                <div className="announcement-toggle-info">
+                  <span className="announcement-toggle-title" style={{ fontSize: 13 }}>
+                    Continuous Scrolling Marquee
+                  </span>
+                  <span className="announcement-toggle-desc" style={{ fontSize: 11 }}>
+                    Seamless horizontal loop. Great for long notices or mobile screens.
+                  </span>
+                </div>
+                <label className="admin-switch-label">
+                  <input
+                    type="checkbox"
+                    checked={form.announcementMarquee}
+                    onChange={(e) => set('announcementMarquee', e.target.checked)}
+                    disabled={!form.announcementEnabled}
+                  />
+                  <span className="admin-switch-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Announcement Text */}
+          <div className="admin-field" style={{ marginTop: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label className="admin-form-label" htmlFor="announcement-text">
+                Announcement Message
+              </label>
+              <span
+                style={{
+                  fontSize: 11.5,
+                  color: form.announcementText.length > 4500 ? 'var(--admin-red)' : 'var(--admin-muted)',
+                }}
+              >
+                {form.announcementText.length} / 5000
+              </span>
+            </div>
             <textarea
               id="announcement-text"
               className="admin-textarea"
@@ -448,85 +678,158 @@ function SettingsForm({
               onChange={(e) => set('announcementText', e.target.value)}
               maxLength={5000}
               disabled={!form.announcementEnabled}
-              placeholder="Kitchen is running a 30-minute delay tonight…"
+              style={{ minHeight: 70 }}
+              placeholder="e.g. Flat 20% OFF on all Handi Biryanis today! Use code ZAIKA20 at checkout."
             />
-            <p
-              style={{
-                margin: '6px 0 0',
-                fontSize: 12,
-                color: 'var(--admin-muted)',
-                textAlign: 'right',
-              }}
-            >
-              {form.announcementText.length} / 5000
-            </p>
           </div>
 
-          {/* Live Preview Box */}
-          {form.announcementEnabled && form.announcementText && (
-            <div style={{ marginTop: 16 }}>
-              <span
-                style={{
-                  display: 'block',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  color: 'var(--admin-muted)',
-                  marginBottom: 6,
-                  letterSpacing: '0.08em',
-                }}
-              >
-                Live Storefront Banner Preview
+          {/* Action Button & Link (CTA) */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: 16,
+              marginTop: 14,
+            }}
+          >
+            <div className="admin-field">
+              <label className="admin-form-label" htmlFor="announcement-link-url">
+                Call-to-Action Link URL (Optional)
+              </label>
+              <input
+                id="announcement-link-url"
+                className="admin-input"
+                value={form.announcementLinkUrl}
+                onChange={(e) => set('announcementLinkUrl', e.target.value)}
+                placeholder="e.g. /#menu-showcase, /reservation, or https://..."
+                maxLength={300}
+                disabled={!form.announcementEnabled}
+              />
+              <span style={{ fontSize: 11.5, color: 'var(--admin-muted)', marginTop: 4, display: 'block' }}>
+                Where clicking the action button directs the customer.
               </span>
-              <div
-                style={{
-                  padding: '10px 16px',
-                  borderRadius: 10,
-                  fontSize: 13,
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  background:
-                    form.announcementType === 'urgent'
-                      ? 'rgba(239, 83, 80, 0.2)'
-                      : form.announcementType === 'warning'
-                      ? 'rgba(245, 166, 35, 0.2)'
-                      : form.announcementType === 'success'
-                      ? 'rgba(34, 192, 125, 0.2)'
-                      : 'rgba(74, 163, 240, 0.2)',
-                  color:
-                    form.announcementType === 'urgent'
-                      ? '#ff8b89'
-                      : form.announcementType === 'warning'
-                      ? 'var(--admin-amber)'
-                      : form.announcementType === 'success'
-                      ? 'var(--admin-green)'
-                      : 'var(--admin-blue)',
-                  border: `1px solid ${
-                    form.announcementType === 'urgent'
-                      ? 'rgba(239, 83, 80, 0.4)'
-                      : form.announcementType === 'warning'
-                      ? 'rgba(245, 166, 35, 0.4)'
-                      : form.announcementType === 'success'
-                      ? 'rgba(34, 192, 125, 0.4)'
-                      : 'rgba(74, 163, 240, 0.4)'
-                  }`,
-                }}
-              >
-                <span>
-                  {form.announcementType === 'urgent'
-                    ? '🚨'
-                    : form.announcementType === 'warning'
-                    ? '⚠️'
-                    : form.announcementType === 'success'
-                    ? '🎉'
-                    : '📢'}
-                </span>
-                <span>{form.announcementText}</span>
+            </div>
+
+            <div className="admin-field">
+              <label className="admin-form-label" htmlFor="announcement-link-label">
+                Button Text (Optional)
+              </label>
+              <input
+                id="announcement-link-label"
+                className="admin-input"
+                value={form.announcementLinkLabel}
+                onChange={(e) => set('announcementLinkLabel', e.target.value)}
+                placeholder="e.g. Order Now, Book Table, Claim Code"
+                maxLength={50}
+                disabled={!form.announcementEnabled}
+              />
+              <span style={{ fontSize: 11.5, color: 'var(--admin-muted)', marginTop: 4, display: 'block' }}>
+                Defaults to &ldquo;View Details&rdquo; if link is provided without label.
+              </span>
+            </div>
+          </div>
+
+          {/* Interactive Live Preview Box */}
+          <div className="announcement-preview-stage">
+            <div className="announcement-preview-bar-head">
+              <span className="announcement-preview-label">
+                <span>👁️</span>
+                <span>Real-Time Storefront Preview</span>
+                {!form.announcementEnabled && (
+                  <span style={{ color: 'var(--admin-muted)', fontWeight: 400, textTransform: 'none' }}>
+                    (Banner is currently inactive on storefront)
+                  </span>
+                )}
+              </span>
+
+              <div className="announcement-preview-mode-switch">
+                <button
+                  type="button"
+                  className={`announcement-preview-mode-btn ${previewMode === 'desktop' ? 'active' : ''}`}
+                  onClick={() => setPreviewMode('desktop')}
+                >
+                  🖥️ Desktop View
+                </button>
+                <button
+                  type="button"
+                  className={`announcement-preview-mode-btn ${previewMode === 'mobile' ? 'active' : ''}`}
+                  onClick={() => setPreviewMode('mobile')}
+                >
+                  📱 Mobile View
+                </button>
               </div>
             </div>
-          )}
+
+            <div
+              className={`announcement-preview-frame ${
+                previewMode === 'mobile' ? 'announcement-preview-frame--mobile' : ''
+              }`}
+            >
+              {form.announcementText ? (
+                <div
+                  className={`preview-announcement-bar preview-announcement-bar--${form.announcementType}`}
+                >
+                  <div className="preview-bar-content">
+                    <span className="preview-icon-wrap" aria-hidden="true">
+                      <span>
+                        {form.announcementType === 'urgent'
+                          ? '🚨'
+                          : form.announcementType === 'warning'
+                          ? '⚠️'
+                          : form.announcementType === 'success'
+                          ? '🎉'
+                          : '📢'}
+                      </span>
+                      {form.announcementType === 'urgent' && <span className="preview-pulse-dot" />}
+                    </span>
+
+                    {form.announcementHighlightBadge && (
+                      <span className="preview-badge">{form.announcementHighlightBadge}</span>
+                    )}
+
+                    {form.announcementMarquee ? (
+                      <div className="preview-marquee-wrapper">
+                        <div className="preview-marquee-track">
+                          <span className="preview-text">{form.announcementText}</span>
+                          <span className="preview-text" aria-hidden="true">
+                            {form.announcementText}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="preview-text">{form.announcementText}</span>
+                    )}
+
+                    {form.announcementLinkUrl && (
+                      <span className="preview-cta-btn">
+                        <span>{form.announcementLinkLabel || 'View Details'}</span>
+                        <span style={{ fontSize: 11, fontWeight: 800 }}>↗</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <span className="preview-close-btn" aria-hidden="true" title="Simulated dismiss">
+                    ✕
+                  </span>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    padding: '24px 16px',
+                    textAlign: 'center',
+                    color: 'var(--admin-muted)',
+                    fontSize: 13,
+                    fontStyle: 'italic',
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    borderRadius: 8,
+                    border: '1px dashed var(--admin-border)',
+                  }}
+                >
+                  Type a message or select a 1-click preset above to see the live preview.
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
