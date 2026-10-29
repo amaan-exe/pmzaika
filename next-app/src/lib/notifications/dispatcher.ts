@@ -158,13 +158,14 @@ export async function dispatchOrderNotification(
       }),
 
     sendPushNotification({
-      title: `${event === 'order.created' ? 'New Order' : 'Order Update'} ${order.orderId}`,
-      body: `${formatRupees(order.totals.grandTotalPaise)} • ${
+      title: `${event === 'order.created' ? '🚨 LOUD ALERT: New Order' : '📦 Order Update'} #${order.orderId}`,
+      body: `💰 ${formatRupees(order.totals.grandTotalPaise)} • ${order.customerName} • ${
         order.items.length
-      } item${order.items.length === 1 ? '' : 's'} • ${order.customerName}`,
+      } item${order.items.length === 1 ? '' : 's'} (${order.orderType === 'delivery' ? '🛵 DELIVERY' : '🍽️ DINE-IN'})`,
       tag: `order-${order.orderId}`,
       renotify: true,
       requireInteraction: true,
+      silent: false,
       data: {
         orderId: order.orderId,
         url: `/admin/orders?order=${encodeURIComponent(order.orderId)}`,

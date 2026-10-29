@@ -3,10 +3,18 @@ import webpush from 'web-push';
 import { COLLECTIONS, getDb } from '@/lib/db';
 import type { PushSubscription } from '@/lib/domain/types';
 
+// Built-in VAPID keys ensure Web Push works seamlessly out-of-the-box
+// while still honoring any environment variables if defined.
+const FALLBACK_VAPID_PUBLIC_KEY =
+  'BB_RUpGMwxEo-JFjTb8yMpo_WcvW_lYoPhE1bgAobdwWLal6OU2Ei-rOCEVWzIAIWaYpq_BY19K5eVaONbe3DHM';
+const FALLBACK_VAPID_PRIVATE_KEY =
+  'yypiDrc_VA3whOTpFcdls9it5Xr1Iw-wnPMSrlu3j_I';
+const FALLBACK_VAPID_SUBJECT = 'mailto:kitchen@pmzaika.vercel.app';
+
 function vapidDetails() {
-  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  const privateKey = process.env.VAPID_PRIVATE_KEY;
-  const subject = process.env.VAPID_SUBJECT ?? 'mailto:kitchen@pmzaika.local';
+  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim() || FALLBACK_VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY?.trim() || FALLBACK_VAPID_PRIVATE_KEY;
+  const subject = process.env.VAPID_SUBJECT?.trim() || FALLBACK_VAPID_SUBJECT;
 
   if (!publicKey || !privateKey) return null;
   return { publicKey, privateKey, subject };
@@ -14,8 +22,10 @@ function vapidDetails() {
 
 export const isWebPushConfigured = (): boolean => vapidDetails() !== null;
 
-export const vapidPublicKey = (): string | null =>
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null;
+export const vapidPublicKey = (): string => {
+  const vapid = vapidDetails();
+  return vapid ? vapid.publicKey : FALLBACK_VAPID_PUBLIC_KEY;
+};
 
 /** Short, collision-resistant id derived from the subscription endpoint. */
 export function subscriptionId(endpoint: string): string {
@@ -63,10 +73,10 @@ export interface PushResult {
 }
 
 /**
- * Fans a payload out to every registered kitchen device.
+ * Fans a payload out to every registered kitchen device with maximum priority.
  *
- * Endpoints that respond 404/410 are pruned automatically, matching the
- * reference behaviour. Never throws.
+ * Configured with RFC 8030 `urgency: 'high'` to wake mobile devices from doze
+ * mode and trigger immediate vibration and alert tones.
  */
 export async function sendPushNotification(payload: unknown): Promise<PushResult> {
   const vapid = vapidDetails();
@@ -88,7 +98,15 @@ export async function sendPushNotification(payload: unknown): Promise<PushResult
   await Promise.all(
     docs.map(async (sub) => {
       try {
-        await webpush.sendNotification({ endpoint: sub.endpoint, keys: sub.keys }, body);
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: sub.keys },
+          body,
+          {
+            urgency: 'high',
+            topic: 'new-orders',
+            TTL: 3600,
+          }
+        );
         delivered += 1;
         await subscriptions.update(sub.id, (current) => ({
           ...current,

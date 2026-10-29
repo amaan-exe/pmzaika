@@ -68,22 +68,77 @@ export function useAsyncData<T>(
 /**
  * Polls `reload` on an interval. Used by the orders desk and menu desk so the
  * kitchen sees new orders without hitting refresh.
+ *
+ * When `pollInBackground` is enabled, an unthrottled Web Worker timer is used
+ * so background tabs and separate desktop windows continue to openly search for
+ * incoming orders without browser throttling.
  */
-export function usePolling(reload: () => void, intervalMs: number): void {
+export function usePolling(
+  reload: () => void,
+  intervalMs: number,
+  options?: { pollInBackground?: boolean }
+): void {
   const reloadRef = useRef(reload);
+  const pollInBackground = options?.pollInBackground ?? false;
 
   useEffect(() => {
     reloadRef.current = reload;
   }, [reload]);
 
   useEffect(() => {
-    // Only poll when the tab/window is actively visible
-    const timer = setInterval(() => {
-      if (typeof document !== 'undefined' && document.hidden) {
-        return;
+    let cleanupWorker: (() => void) | null = null;
+    let timer: NodeJS.Timeout | null = null;
+
+    // In modern browsers, timers in background tabs or un-focused windows
+    // are throttled down to 60s or paused. An inline Web Worker runs on an
+    // independent background OS thread and cannot be throttled by tab visibility!
+    if (pollInBackground && typeof window !== 'undefined' && typeof Worker !== 'undefined') {
+      try {
+        const workerCode = `
+          let t = null;
+          self.onmessage = function(e) {
+            if (e.data === 'start') {
+              if (t) clearInterval(t);
+              t = setInterval(function() {
+                self.postMessage('tick');
+              }, ${intervalMs});
+            } else if (e.data === 'stop') {
+              if (t) clearInterval(t);
+              t = null;
+            }
+          };
+        `;
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        const url = URL.createObjectURL(blob);
+        const worker = new Worker(url);
+
+        worker.onmessage = (e) => {
+          if (e.data === 'tick') {
+            reloadRef.current();
+          }
+        };
+
+        worker.postMessage('start');
+
+        cleanupWorker = () => {
+          worker.postMessage('stop');
+          worker.terminate();
+          URL.revokeObjectURL(url);
+        };
+      } catch {
+        // Fallback to standard timer if worker creation is blocked
       }
-      reloadRef.current();
-    }, intervalMs);
+    }
+
+    if (!cleanupWorker) {
+      timer = setInterval(() => {
+        // If not configured to poll in background, respect tab visibility
+        if (!pollInBackground && typeof document !== 'undefined' && document.hidden) {
+          return;
+        }
+        reloadRef.current();
+      }, intervalMs);
+    }
 
     // Refresh immediately when returning to the tab
     const handleVisibility = () => {
@@ -97,10 +152,11 @@ export function usePolling(reload: () => void, intervalMs: number): void {
     }
 
     return () => {
-      clearInterval(timer);
+      if (cleanupWorker) cleanupWorker();
+      if (timer) clearInterval(timer);
       if (typeof document !== 'undefined') {
         document.removeEventListener('visibilitychange', handleVisibility);
       }
     };
-  }, [intervalMs]);
+  }, [intervalMs, pollInBackground]);
 }

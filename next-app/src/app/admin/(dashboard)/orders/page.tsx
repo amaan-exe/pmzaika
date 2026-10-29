@@ -16,6 +16,8 @@ import {
 } from '@/components/admin/ui';
 import { useAsyncData, usePolling } from '@/components/admin/useAsyncData';
 import { useNewOrderAlert } from '@/components/admin/useNewOrderAlert';
+import IncomingOrderAlert from '@/components/admin/IncomingOrderAlert';
+import NotificationSettingsModal from '@/components/admin/NotificationSettingsModal';
 
 type Tab = 'open' | 'awaiting' | 'all' | 'archive';
 
@@ -26,7 +28,7 @@ const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'archive', label: 'Archive' },
 ];
 
-const REFRESH_MS = 45_000;
+const REFRESH_MS = 8_000;
 
 /** Kitchen priority: payment decisions first, then cooking, then done. */
 const PRIORITY: Record<string, number> = {
@@ -43,11 +45,13 @@ const PRIORITY: Record<string, number> = {
 function OrderCard({
   order,
   busy,
+  highlighted,
   onAction,
   onNotify,
 }: {
   order: AdminOrder;
   busy: boolean;
+  highlighted?: boolean;
   onAction: (action: StatusAction) => void;
   onNotify: (order: AdminOrder) => void;
 }) {
@@ -57,7 +61,12 @@ function OrderCard({
   const urgent = order.status === 'payment_verification_pending';
 
   return (
-    <article className={`order-card${urgent ? ' order-card--urgent' : ''}`}>
+    <article
+      id={`order-${order.orderId}`}
+      className={`order-card${urgent ? ' order-card--urgent' : ''}${
+        highlighted ? ' order-card--highlighted' : ''
+      }`}
+    >
       <div className="order-card-head">
         <div>
           <div className="order-card-id">{order.orderId}</div>
@@ -232,8 +241,31 @@ export default function AdminOrdersPage() {
     [tab, search, orderType],
   );
 
-  // Keep the queue live without hammering the API.
-  usePolling(reload, REFRESH_MS);
+  // Keep the queue live without hammering the API; openly polls even when tab is in another panel.
+  usePolling(reload, REFRESH_MS, { pollInBackground: true });
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+  const orders = useMemo(() => {
+    if (!data) return [];
+    return [...data.orders].sort(
+      (a, b) => (PRIORITY[a.status] ?? 9) - (PRIORITY[b.status] ?? 9),
+    );
+  }, [data]);
+
+  const {
+    config: soundConfig,
+    updateConfig: updateSoundConfig,
+    soundEnabled,
+    toggleSound,
+    activeAlertOrder,
+    unacknowledgedCount,
+    isRinging,
+    acknowledgeOrder,
+    acknowledgeAllOrders,
+    testSound,
+  } = useNewOrderAlert(orders);
 
   // Chime when a new order lands — kitchens are loud and staff are not always
   // looking at the screen. Browsers require a user gesture before audio plays.
@@ -241,6 +273,7 @@ export default function AdminOrdersPage() {
     async (order: AdminOrder, action: StatusAction) => {
       setBusyId(order.orderId);
       setNotice(null);
+      acknowledgeOrder(order.orderId);
 
       try {
         await updateOrderStatus(order.orderId, {
@@ -257,7 +290,7 @@ export default function AdminOrdersPage() {
         setBusyId(null);
       }
     },
-    [reload],
+    [reload, acknowledgeOrder],
   );
 
   const handleNotify = useCallback(async (order: AdminOrder) => {
@@ -269,15 +302,22 @@ export default function AdminOrdersPage() {
     }
   }, []);
 
-  const orders = useMemo(() => {
-    if (!data) return [];
-    return [...data.orders].sort(
-      (a, b) => (PRIORITY[a.status] ?? 9) - (PRIORITY[b.status] ?? 9),
-    );
-  }, [data]);
+  const handleViewOrder = useCallback((orderId: string) => {
+    acknowledgeOrder(orderId);
+    setHighlightedId(orderId);
+    setTab('all');
 
-  const orderIds = useMemo(() => orders.map((order) => order.orderId), [orders]);
-  const { enabled: soundEnabled, enable: enableSound } = useNewOrderAlert(orderIds);
+    setTimeout(() => {
+      const el = document.getElementById(`order-${orderId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
+
+    setTimeout(() => {
+      setHighlightedId((curr) => (curr === orderId ? null : curr));
+    }, 6000);
+  }, [acknowledgeOrder]);
 
   const counts = useMemo(() => {
     const awaiting = orders.filter(
@@ -288,6 +328,23 @@ export default function AdminOrdersPage() {
 
   return (
     <>
+      <IncomingOrderAlert
+        order={activeAlertOrder}
+        unacknowledgedCount={unacknowledgedCount}
+        isRinging={isRinging}
+        onViewOrder={handleViewOrder}
+        onAcknowledge={acknowledgeOrder}
+        onAcknowledgeAll={acknowledgeAllOrders}
+      />
+
+      <NotificationSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        config={soundConfig}
+        onUpdateConfig={updateSoundConfig}
+        onTestSound={testSound}
+      />
+
       <PageHeader
         title="Orders desk"
         subtitle={
@@ -301,11 +358,25 @@ export default function AdminOrdersPage() {
           <>
             <button
               type="button"
-              className={`admin-btn admin-btn--sm ${soundEnabled ? 'admin-btn--green' : ''}`}
-              onClick={enableSound}
-              title={soundEnabled ? 'New-order chime is on' : 'Get an audio alert when a new order arrives'}
+              className={`admin-btn admin-btn--sm ${
+                soundEnabled
+                  ? isRinging
+                    ? 'admin-btn--urgent-pulse'
+                    : 'admin-btn--green'
+                  : ''
+              }`}
+              onClick={toggleSound}
+              title={soundEnabled ? 'Order sound alarm is on' : 'Get an audio alert when a new order arrives'}
             >
-              {soundEnabled ? '🔔 Chime on' : '🔕 Chime off'}
+              {soundEnabled ? (isRinging ? '🚨 Alarm Ringing' : '🔔 Chime on') : '🔕 Chime off'}
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn--sm"
+              onClick={() => setIsSettingsOpen(true)}
+              title="Configure alert tones, repeating alarm, and Web Push notifications"
+            >
+              ⚙️ Alert Settings
             </button>
             <button type="button" className="admin-btn admin-btn--sm" onClick={reload}>
               Refresh
@@ -370,6 +441,7 @@ export default function AdminOrdersPage() {
               key={order.orderId}
               order={order}
               busy={busyId === order.orderId}
+              highlighted={highlightedId === order.orderId}
               onAction={(action) => void handleAction(order, action)}
               onNotify={(target) => void handleNotify(target)}
             />

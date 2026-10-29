@@ -20,16 +20,20 @@ export function orderSummaryHtml(order: Order): string {
       : order.seatingNote || 'Dine-in / Takeaway'
   );
 
+  const totalQty = order.items && order.items.length
+    ? order.items.reduce((sum, item) => sum + (item.qty || 1), 0)
+    : 0;
+
   const items = order.items && order.items.length
     ? order.items
         .map(
-          (item) =>
-            `   • <b>${escapeHtml(item.title)}</b> × ${item.qty} (₹${Math.round(
+          (item, idx) =>
+            `   ${idx + 1}. <b>${escapeHtml(item.title)}</b> × <b>${item.qty}</b> (₹${Math.round(
               item.lineTotalPaise / 100
             )})`
         )
         .join('\n')
-    : '   • Order items details';
+    : '   • No item details provided';
 
   const coupon = order.appliedCoupon
     ? `\n🎁 <b>Coupon Applied:</b> <code>${escapeHtml(order.appliedCoupon)}</code> (− ₹${Math.round(
@@ -37,27 +41,50 @@ export function orderSummaryHtml(order: Order): string {
       )})`
     : '';
 
-  const cleanPhone = (order.customerPhone || '').replace(/\D/g, '').slice(-10);
+  const notes = order.notes
+    ? `\n📝 <b>Kitchen Note:</b> <i>${escapeHtml(order.notes)}</i>`
+    : '';
+
+  const paymentStatus = (order.paymentStatus || 'awaiting').replace(/_/g, ' ').toUpperCase();
+  const paymentBadge =
+    order.paymentStatus === 'verified'
+      ? `✅ <b>PAID & VERIFIED ONLINE</b>`
+      : order.paymentStatus === 'verification_pending'
+      ? `⏳ <b>UPI VERIFICATION PENDING</b>`
+      : `⚠️ <b>${paymentStatus} (COLLECT ON DELIVERY)</b>`;
+
+  const orderTypeBadge =
+    order.orderType === 'delivery'
+      ? '🛵 <b>DOORSTEP DELIVERY</b>'
+      : '🍽️ <b>DINE-IN / TAKEAWAY</b>';
+
+  const timeFormatted = new Date(order.createdAt).toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
 
   return `
-🔔 <b>NEW ORDER RECEIVED - ${escapeHtml(RESTAURANT.name)}</b>
+🚨 <b>LOUD KITCHEN ALERT: NEW ORDER</b> 🚨
+🏪 <b>${escapeHtml(RESTAURANT.name)} Kitchen Desk</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━
-🆔 <b>Order ID:</b> <code>${escapeHtml(order.orderId)}</code>
-💰 <b>Grand Total:</b> <b>${formatRupees(order.totals.grandTotalPaise)}</b>
-💳 <b>Payment:</b> ${escapeHtml((order.paymentStatus || 'awaiting').replace(/_/g, ' ').toUpperCase())}
-📦 <b>Type:</b> ${order.orderType === 'delivery' ? '🛵 Doorstep Delivery' : '🍽️ Dine-in / Takeaway'}
-
-👤 <b>Customer:</b> ${customer}
+🆔 <b>Order ID:</b> <code>#${escapeHtml(order.orderId)}</code>
+💰 <b>COLLECT / TOTAL:</b> <b>${formatRupees(order.totals.grandTotalPaise)}</b>
+💳 <b>Payment:</b> ${paymentBadge}
+📦 <b>Type:</b> ${orderTypeBadge}
+━━━━━━━━━━━━━━━━━━━━━━━━━
+👤 <b>Customer:</b> <b>${customer}</b>
 📞 <b>Phone:</b> <code>${phone}</code>
-📍 <b>${order.orderType === 'delivery' ? 'Delivery Address' : 'Dine-in Note'}:</b> ${address}
-
-📋 <b>Items Ordered:</b>
-${items}
-${order.notes ? `\n📝 <b>Special Instructions:</b> <i>${escapeHtml(order.notes)}</i>` : ''}${coupon}
-
-⏰ <b>Placed At:</b> ${new Date(order.createdAt).toLocaleString('en-IN', {
-    timeZone: 'Asia/Kolkata',
-  })}
+📍 <b>${order.orderType === 'delivery' ? 'Delivery Address' : 'Dine-in / Table'}:</b>
+<i>${address}</i>
+━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 <b>ITEMS TO PREPARE (${totalQty} item${totalQty === 1 ? '' : 's'}):</b>
+${items}${notes}${coupon}
+━━━━━━━━━━━━━━━━━━━━━━━━━
+⏰ <b>Received At:</b> ${timeFormatted}
 ━━━━━━━━━━━━━━━━━━━━━━━━━
 `.trim();
 }
