@@ -7,9 +7,12 @@ import {
   loadSoundConfig,
   playAlertSound,
   saveSoundConfig,
+  isAudioArmed,
+  onAudioArmed,
   startAlarmLoop,
   stopAlarmLoop,
   unlockAudioPlayback,
+  playArmingChime,
   type SoundConfig,
   type SoundProfile,
 } from './audioAlert';
@@ -95,6 +98,11 @@ export function useNewOrderAlert(orders: readonly AdminOrder[]) {
   const [activeAlertOrder, setActiveAlertOrder] = useState<AdminOrder | null>(null);
   const [unacknowledgedCount, setUnacknowledgedCount] = useState(0);
   const [isRinging, setIsRinging] = useState(false);
+  const [audioArmed, setAudioArmed] = useState<boolean>(() => isAudioArmed());
+
+  useEffect(() => {
+    return onAudioArmed((armed) => setAudioArmed(armed));
+  }, []);
 
   // References to keep worker timer and fallback
   const ringCleanupRef = useRef<(() => void) | null>(null);
@@ -156,8 +164,8 @@ export function useNewOrderAlert(orders: readonly AdminOrder[]) {
       isRingingRef.current = true;
       setIsRinging(true);
 
-      // 1. Play HTML5 background loop (authorized for background tabs!)
-      startAlarmLoop(volume);
+      // 1. Play HTML5 background loop with chosen sound profile (authorized for background tabs!)
+      startAlarmLoop(profile, volume);
 
       // 2. Start unthrottled repeating alarm ticker
       const cleanupWorker = createWorkerAlarmTicker(2800, () => {
@@ -299,11 +307,22 @@ export function useNewOrderAlert(orders: readonly AdminOrder[]) {
     }
   }, [orders, acknowledgedIds, config.enabled, config.profile, config.volume, startRinging, stopRinging]);
 
-  // Flash Document Title while alarm is ringing
+  // Flash Document Title and Favicon while alarm is ringing
   useEffect(() => {
     if (!isRinging || !activeAlertOrder || typeof document === 'undefined') return;
 
     const originalTitle = document.title;
+    const faviconLink = (document.querySelector("link[rel*='icon']") as HTMLLinkElement | null) ||
+      (() => {
+        const link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+        return link;
+      })();
+    const originalFavicon = faviconLink.href || '/favicon.ico';
+    const alertFavicon =
+      'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2248%22 fill=%22%23f05d23%22/><text y=%2268%22 font-size=%2254%22 x=%2250%22 text-anchor=%22middle%22>🚨</text></svg>';
+
     let toggle = false;
 
     const titleTimer = setInterval(() => {
@@ -313,11 +332,14 @@ export function useNewOrderAlert(orders: readonly AdminOrder[]) {
             activeAlertOrder.totals.grandTotalPaise / 100
           )})!`
         : `🔔 PM ZAIKA - ACKNOWLEDGE NOW! 🔔`;
-    }, 900);
+
+      faviconLink.href = toggle ? alertFavicon : originalFavicon;
+    }, 850);
 
     return () => {
       clearInterval(titleTimer);
       document.title = originalTitle;
+      faviconLink.href = originalFavicon;
     };
   }, [isRinging, activeAlertOrder]);
 
@@ -327,6 +349,20 @@ export function useNewOrderAlert(orders: readonly AdminOrder[]) {
       if (ringCleanupRef.current) ringCleanupRef.current();
       if (ringFallbackTimerRef.current) clearInterval(ringFallbackTimerRef.current);
     };
+  }, []);
+
+  // Arm audio explicitly with user confirmation chime and permission request
+  const armAudio = useCallback(async () => {
+    unlockAudioPlayback();
+    playArmingChime();
+
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+      try {
+        await Notification.requestPermission();
+      } catch {
+        // Ignore
+      }
+    }
   }, []);
 
   // Update configuration and persist
@@ -367,19 +403,15 @@ export function useNewOrderAlert(orders: readonly AdminOrder[]) {
     updateConfig,
     soundEnabled: config.enabled,
     toggleSound,
+    armAudio,
     enable: () => {
       updateConfig({ enabled: true });
-      unlockAudioPlayback();
-      try {
-        const ctx = getAudioContext();
-        if (ctx.state === 'suspended') void ctx.resume();
-      } catch {
-        // Ignore
-      }
+      armAudio();
     },
     activeAlertOrder,
     unacknowledgedCount,
     isRinging,
+    audioArmed,
     acknowledgeOrder,
     acknowledgeAllOrders,
     silenceAlert: acknowledgeOrder,

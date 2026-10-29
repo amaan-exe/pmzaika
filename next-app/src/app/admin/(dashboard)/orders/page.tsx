@@ -18,6 +18,7 @@ import { useAsyncData, usePolling } from '@/components/admin/useAsyncData';
 import { useNewOrderAlert } from '@/components/admin/useNewOrderAlert';
 import IncomingOrderAlert from '@/components/admin/IncomingOrderAlert';
 import NotificationSettingsModal from '@/components/admin/NotificationSettingsModal';
+import DeskAudioBanner from '@/components/admin/DeskAudioBanner';
 
 type Tab = 'open' | 'awaiting' | 'all' | 'archive';
 
@@ -259,9 +260,11 @@ export default function AdminOrdersPage() {
     updateConfig: updateSoundConfig,
     soundEnabled,
     toggleSound,
+    armAudio,
     activeAlertOrder,
     unacknowledgedCount,
     isRinging,
+    audioArmed,
     acknowledgeOrder,
     acknowledgeAllOrders,
     testSound,
@@ -362,13 +365,35 @@ export default function AdminOrdersPage() {
                 soundEnabled
                   ? isRinging
                     ? 'admin-btn--urgent-pulse'
-                    : 'admin-btn--green'
+                    : audioArmed
+                    ? 'admin-btn--green'
+                    : 'admin-btn--amber'
                   : ''
               }`}
-              onClick={toggleSound}
-              title={soundEnabled ? 'Order sound alarm is on' : 'Get an audio alert when a new order arrives'}
+              onClick={() => {
+                if (soundEnabled && !audioArmed) {
+                  void armAudio();
+                } else {
+                  toggleSound();
+                }
+              }}
+              title={
+                soundEnabled
+                  ? isRinging
+                    ? 'Order alarm is actively ringing!'
+                    : audioArmed
+                    ? 'Alarm is active and armed for background ringing'
+                    : 'Click to arm background audio'
+                  : 'Alarm is turned off. Click to turn on.'
+              }
             >
-              {soundEnabled ? (isRinging ? '🚨 Alarm Ringing' : '🔔 Chime on') : '🔕 Chime off'}
+              {soundEnabled
+                ? isRinging
+                  ? '🚨 Alarm Ringing'
+                  : audioArmed
+                  ? '🟢 Alarm Armed'
+                  : '🔔 Arm Background Audio'
+                : '🔕 Alarm Off'}
             </button>
             <button
               type="button"
@@ -383,6 +408,14 @@ export default function AdminOrdersPage() {
             </button>
           </>
         }
+      />
+
+      <DeskAudioBanner
+        isArmed={audioArmed}
+        soundEnabled={soundEnabled}
+        isRinging={isRinging}
+        onArm={armAudio}
+        onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
       <div className="admin-toolbar">

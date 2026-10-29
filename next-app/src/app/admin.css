@@ -1865,3 +1865,238 @@
   border-top: 1px solid var(--admin-border);
   padding-top: 16px;
 }
+
+/* Button amber state */
+.admin-btn--amber {
+  background: rgba(245, 166, 35, 0.15) !important;
+  color: var(--admin-amber) !important;
+  border: 1px solid rgba(245, 166, 35, 0.35) !important;
+}
+
+.admin-btn--amber:hover {
+  background: rgba(245, 166, 35, 0.25) !important;
+  border-color: rgba(245, 166, 35, 0.6) !important;
+}
+
+/* Button-in-Button Trailing Icon Bubble (Agency-Grade) */
+.btn-icon-bubble {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  margin-left: 8px;
+  font-size: 13px;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.desk-audio-arm-btn:hover .btn-icon-bubble {
+  transform: scale(1.15) rotate(-6deg);
+}
+
+/* ==========================================================================
+   Desk Audio Arming & Status Banner (Double-Bezel Architecture)
+   ========================================================================== */
+.desk-audio-banner {
+  margin: 0 0 20px;
+  border-radius: 20px;
+  padding: 2px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: fadeInBanner 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInBanner {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.desk-audio-banner-inner {
+  border-radius: 18px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.desk-audio-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 260px;
+}
+
+.desk-audio-icon-wrapper {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(245, 166, 35, 0.15);
+  border: 1px solid rgba(245, 166, 35, 0.3);
+}
+
+.desk-audio-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.desk-audio-ping {
+  position: absolute;
+  inset: -3px;
+  border-radius: 14px;
+  border: 2px solid rgba(245, 166, 35, 0.5);
+  animation: pingRipple 1.8s infinite cubic-bezier(0, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+@keyframes pingRipple {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+.desk-audio-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.desk-audio-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.desk-audio-desc {
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+/* Standby State */
+.desk-audio-banner--standby {
+  background: linear-gradient(135deg, rgba(245, 166, 35, 0.25), rgba(240, 93, 35, 0.12));
+  border: 1px solid rgba(245, 166, 35, 0.35);
+  box-shadow: 0 8px 24px rgba(245, 166, 35, 0.12);
+}
+
+.desk-audio-banner--standby .desk-audio-banner-inner {
+  background: #181c22;
+}
+
+.desk-audio-banner--standby .desk-audio-title {
+  color: #ffc259;
+}
+
+.desk-audio-banner--standby .desk-audio-desc {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.desk-audio-arm-btn {
+  background: linear-gradient(135deg, #f05d23, #f5a623) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 10px 18px !important;
+  box-shadow: 0 4px 18px rgba(240, 93, 35, 0.35);
+  border: none !important;
+}
+
+/* Armed State */
+.desk-audio-banner--armed {
+  background: rgba(34, 192, 125, 0.12);
+  border: 1px solid rgba(34, 192, 125, 0.25);
+}
+
+.desk-audio-banner--armed .desk-audio-banner-inner {
+  background: #14191d;
+  padding: 10px 18px;
+}
+
+.desk-audio-banner--armed .desk-audio-title {
+  color: var(--admin-green);
+  font-size: 13.5px;
+}
+
+.desk-audio-banner--armed .desk-audio-desc {
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+
+.desk-audio-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c07d;
+  box-shadow: 0 0 10px #22c07d;
+  flex-shrink: 0;
+}
+
+.desk-audio-banner--just-armed {
+  animation: armedGlowFlash 1.5s ease-out;
+}
+
+@keyframes armedGlowFlash {
+  0% { box-shadow: 0 0 30px rgba(34, 192, 125, 0.6); }
+  100% { box-shadow: none; }
+}
+
+/* Ringing State */
+.desk-audio-banner--ringing {
+  background: linear-gradient(135deg, rgba(240, 93, 35, 0.4), rgba(239, 83, 80, 0.3));
+  border: 1px solid rgba(240, 93, 35, 0.6);
+  box-shadow: 0 0 25px rgba(240, 93, 35, 0.3);
+  animation: urgentBtnPulse 1.2s infinite ease-in-out;
+}
+
+.desk-audio-banner--ringing .desk-audio-banner-inner {
+  background: #1d1616;
+}
+
+.desk-audio-banner--ringing .desk-audio-title {
+  color: #ff6e40;
+}
+
+.desk-audio-banner--ringing .desk-audio-desc {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.desk-audio-beacon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #f05d23;
+  box-shadow: 0 0 12px #f05d23;
+  animation: pulseDot 0.6s infinite alternate;
+  flex-shrink: 0;
+}
+
+/* Disabled State */
+.desk-audio-banner--disabled {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.desk-audio-banner--disabled .desk-audio-banner-inner {
+  background: #15181b;
+}
+
+.desk-audio-banner--disabled .desk-audio-title {
+  color: var(--admin-muted);
+}
+
+.desk-audio-banner--disabled .desk-audio-desc {
+  color: var(--admin-muted);
+  opacity: 0.8;
+}
