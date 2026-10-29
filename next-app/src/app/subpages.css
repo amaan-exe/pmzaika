@@ -956,3 +956,231 @@ select.form-input-res {
     right: 10px;
   }
 }
+
+/* ==========================================================================
+   POLICY & LEGAL PAGES DESIGN SYSTEM — Privacy · Shipping · Refund · Terms
+   ========================================================================== */
+
+.policy-page-section {
+  padding: 64px 0 100px;
+  background: #fdfbf7;
+}
+
+.policy-container {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.policy-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 24px;
+  padding: 52px 56px;
+  box-shadow: 0 12px 44px rgba(0, 0, 0, 0.04);
+}
+
+.policy-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-wrap: wrap;
+}
+
+.policy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  background: rgba(245, 166, 35, 0.12);
+  color: #c97d0c;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.policy-date {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.policy-callout {
+  border-radius: 18px;
+  padding: 20px 24px;
+  margin: 28px 0;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.policy-callout--amber {
+  background: rgba(245, 166, 35, 0.08);
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  color: #7a4e05;
+}
+
+.policy-callout--danger {
+  background: rgba(239, 83, 80, 0.08);
+  border: 1px solid rgba(239, 83, 80, 0.3);
+  color: #a8201a;
+}
+
+.policy-callout-icon {
+  font-size: 24px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.policy-callout-content {
+  flex: 1;
+}
+
+.policy-callout-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: inherit;
+}
+
+.policy-callout-text {
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin: 0;
+  color: inherit;
+}
+
+.policy-phone-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  background: #f05d23;
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 13.5px;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(240, 93, 35, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.policy-phone-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(240, 93, 35, 0.4);
+}
+
+.policy-section-block {
+  margin-bottom: 38px;
+}
+
+.policy-section-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.policy-section-num {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--primary-orange);
+  background: rgba(240, 93, 35, 0.1);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.policy-text {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #4b5563;
+  margin-bottom: 14px;
+}
+
+.policy-list {
+  margin: 12px 0 18px 24px;
+  padding: 0;
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: #4b5563;
+}
+
+.policy-list li {
+  margin-bottom: 8px;
+}
+
+.policy-contact-box {
+  background: #f8f6f0;
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-top: 40px;
+  border: 1px dashed rgba(0, 0, 0, 0.12);
+}
+
+.policy-contact-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: 8px;
+}
+
+.policy-contact-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.policy-contact-links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.policy-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--primary-orange);
+  text-decoration: none;
+}
+
+.policy-contact-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .policy-card {
+    padding: 28px 20px;
+    border-radius: 18px;
+  }
+
+  .policy-meta-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .policy-callout {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .policy-contact-links {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

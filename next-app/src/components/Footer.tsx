@@ -87,12 +87,30 @@ export default function Footer() {
 
         {/* Footer Bottom Bar */}
         <div className="footer-bottom-dark">
-          <div>Copyright © 2021 ASK Project</div>
-          <div>
-            <Link href="#">Privacy Policy</Link>
-            <Link href="#">Shipping Policy</Link>
-            <Link href="#">Refund Policy</Link>
-            <Link href="#">Terms & Services</Link>
+          <div className="footer-copyright">
+            Copyright © {Math.max(2026, new Date().getFullYear())} PM Zaika Restaurant. All rights reserved.
+          </div>
+
+          <div className="footer-credit">
+            Made by{' '}
+            <a
+              href="https://igniusstudios.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ignius-link"
+              title="Designed & Developed by IGNIUS STUDIOS"
+            >
+              <strong className="ignius-orange">IGNIUS</strong>{' '}
+              <strong className="ignius-blue">STUDIOS</strong>
+            </a>{' '}
+            with <span className="footer-heart" role="img" aria-label="love">💖</span>
+          </div>
+
+          <div className="footer-policy-links">
+            <Link href="/privacy-policy">Privacy Policy</Link>
+            <Link href="/shipping-policy">Shipping Policy</Link>
+            <Link href="/refund-policy">Refund Policy</Link>
+            <Link href="/terms-and-conditions">Terms & Services</Link>
           </div>
         </div>
       </div>
